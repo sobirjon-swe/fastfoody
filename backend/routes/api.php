@@ -43,6 +43,7 @@ Route::get('restaurants/{restaurant}', [CustomerRestaurantController::class, 'sh
 
 Route::middleware(['auth:sanctum', 'role:customer'])->group(function () {
     Route::get('orders', [OrderController::class, 'index']);
+    Route::post('orders/estimate', [OrderController::class, 'estimate']);
     Route::post('orders', [OrderController::class, 'store']);
     Route::get('orders/{order}', [OrderController::class, 'show'])->whereNumber('order');
     Route::post('orders/{order}/pay', [OrderController::class, 'pay'])->whereNumber('order');

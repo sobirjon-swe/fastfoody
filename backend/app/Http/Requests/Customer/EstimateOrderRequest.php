@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Customer;
 
-class StoreOrderRequest extends CartRequest
+class EstimateOrderRequest extends CartRequest
 {
     //
 }

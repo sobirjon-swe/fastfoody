@@ -1,16 +1,16 @@
-import { ArrowLeft, Minus, Plus, ShoppingCart } from 'lucide-react'
+import { ArrowLeft, Clock, Minus, Plus, ShoppingCart } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 
-import { getRestaurantMenu, placeOrder } from '@/api/orders'
+import { estimateOrder, getRestaurantMenu, placeOrder } from '@/api/orders'
 import { Spinner } from '@/components/Spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { apiErrorMessage } from '@/lib/api'
-import { formatPrepTime, formatPrice } from '@/lib/format'
-import type { MenuItem, Restaurant } from '@/types/api'
+import { formatClock, formatPrepTime, formatPrice, minutesFromNow } from '@/lib/format'
+import type { MenuItem, OrderEstimate, Restaurant } from '@/types/api'
 
 /** menu item id -> quantity */
 type Cart = Record<number, number>
@@ -25,6 +25,8 @@ export function RestaurantMenuPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [placing, setPlacing] = useState(false)
+  const [estimate, setEstimate] = useState<OrderEstimate | null>(null)
+  const [estimating, setEstimating] = useState(false)
 
   const id = Number(restaurantId)
 
@@ -67,18 +69,43 @@ export function RestaurantMenuPage() {
     .filter((item) => cart[item.id])
     .map((item) => ({ item, quantity: cart[item.id] }))
 
+  // Stable identity of the cart contents, so the estimate effect reruns on a
+  // real change and not on every render.
+  const cartKey = lines.map((line) => `${line.item.id}:${line.quantity}`).join(',')
+
   const total = lines.reduce(
     (sum, line) => sum + Number.parseFloat(line.item.price) * line.quantity,
     0,
   )
 
-  // Shown only as an estimate of this order on its own; the real ready time
-  // also depends on the kitchen queue and arrives in 3-bosqich.
-  const prepMinutes = lines.reduce(
-    (sum, line) =>
-      sum + line.item.base_prep_minutes + line.item.extra_prep_minutes * (line.quantity - 1),
-    0,
-  )
+  // The ready time depends on the kitchen queue, so it is asked of the server
+  // rather than guessed here. Debounced: tapping "+" five times must not fire
+  // five requests, and a stale answer must never overwrite a newer one.
+  useEffect(() => {
+    if (lines.length === 0) {
+      setEstimate(null)
+
+      return
+    }
+
+    const payload = lines.map((line) => ({ menu_item_id: line.item.id, quantity: line.quantity }))
+    let current = true
+
+    setEstimating(true)
+
+    const timer = setTimeout(() => {
+      estimateOrder(id, payload)
+        .then((result) => current && setEstimate(result))
+        .catch(() => current && setEstimate(null))
+        .finally(() => current && setEstimating(false))
+    }, 350)
+
+    return () => {
+      current = false
+      clearTimeout(timer)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, cartKey])
 
   async function submit() {
     setPlacing(true)
@@ -221,10 +248,29 @@ export function RestaurantMenuPage() {
                 <span data-testid="cart-total">{formatPrice(total)}</span>
               </div>
 
-              <p className="text-muted-foreground text-xs">
-                Taxminiy tayyorlash: ~{prepMinutes} daqiqa. Navbat hisobga olingan aniq vaqt
-                keyingi bosqichda qoʻshiladi.
-              </p>
+              <div className="bg-muted/50 grid gap-1 rounded-md p-3 text-sm" data-testid="estimate">
+                {estimate ? (
+                  <>
+                    <div className="flex items-center gap-2 font-medium">
+                      <Clock className="size-4" />
+                      Taxminan {formatClock(estimate.ready_at)} da tayyor
+                      <span className="text-muted-foreground font-normal">
+                        (~{minutesFromNow(estimate.ready_at)} daq)
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground text-xs">
+                      Tayyorlash {estimate.prep_minutes} daq
+                      {estimate.queue_minutes > 0
+                        ? ` · oldingizda ${estimate.queue_minutes} daqiqalik navbat bor`
+                        : ' · navbat boʻsh'}
+                    </p>
+                  </>
+                ) : (
+                  <span className="text-muted-foreground text-xs">
+                    {estimating ? 'Vaqt hisoblanmoqda...' : 'Vaqt hisoblab boʻlinmadi.'}
+                  </span>
+                )}
+              </div>
             </>
           )}
 

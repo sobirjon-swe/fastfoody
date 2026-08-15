@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { apiErrorMessage } from '@/lib/api'
-import { formatPrice } from '@/lib/format'
+import { formatClock, formatPrice } from '@/lib/format'
 import type { Order } from '@/types/api'
 
 export function MyOrdersPage() {
@@ -73,6 +73,14 @@ export function MyOrdersPage() {
                     {new Date(order.created_at).toLocaleString('uz-UZ')} ·{' '}
                     {formatPrice(order.total_price)}
                   </div>
+                  {(order.ready_at ?? order.estimated_ready_at) && (
+                    <div className="mt-1 text-sm">
+                      {order.ready_at ? 'Tayyor boʻladi' : 'Taxminan'}:{' '}
+                      <span className="font-medium">
+                        {formatClock(order.ready_at ?? order.estimated_ready_at!)}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   <OrderStatusBadge status={order.status} />

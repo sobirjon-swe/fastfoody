@@ -65,8 +65,10 @@ export interface Order {
   status: OrderStatus
   total_price: string
   prep_minutes: number
-  /** 3-bosqichda toʻldiriladi. */
+  /** Toʻlangandan keyin qatʼiylashadi. */
   ready_at: string | null
+  /** Toʻlanmagan buyurtma uchun jonli baho. */
+  estimated_ready_at: string | null
   paid_at: string | null
   created_at: string
   items?: OrderItem[]
@@ -80,6 +82,15 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   olib_ketildi: 'Olib ketildi',
   bekor_qilindi_mahsulot_yoq: 'Bekor qilindi (mahsulot yoʻq)',
   muddati_otdi: 'Muddati oʻtdi',
+}
+
+export interface OrderEstimate {
+  total_price: string
+  /** Buyurtmaning oʻz tayyorlanish vaqti. */
+  prep_minutes: number
+  /** Oshxona navbati hozir qancha band. */
+  queue_minutes: number
+  ready_at: string
 }
 
 export interface PaginationMeta {

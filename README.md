@@ -115,6 +115,7 @@ mavjudligini ham tasdiqlamaydi.
 |---|---|---|---|
 | GET | `/api/restaurants` | ochiq | Faqat faol oshxonalar; `?q=` bilan qidiruv |
 | GET | `/api/restaurants/{id}` | ochiq | Oshxona + faqat mavjud taomlari (nofaol boʻlsa 404) |
+| POST | `/api/orders/estimate` | mijoz | **Toʻlovdan oldin** tayyor boʻlish vaqti; hech narsa saqlanmaydi |
 | POST | `/api/orders` | mijoz | Savatchadan buyurtma: `restaurant_id` + `items[{menu_item_id, quantity}]` |
 | GET | `/api/orders` | mijoz | Faqat oʻz buyurtmalari |
 | GET | `/api/orders/{id}` | mijoz | Tarkibi bilan (begonasi 404) |
@@ -123,6 +124,30 @@ mavjudligini ham tasdiqlamaydi.
 Narx va tayyorlash vaqti **savatchadan olinmaydi** — server menyudan oʻqiydi, shuning uchun
 mijoz yuborgan `unit_price` eʼtiborga olinmaydi. Butun savatcha bitta tranzaksiyada
 yoziladi: bitta taom tugagan boʻlsa, buyurtma umuman yaratilmaydi.
+
+## Tayyor boʻlish vaqti (3-bosqich)
+
+Loyihaning oʻzagi. Vaqt ikki omildan yigʻiladi:
+
+1. **Buyurtmaning oʻz vaqti** — miqdorga bogʻliq: `base_prep_minutes + extra_prep_minutes ×
+   (miqdor − 1)`, savatchadagi hamma taom uchun yigʻiladi (`orders.prep_minutes`).
+2. **Oshxona navbati** — shu oshxonada hozir tayyorlanayotgan (`tolov_qilindi` yoki
+   `tayyorlanmoqda`) buyurtmalarning eng kechi qachon tugashi.
+
+```
+tayyor_boʻladi = max(hozir, navbatdagi oxirgi buyurtma tugash vaqti) + buyurtmaning oʻz vaqti
+```
+
+- Vaqt **toʻlovdan oldin** koʻrsatiladi (`POST /orders/estimate`), shunda mijoz «bu menga mos
+  keladimi» deb oʻzi qaror qiladi.
+- **Faqat toʻlangan buyurtma navbatda joy egallaydi** — tashlab ketilgan savatcha boshqalarning
+  taomini kechiktirmaydi. Shu sababli `ready_at` toʻlov paytida qatʼiylashadi; toʻlanmagan
+  buyurtmada esa har safar qayta hisoblanadigan `estimated_ready_at` koʻrsatiladi.
+- Buyurtma «tayyor» deb belgilansa navbatdan chiqadi va keyingi mijozlarga koʻrsatiladigan vaqt
+  oʻz-oʻzidan qisqaradi (baho har doim joriy navbatdan hisoblanadi).
+- Navbat kechikkan boʻlsa ham vaqt oʻtmishda koʻrsatilmaydi (`max(hozir, ...)`).
+- **Masʼuliyat qoidasi (TZ 5-bandi):** tizim mijozning haqiqiy kelish vaqtini kuzatmaydi. Mijoz
+  kech qolsa yoki kelmasa — bu uning masʼuliyati.
 
 **Buyurtma holatlari**
 
@@ -136,7 +161,7 @@ tolov_qilindi` oʻtishini bajaradi, qolgan oʻtishlar 4-bosqichda oshxona paneli
 ## Testlar
 
 ```bash
-cd backend && php artisan test      # 76 ta test (auth, rollar, menyu, buyurtma)
+cd backend && php artisan test      # 87 ta test (auth, rollar, menyu, buyurtma, navbat)
 cd frontend && npm run build        # tsc + vite build
 cd frontend && npm run lint
 ```
@@ -179,7 +204,8 @@ Testlar SQLite (`:memory:`) da ishlaydi, ishlab chiqarish va lokal muhit — MyS
       qoʻshish/tahrirlash/oʻchirish, «mavjud emas» belgisi, tayyorlash vaqti).
 - [x] **2-bosqich** — mijoz tomoni: oshxonalar roʻyxati, menyu, savatcha (miqdor tanlash),
       buyurtma berish, buyurtmalar roʻyxati va holati, toʻlov simulyatsiyasi.
-- [ ] **3-bosqich** — tayyor boʻlish vaqtini hisoblash (miqdor + navbat).
+- [x] **3-bosqich** — tayyor boʻlish vaqtini hisoblash: `KitchenQueue` xizmati, toʻlovdan
+      oldingi baho, toʻlovda navbatga qoʻshilish, savatchada jonli koʻrsatish.
 - [ ] **4-bosqich** — buyurtma holatlarini boshqarish (oshxona paneli).
 - [ ] **5-bosqich** — mahsulot tugagan holat va bekor qilish oqimi.
 - [ ] Keyingi bosqichlar — Payme/Click integratsiyasi, real-time bildirishnoma.

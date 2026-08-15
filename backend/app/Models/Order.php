@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OrderStatus;
+use Carbon\CarbonInterface;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,6 +21,12 @@ class Order extends Model
 {
     /** @use HasFactory<OrderFactory> */
     use HasFactory;
+
+    /**
+     * Live ready-time estimate of a pending order. A declared property, so it
+     * is never treated as a column and never written to the database.
+     */
+    public ?CarbonInterface $estimatedReadyAt = null;
 
     /**
      * Get the attributes that should be cast.

@@ -1,5 +1,5 @@
 import { api } from '@/lib/api'
-import type { MenuItem, Order, Restaurant } from '@/types/api'
+import type { MenuItem, Order, OrderEstimate, Restaurant } from '@/types/api'
 
 export interface CartLine {
   menu_item_id: number
@@ -20,6 +20,16 @@ export async function getRestaurantMenu(restaurantId: number) {
   )
 
   return data
+}
+
+/** Toʻlovdan oldin koʻrsatiladigan baho; hech narsa saqlanmaydi. */
+export async function estimateOrder(restaurantId: number, items: CartLine[]) {
+  const { data } = await api.post<{ estimate: OrderEstimate }>('/orders/estimate', {
+    restaurant_id: restaurantId,
+    items,
+  })
+
+  return data.estimate
 }
 
 export async function placeOrder(restaurantId: number, items: CartLine[]) {

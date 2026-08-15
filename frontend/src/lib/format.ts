@@ -22,3 +22,13 @@ export function formatPrice(price: string | number): string {
 export function formatPrepTime(base: number, extra: number): string {
   return extra > 0 ? `${base} daq (+${extra} daq)` : `${base} daq`
 }
+
+/** ISO vaqt -> "12:16" */
+export function formatClock(iso: string): string {
+  return new Date(iso).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
+}
+
+/** Hozirdan boshlab necha daqiqa qolgani (manfiy boʻlsa 0). */
+export function minutesFromNow(iso: string): number {
+  return Math.max(0, Math.round((new Date(iso).getTime() - Date.now()) / 60000))
+}

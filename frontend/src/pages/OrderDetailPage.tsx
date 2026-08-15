@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Clock } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { toast } from 'sonner'
@@ -10,8 +10,41 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { apiErrorMessage } from '@/lib/api'
-import { formatPrice } from '@/lib/format'
+import { formatClock, formatPrice, minutesFromNow } from '@/lib/format'
 import type { Order } from '@/types/api'
+
+/**
+ * Toʻlangan buyurtma uchun qatʼiy vaqt (ready_at), toʻlanmagani uchun jonli
+ * baho (estimated_ready_at) koʻrsatiladi.
+ */
+function ReadyTimeCard({ order }: { order: Order }) {
+  const time = order.ready_at ?? order.estimated_ready_at
+
+  if (!time || order.status === 'olib_ketildi' || order.status.startsWith('bekor')) {
+    return null
+  }
+
+  return (
+    <Card>
+      <CardContent className="flex items-center gap-3">
+        <Clock className="text-muted-foreground size-5" />
+        <div>
+          <div className="text-lg font-semibold" data-testid="ready-at">
+            {formatClock(time)} da tayyor boʻladi
+            <span className="text-muted-foreground ml-2 text-sm font-normal">
+              (~{minutesFromNow(time)} daq)
+            </span>
+          </div>
+          <p className="text-muted-foreground text-sm">
+            {order.ready_at
+              ? 'Oshxona navbatiga qoʻshildi. Shu vaqtga yetib boring — kechiksangiz taom sovib qolishi mumkin.'
+              : 'Bu — taxminiy vaqt. Toʻlaganingizdan keyin buyurtma navbatga qoʻshiladi va vaqt qatʼiylashadi.'}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export function OrderDetailPage() {
   const { orderId } = useParams()
@@ -89,13 +122,12 @@ export function OrderDetailPage() {
         </p>
       </div>
 
+      <ReadyTimeCard order={order} />
+
       <Card>
         <CardHeader>
           <CardTitle>Tarkibi</CardTitle>
-          <CardDescription>
-            Taxminiy tayyorlash vaqti: {order.prep_minutes} daqiqa
-            {order.ready_at && ` · tayyor boʻladi: ${new Date(order.ready_at).toLocaleString('uz-UZ')}`}
-          </CardDescription>
+          <CardDescription>Tayyorlash vaqti: {order.prep_minutes} daqiqa</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3">
           <ul className="grid gap-2 text-sm">
