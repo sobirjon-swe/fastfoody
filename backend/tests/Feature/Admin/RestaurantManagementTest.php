@@ -60,6 +60,17 @@ class RestaurantManagementTest extends TestCase
             ->assertJsonPath('meta.total', 2);
     }
 
+    public function test_an_unknown_status_value_does_not_filter_anything(): void
+    {
+        Restaurant::factory()->create();
+        Restaurant::factory()->inactive()->create();
+
+        $this->actingAs($this->admin(), 'sanctum')
+            ->getJson('/api/admin/restaurants?status=hammasi')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 2);
+    }
+
     public function test_search_treats_like_wildcards_as_plain_characters(): void
     {
         Restaurant::factory()->create(['name' => '100% Halol', 'address' => 'Toshkent']);

@@ -1,5 +1,5 @@
 import { Pencil, Plus, Users } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { listRestaurants, updateRestaurant } from '@/api/restaurants'
@@ -45,19 +45,36 @@ export function AdminDashboardPage() {
   const [editing, setEditing] = useState<Restaurant | null>(null)
   const [staffFor, setStaffFor] = useState<Restaurant | null>(null)
 
+  // Only the newest request may write to the table: an earlier one resolving
+  // last would otherwise leave the rows and the pager describing different
+  // pages.
+  const requestRef = useRef(0)
+
   const load = useCallback(async () => {
+    const requestId = ++requestRef.current
+
     setLoading(true)
     setError(null)
 
     try {
       const { data, meta: pagination } = await listRestaurants({ q: query, status, page })
 
+      if (requestId !== requestRef.current) {
+        return
+      }
+
       setRestaurants(data)
       setMeta(pagination)
     } catch (caught) {
+      if (requestId !== requestRef.current) {
+        return
+      }
+
       setError(apiErrorMessage(caught, 'Oshxonalarni yuklab boʻlmadi.'))
     } finally {
-      setLoading(false)
+      if (requestId === requestRef.current) {
+        setLoading(false)
+      }
     }
   }, [query, status, page])
 
@@ -231,11 +248,17 @@ export function AdminDashboardPage() {
           <span className="text-muted-foreground">
             {meta.current_page}/{meta.last_page} — jami {meta.total} ta
           </span>
+          {/*
+            The buttons are gated on the page counter they mutate — not on the
+            server's meta, which is one response behind — and stay disabled
+            while a page is loading, so a fast second click cannot skip a page
+            or ask for one past the last.
+          */}
           <div className="flex gap-2">
             <Button
               size="sm"
               variant="outline"
-              disabled={meta.current_page === 1}
+              disabled={loading || page <= 1}
               onClick={() => setPage((current) => current - 1)}
             >
               Oldingi
@@ -243,7 +266,7 @@ export function AdminDashboardPage() {
             <Button
               size="sm"
               variant="outline"
-              disabled={meta.current_page === meta.last_page}
+              disabled={loading || page >= meta.last_page}
               onClick={() => setPage((current) => current + 1)}
             >
               Keyingi

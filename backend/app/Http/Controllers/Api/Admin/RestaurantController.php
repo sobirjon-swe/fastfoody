@@ -31,10 +31,12 @@ class RestaurantController extends Controller
                     ->whereRaw('name LIKE ? ESCAPE ?', [$pattern, '\\'])
                     ->orWhereRaw('address LIKE ? ESCAPE ?', [$pattern, '\\']));
             })
-            ->when($request->filled('status'), fn ($query) => $query->where(
-                'is_active',
-                $request->string('status')->toString() === 'active',
-            ))
+            // Anything other than the two known values means "no filter", so a
+            // mistyped parameter cannot quietly answer with the inactive list.
+            ->when(
+                in_array($request->string('status')->toString(), ['active', 'inactive'], true),
+                fn ($query) => $query->where('is_active', $request->string('status')->toString() === 'active'),
+            )
             ->orderBy('name')
             ->paginate(perPage: 15)
             ->withQueryString();

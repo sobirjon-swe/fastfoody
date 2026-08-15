@@ -148,11 +148,17 @@ export function MenuItemFormDialog({
 
           <div className="grid gap-2">
             <Label htmlFor="item-price">Narxi (soʻm)</Label>
+            {/*
+              step must stay "any": a numeric step is a validity constraint, so
+              step={500} would make the browser silently refuse to submit an
+              ordinary price like 32 900 that the API accepts.
+            */}
             <Input
               id="item-price"
               type="number"
               min={0}
-              step={500}
+              max={99999999.99}
+              step="any"
               required
               value={form.price}
               onChange={(event) => update('price', event.target.value)}

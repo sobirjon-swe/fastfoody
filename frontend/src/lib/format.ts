@@ -10,11 +10,12 @@ export function formatPrice(price: string | number): string {
     return '—'
   }
 
-  const grouped = Math.round(value)
-    .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  const [whole, fraction] = value.toFixed(2).split('.')
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 
-  return `${grouped} soʻm`
+  // Tiyin are shown only when they exist, so an ordinary price stays "32 000
+  // soʻm" while 12 500,75 is not silently rounded away.
+  return fraction === '00' ? `${grouped} soʻm` : `${grouped},${fraction} soʻm`
 }
 
 /** Prep time of one portion and of each additional portion. */
