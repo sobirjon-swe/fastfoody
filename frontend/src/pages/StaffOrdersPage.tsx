@@ -21,6 +21,7 @@ const ACTIONS: Partial<Record<OrderStatus, string>> = {
   tayyorlanmoqda: 'Tayyorlashni boshlash',
   tayyor: 'Tayyor',
   olib_ketildi: 'Berildi',
+  muddati_otdi: 'Kelmadi',
 }
 
 const FILTERS: { value: OrderStatus | ''; label: string }[] = [
@@ -30,6 +31,7 @@ const FILTERS: { value: OrderStatus | ''; label: string }[] = [
   { value: 'mijoz_qarori_kutilmoqda', label: 'Mijoz javobi kutilmoqda' },
   { value: 'tayyor', label: 'Tayyor' },
   { value: 'olib_ketildi', label: 'Berilgan' },
+  { value: 'muddati_otdi', label: 'Muddati oʻtgan' },
 ]
 
 export function StaffOrdersPage() {
@@ -198,6 +200,7 @@ export function StaffOrdersPage() {
                       <Button
                         key={next}
                         size="sm"
+                        variant={next === 'muddati_otdi' ? 'outline' : 'default'}
                         disabled={busyId === order.id}
                         onClick={() => move(order, next)}
                       >

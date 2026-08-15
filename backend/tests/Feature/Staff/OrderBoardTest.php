@@ -133,12 +133,21 @@ class OrderBoardTest extends TestCase
     {
         $order = $this->order(OrderStatus::Paid);
 
-        foreach ([OrderStatus::Pending, OrderStatus::CancelledOutOfStock, OrderStatus::Expired] as $status) {
+        // Toʻlov mijozning ishi, bekor qilish esa «mahsulot yoʻq» oqimining
+        // bir qismi — ikkalasi ham oshxonaning tugmasi emas.
+        foreach ([OrderStatus::Pending, OrderStatus::CancelledOutOfStock] as $status) {
             $this->actingAs($this->staff, 'sanctum')
                 ->patchJson("/api/staff/orders/{$order->id}", ['status' => $status->value])
                 ->assertStatus(422)
                 ->assertJsonValidationErrors('status');
         }
+
+        // «muddati_otdi» oshxonaning holati, lekin faqat tayyor buyurtma uchun.
+        $this->actingAs($this->staff, 'sanctum')
+            ->patchJson("/api/staff/orders/{$order->id}", ['status' => OrderStatus::Expired->value])
+            ->assertStatus(422);
+
+        $this->assertSame(OrderStatus::Paid, $order->fresh()->status);
     }
 
     public function test_another_restaurants_order_is_invisible(): void

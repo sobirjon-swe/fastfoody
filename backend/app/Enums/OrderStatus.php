@@ -74,7 +74,8 @@ enum OrderStatus: string
         return match ($this) {
             self::Paid => [self::Preparing],
             self::Preparing => [self::Ready],
-            self::Ready => [self::PickedUp],
+            // Mijoz kelmasa, xodim buyurtmani qoʻlda yopa oladi.
+            self::Ready => [self::PickedUp, self::Expired],
             default => [],
         };
     }

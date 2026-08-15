@@ -25,6 +25,7 @@ class UpdateOrderStatusRequest extends FormRequest
                     OrderStatus::Preparing->value,
                     OrderStatus::Ready->value,
                     OrderStatus::PickedUp->value,
+                    OrderStatus::Expired->value,
                 ]),
             ],
         ];

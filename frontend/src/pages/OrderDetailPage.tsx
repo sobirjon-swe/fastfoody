@@ -133,6 +133,16 @@ export function OrderDetailPage() {
         <OutOfStockDecision order={order} onResolved={setOrder} />
       )}
 
+      {order.status === 'muddati_otdi' && (
+        <Alert>
+          <AlertDescription>
+            {order.paid_at
+              ? 'Buyurtma belgilangan vaqtda olib ketilmagani uchun yopildi. Taom tayyorlangani sababli toʻlov qaytarilmaydi.'
+              : 'Toʻlov qilinmagani uchun buyurtma bekor boʻldi. Xohlasangiz, yangisini bering.'}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {order.status === 'bekor_qilindi_mahsulot_yoq' && (
         <Alert>
           <AlertDescription>

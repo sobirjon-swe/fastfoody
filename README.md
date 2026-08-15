@@ -177,9 +177,28 @@ Oʻtish qoidalari bitta joyda — `OrderStatus::nextForStaff()`:
 |---|---|
 | Mijoz | `kutilmoqda → tolov_qilindi` (toʻlov) |
 | Oshxona | `tolov_qilindi → tayyorlanmoqda → tayyor → olib_ketildi` |
+| Oshxona | `tayyor → muddati_otdi` (mijoz kelmadi) |
+| Tizim | `kutilmoqda → muddati_otdi`, `tayyor → muddati_otdi` (vaqt oʻtib ketdi) |
 
 Zanjir faqat **oldinga** yuradi: sakrash ham, ortga qaytish ham 422 bilan rad etiladi.
 Toʻlanmagan buyurtmani oshxona qoʻzgʻata olmaydi.
+
+## Osilib qolgan buyurtmalar
+
+`php artisan orders:expire` toʻlanmay qolgan savatchalarni va olib ketilmagan taomlarni
+`muddati_otdi` holatiga oʻtkazadi; jadval boʻyicha har 5 daqiqada ishlaydi
+(server'da `php artisan schedule:work` yoki cron kerak). Oraliqlar `config/fastfoody.php`
+da:
+
+| Sozlama | Sukut | Maʼnosi |
+|---|---|---|
+| `expiry.unpaid_after_minutes` | 15 | Toʻlov qilinmagan buyurtma shuncha daqiqadan keyin yopiladi |
+| `expiry.uncollected_after_minutes` | 30 | Tayyor boʻlib, olib ketilmagan buyurtma shuncha daqiqadan keyin yopiladi |
+
+Tayyorlanayotgan yoki mijoz javobi kutilayotgan buyurtmaga tegilmaydi. Olib ketilmagan
+buyurtma uchun **pul qaytarilmaydi** — TZ 5-bandidagi masʼuliyat qoidasi: tizim mijozning
+kelishini kuzatmaydi. Oshxona xodimi tayyor buyurtmani «Kelmadi» tugmasi bilan qoʻlda ham
+yopa oladi.
 
 ## Mahsulot tugaganda (5-bosqich)
 
@@ -202,7 +221,7 @@ mijoz javobini kutayotganini biladi, lekin uni oldinga sura olmaydi.
 ## Testlar
 
 ```bash
-cd backend && php artisan test      # 110 ta test (auth, rollar, menyu, buyurtma, navbat, holatlar, mahsulot tugashi)
+cd backend && php artisan test      # 117 ta test (auth, rollar, menyu, buyurtma, navbat, holatlar, muddat)
 cd frontend && npm run build        # tsc + vite build
 cd frontend && npm run lint
 ```
@@ -251,6 +270,9 @@ Testlar SQLite (`:memory:`) da ishlaydi, ishlab chiqarish va lokal muhit — MyS
       vaqti), holatni oldinga surish, 15 soniyalik avtomatik yangilanish.
 - [x] **5-bosqich** — mahsulot tugagan holat: oshxona bildiradi, mijoz almashtiradi yoki
       bekor qilib pulini qaytarib oladi; bloklangan buyurtma navbatni band qilmaydi.
+
+- [x] **Qoʻshimcha** — osilib qolgan buyurtmalarni yopish (`orders:expire`), shu bilan
+      `muddati_otdi` holati ham ishlaydi.
 
 **MVP toʻliq bajarildi.**
 - [ ] Keyingi bosqichlar — Payme/Click integratsiyasi, real-time bildirishnoma.
