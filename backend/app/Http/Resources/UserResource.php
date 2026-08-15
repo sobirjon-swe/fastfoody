@@ -25,6 +25,7 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'role' => $this->role->value,
             'restaurant_id' => $this->restaurant_id,
+            'is_deactivated' => $this->isDeactivated(),
             'restaurant' => RestaurantResource::make($this->whenLoaded('restaurant')),
             'created_at' => $this->created_at,
         ];

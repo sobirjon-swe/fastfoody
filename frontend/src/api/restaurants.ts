@@ -59,3 +59,20 @@ export async function createRestaurantStaff(restaurantId: number, payload: Staff
 
   return data.user
 }
+
+/** Xodim hisobi oʻchirilmaydi — faolsizlantiriladi (tokenlari bekor qilinadi). */
+export async function deactivateStaff(restaurantId: number, staffId: number) {
+  const { data } = await api.delete<{ user: User }>(
+    `/admin/restaurants/${restaurantId}/staff/${staffId}`,
+  )
+
+  return data.user
+}
+
+export async function restoreStaff(restaurantId: number, staffId: number) {
+  const { data } = await api.post<{ user: User }>(
+    `/admin/restaurants/${restaurantId}/staff/${staffId}/restore`,
+  )
+
+  return data.user
+}

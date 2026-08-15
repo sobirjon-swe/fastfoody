@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 
-import { createRestaurantStaff, listRestaurantStaff } from '@/api/restaurants'
+import {
+  createRestaurantStaff,
+  deactivateStaff,
+  listRestaurantStaff,
+  restoreStaff,
+} from '@/api/restaurants'
 import { Spinner } from '@/components/Spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -38,6 +43,7 @@ export function RestaurantStaffDialog({
   const [form, setForm] = useState(EMPTY)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [busyId, setBusyId] = useState<number | null>(null)
 
   const restaurantId = restaurant?.id
   const staff = loaded && loaded.restaurantId === restaurantId ? loaded.staff : []
@@ -75,6 +81,32 @@ export function RestaurantStaffDialog({
     setError(null)
     void load()
   }, [load])
+
+  /** Faolsizlantirilgan xodim tizimga kira olmaydi; hisobi esa saqlanadi. */
+  async function toggleAccess(member: User) {
+    if (!restaurantId) {
+      return
+    }
+
+    setBusyId(member.id)
+
+    try {
+      if (member.is_deactivated) {
+        await restoreStaff(restaurantId, member.id)
+        toast.success(`${member.name} yana kira oladi.`)
+      } else {
+        await deactivateStaff(restaurantId, member.id)
+        toast.success(`${member.name} tizimdan chiqarildi.`)
+      }
+
+      await load()
+      onChanged()
+    } catch (caught) {
+      setError(apiErrorMessage(caught, 'Amalni bajarib boʻlmadi.'))
+    } finally {
+      setBusyId(null)
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -115,9 +147,22 @@ export function RestaurantStaffDialog({
         ) : staff.length > 0 ? (
           <ul className="grid gap-1 text-sm">
             {staff.map((member) => (
-              <li key={member.id} className="flex justify-between rounded-md border px-3 py-2">
-                <span>{member.name}</span>
-                <span className="text-muted-foreground">{member.email}</span>
+              <li
+                key={member.id}
+                className="flex items-center justify-between gap-2 rounded-md border px-3 py-2"
+              >
+                <span className={member.is_deactivated ? 'text-muted-foreground line-through' : ''}>
+                  {member.name}
+                  <span className="text-muted-foreground ml-2 text-xs">{member.email}</span>
+                </span>
+                <Button
+                  size="sm"
+                  variant={member.is_deactivated ? 'outline' : 'ghost'}
+                  disabled={busyId === member.id}
+                  onClick={() => toggleAccess(member)}
+                >
+                  {member.is_deactivated ? 'Tiklash' : 'Oʻchirish'}
+                </Button>
               </li>
             ))}
           </ul>

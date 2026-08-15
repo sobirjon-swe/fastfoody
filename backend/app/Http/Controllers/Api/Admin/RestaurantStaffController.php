@@ -24,6 +24,39 @@ class RestaurantStaffController extends Controller
         ]);
     }
 
+    /**
+     * Xodim hisobi oʻchirilmaydi — faolsizlantiriladi va barcha tokenlari bekor
+     * qilinadi, shunda u darhol tizimdan chiqib qoladi, tarix esa saqlanadi.
+     */
+    public function destroy(Restaurant $restaurant, User $staff): JsonResponse
+    {
+        $this->assertBelongsTo($restaurant, $staff);
+
+        $staff->deactivated_at = now();
+        $staff->save();
+        $staff->tokens()->delete();
+
+        return response()->json(['user' => UserResource::make($staff)]);
+    }
+
+    public function restore(Restaurant $restaurant, User $staff): JsonResponse
+    {
+        $this->assertBelongsTo($restaurant, $staff);
+
+        $staff->deactivated_at = null;
+        $staff->save();
+
+        return response()->json(['user' => UserResource::make($staff)]);
+    }
+
+    private function assertBelongsTo(Restaurant $restaurant, User $staff): void
+    {
+        abort_unless(
+            $staff->isRestaurantStaff() && $staff->restaurant_id === $restaurant->id,
+            Response::HTTP_NOT_FOUND,
+        );
+    }
+
     public function store(StoreRestaurantStaffRequest $request, Restaurant $restaurant): JsonResponse
     {
         $staff = new User($request->safe()->only('name', 'email', 'phone', 'password'));

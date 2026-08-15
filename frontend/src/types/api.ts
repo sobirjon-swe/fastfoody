@@ -23,6 +23,7 @@ export interface User {
   phone: string | null
   role: UserRole
   restaurant_id: number | null
+  is_deactivated?: boolean
   restaurant?: Restaurant
   created_at: string
 }

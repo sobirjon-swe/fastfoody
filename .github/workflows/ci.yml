@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend (Laravel)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_sqlite, gd, fileinfo
+          coverage: none
+
+      - name: Composer paketlarini keshlash
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: composer-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Kod uslubi (Pint)
+        run: ./vendor/bin/pint --test
+
+      - name: Testlar
+        # Testlar xotiradagi SQLite'da ishlaydi (phpunit.xml), shuning uchun
+        # alohida ma'lumotlar bazasi kerak emas.
+        run: php artisan test
+
+  frontend:
+    name: Frontend (React)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Testlar
+        run: npm run test
+
+      - name: Build (TypeScript + Vite)
+        run: npm run build

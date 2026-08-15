@@ -41,6 +41,12 @@ class AuthController extends Controller
             ]);
         }
 
+        if ($user->isDeactivated()) {
+            throw ValidationException::withMessages([
+                'email' => [__('Bu hisob faolsizlantirilgan. Tizim egasiga murojaat qiling.')],
+            ]);
+        }
+
         return $this->tokenResponse($user, $request->string('device_name')->toString());
     }
 

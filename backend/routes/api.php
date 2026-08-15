@@ -44,10 +44,13 @@ Route::get('restaurants/{restaurant}', [CustomerRestaurantController::class, 'sh
 
 Route::middleware(['auth:sanctum', 'role:customer'])->group(function () {
     Route::get('orders', [OrderController::class, 'index']);
-    Route::post('orders/estimate', [OrderController::class, 'estimate']);
-    Route::post('orders', [OrderController::class, 'store']);
+    // Savatcha oʻzgarganda soʻraladi, shuning uchun chegara kengroq.
+    Route::post('orders/estimate', [OrderController::class, 'estimate'])->middleware('throttle:60,1');
+    Route::post('orders', [OrderController::class, 'store'])->middleware('throttle:20,1');
     Route::get('orders/{order}', [OrderController::class, 'show'])->whereNumber('order');
-    Route::post('orders/{order}/pay', [OrderController::class, 'pay'])->whereNumber('order');
+    Route::post('orders/{order}/pay', [OrderController::class, 'pay'])
+        ->whereNumber('order')
+        ->middleware('throttle:20,1');
 
     // Mahsulot tugaganda mijozning tanlovi (5-bosqich)
     Route::post('orders/{order}/replace-item', [OrderController::class, 'replaceItem'])->whereNumber('order');
@@ -68,6 +71,8 @@ Route::middleware(['auth:sanctum', 'role:super_admin'])->prefix('admin')->group(
 
     Route::get('restaurants/{restaurant}/staff', [RestaurantStaffController::class, 'index']);
     Route::post('restaurants/{restaurant}/staff', [RestaurantStaffController::class, 'store']);
+    Route::delete('restaurants/{restaurant}/staff/{staff}', [RestaurantStaffController::class, 'destroy']);
+    Route::post('restaurants/{restaurant}/staff/{staff}/restore', [RestaurantStaffController::class, 'restore']);
 });
 
 /*

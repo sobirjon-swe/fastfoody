@@ -37,6 +37,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
+            'deactivated_at' => 'datetime',
         ];
     }
 
@@ -58,6 +59,11 @@ class User extends Authenticatable
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class, 'customer_id');
+    }
+
+    public function isDeactivated(): bool
+    {
+        return $this->deactivated_at !== null;
     }
 
     public function hasRole(UserRole ...$roles): bool
