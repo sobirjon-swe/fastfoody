@@ -10,7 +10,8 @@ import { NotFoundPage } from '@/pages/NotFoundPage'
 import { OrderDetailPage } from '@/pages/OrderDetailPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { RestaurantMenuPage } from '@/pages/RestaurantMenuPage'
-import { StaffDashboardPage } from '@/pages/StaffDashboardPage'
+import { StaffMenuPage } from '@/pages/StaffMenuPage'
+import { StaffOrdersPage } from '@/pages/StaffOrdersPage'
 
 export default function App() {
   return (
@@ -28,7 +29,8 @@ export default function App() {
           </Route>
 
           <Route element={<ProtectedRoute roles={['restaurant_staff']} />}>
-            <Route path="staff" element={<StaffDashboardPage />} />
+            <Route path="staff" element={<StaffOrdersPage />} />
+            <Route path="staff/menu" element={<StaffMenuPage />} />
           </Route>
 
           <Route element={<ProtectedRoute roles={['super_admin']} />}>

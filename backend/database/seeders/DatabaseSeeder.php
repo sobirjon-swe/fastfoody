@@ -2,9 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Enums\OrderStatus;
 use App\Enums\UserRole;
+use App\Models\Order;
 use App\Models\Restaurant;
 use App\Models\User;
+use App\Services\KitchenQueue;
+use App\Services\OrderPlacer;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -37,6 +41,40 @@ class DatabaseSeeder extends Seeder
         $this->account('Mijoz Aliyev', 'customer@fastfoody.uz', UserRole::Customer);
 
         $this->menu($restaurant);
+        $this->demoOrders($restaurant);
+    }
+
+    /**
+     * Two orders so the kitchen board is not empty right after seeding: one
+     * waiting to be started and one already being prepared.
+     */
+    private function demoOrders(Restaurant $restaurant): void
+    {
+        if (Order::where('restaurant_id', $restaurant->id)->exists()) {
+            return;
+        }
+
+        $customer = User::firstWhere('email', 'customer@fastfoody.uz');
+        $menu = $restaurant->menuItems()->orderBy('name')->get();
+        $placer = app(OrderPlacer::class);
+        $queue = app(KitchenQueue::class);
+
+        $carts = [
+            [OrderStatus::Paid, [[$menu->firstWhere('name', 'Lavash'), 2], [$menu->firstWhere('name', 'Coca-Cola 0.5'), 1]]],
+            [OrderStatus::Preparing, [[$menu->firstWhere('name', 'Gamburger'), 1]]],
+        ];
+
+        foreach ($carts as [$status, $lines]) {
+            $order = $placer->place($customer, $restaurant, array_map(
+                fn (array $line) => ['menu_item_id' => $line[0]->id, 'quantity' => $line[1]],
+                $lines,
+            ));
+
+            $order->status = $status;
+            $order->paid_at = now();
+            $queue->schedule($order);
+            $order->save();
+        }
     }
 
     /**

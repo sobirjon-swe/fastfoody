@@ -36,4 +36,38 @@ enum OrderStatus: string
             strict: true,
         );
     }
+
+    /**
+     * Oshxona xodimi shu holatdan qaysi holatlarga oʻtkaza oladi.
+     *
+     * Zanjir faqat oldinga yuradi. `kutilmoqda` — mijozning ishi (toʻlov), shu
+     * sababli oshxona uni qoʻzgʻata olmaydi; tugagan holatlar ham yopiq.
+     * Bekor qilish (`bekor_qilindi_mahsulot_yoq`) 5-bosqichda qoʻshiladi.
+     *
+     * @return array<int, self>
+     */
+    public function nextForStaff(): array
+    {
+        return match ($this) {
+            self::Paid => [self::Preparing],
+            self::Preparing => [self::Ready],
+            self::Ready => [self::PickedUp],
+            default => [],
+        };
+    }
+
+    public function canBeMovedByStaffTo(self $next): bool
+    {
+        return in_array($next, $this->nextForStaff(), strict: true);
+    }
+
+    /**
+     * Oshxona panelining ish taxtasi: hozir eʼtibor talab qiladigan holatlar.
+     *
+     * @return array<int, self>
+     */
+    public static function board(): array
+    {
+        return [self::Paid, self::Preparing, self::Ready];
+    }
 }

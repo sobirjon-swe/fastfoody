@@ -105,6 +105,17 @@ Oshxona oʻchirilmaydi — `is_active: false` qilinadi, tarixi saqlanib qoladi.
 | PATCH | `/api/staff/menu-items/{id}` | Tahrirlash, `is_available` bilan «tugadi» belgisi |
 | DELETE | `/api/staff/menu-items/{id}` | Oʻchirish |
 
+**Buyurtmalar taxtasi — restaurant_staff (4-bosqich)**
+
+| Metod | Endpoint | Tavsif |
+|---|---|---|
+| GET | `/api/staff/orders` | Ish taxtasi: toʻlangan, tayyorlanayotgan va tayyor buyurtmalar (eng eskisi birinchi); `?status=` bilan istalgan holat |
+| GET | `/api/staff/orders/{id}` | Bitta buyurtma: tarkibi, mijoz ismi va telefoni |
+| PATCH | `/api/staff/orders/{id}` | Holatni bir qadam oldinga surish (`{"status": "tayyorlanmoqda"}`) |
+
+Javobdagi `next_statuses` — shu buyurtma uchun ruxsat etilgan keyingi qadamlar; interfeys
+tugmalarni shundan chizadi, qoidalar esa faqat serverda yashaydi.
+
 Taom qaysi oshxonaga tegishli ekani **soʻrovdan olinmaydi** — u har doim kirgan xodimning
 oshxonasi. Boshqa oshxona taomiga murojaat qilinsa 403 emas, **404** qaytadi: API uning
 mavjudligini ham tasdiqlamaydi.
@@ -155,13 +166,22 @@ tayyor_boʻladi = max(hozir, navbatdagi oxirgi buyurtma tugash vaqti) + buyurtma
 kutilmoqda → tolov_qilindi → tayyorlanmoqda → tayyor → olib_ketildi
 ```
 
-Qoʻshimcha: `bekor_qilindi_mahsulot_yoq`, `muddati_otdi`. Hozircha mijoz `kutilmoqda →
-tolov_qilindi` oʻtishini bajaradi, qolgan oʻtishlar 4-bosqichda oshxona paneliga qoʻshiladi.
+Qoʻshimcha: `bekor_qilindi_mahsulot_yoq`, `muddati_otdi`.
+
+Oʻtish qoidalari bitta joyda — `OrderStatus::nextForStaff()`:
+
+| Kim | Oʻtish |
+|---|---|
+| Mijoz | `kutilmoqda → tolov_qilindi` (toʻlov) |
+| Oshxona | `tolov_qilindi → tayyorlanmoqda → tayyor → olib_ketildi` |
+
+Zanjir faqat **oldinga** yuradi: sakrash ham, ortga qaytish ham 422 bilan rad etiladi.
+Toʻlanmagan buyurtmani oshxona qoʻzgʻata olmaydi. Bekor qilish oqimi 5-bosqichda qoʻshiladi.
 
 ## Testlar
 
 ```bash
-cd backend && php artisan test      # 87 ta test (auth, rollar, menyu, buyurtma, navbat)
+cd backend && php artisan test      # 98 ta test (auth, rollar, menyu, buyurtma, navbat, holatlar)
 cd frontend && npm run build        # tsc + vite build
 cd frontend && npm run lint
 ```
@@ -206,6 +226,7 @@ Testlar SQLite (`:memory:`) da ishlaydi, ishlab chiqarish va lokal muhit — MyS
       buyurtma berish, buyurtmalar roʻyxati va holati, toʻlov simulyatsiyasi.
 - [x] **3-bosqich** — tayyor boʻlish vaqtini hisoblash: `KitchenQueue` xizmati, toʻlovdan
       oldingi baho, toʻlovda navbatga qoʻshilish, savatchada jonli koʻrsatish.
-- [ ] **4-bosqich** — buyurtma holatlarini boshqarish (oshxona paneli).
+- [x] **4-bosqich** — oshxona paneli: buyurtmalar taxtasi (mijoz, tarkib, tayyor boʻlish
+      vaqti), holatni oldinga surish, 15 soniyalik avtomatik yangilanish.
 - [ ] **5-bosqich** — mahsulot tugagan holat va bekor qilish oqimi.
 - [ ] Keyingi bosqichlar — Payme/Click integratsiyasi, real-time bildirishnoma.

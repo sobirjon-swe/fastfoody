@@ -30,6 +30,28 @@ export function AppLayout() {
               FastFoody
             </Link>
 
+            {user?.role === 'restaurant_staff' && (
+              <nav className="flex items-center gap-4 text-sm">
+                <NavLink
+                  to="/staff"
+                  end
+                  className={({ isActive }) =>
+                    cn('hover:text-foreground', isActive ? 'font-medium' : 'text-muted-foreground')
+                  }
+                >
+                  Buyurtmalar
+                </NavLink>
+                <NavLink
+                  to="/staff/menu"
+                  className={({ isActive }) =>
+                    cn('hover:text-foreground', isActive ? 'font-medium' : 'text-muted-foreground')
+                  }
+                >
+                  Menyu
+                </NavLink>
+              </nav>
+            )}
+
             {user?.role === 'customer' && (
               <nav className="flex items-center gap-4 text-sm">
                 <NavLink

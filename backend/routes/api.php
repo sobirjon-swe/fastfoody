@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Customer\OrderController;
 use App\Http\Controllers\Api\Customer\RestaurantController as CustomerRestaurantController;
 use App\Http\Controllers\Api\Staff\MenuItemController;
+use App\Http\Controllers\Api\Staff\OrderController as StaffOrderController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -77,4 +78,9 @@ Route::middleware(['auth:sanctum', 'role:restaurant_staff'])->prefix('staff')->g
     Route::get('menu-items/{menuItem}', [MenuItemController::class, 'show'])->whereNumber('menuItem');
     Route::patch('menu-items/{menuItem}', [MenuItemController::class, 'update'])->whereNumber('menuItem');
     Route::delete('menu-items/{menuItem}', [MenuItemController::class, 'destroy'])->whereNumber('menuItem');
+
+    // Buyurtmalar taxtasi va holatni oʻzgartirish (4-bosqich)
+    Route::get('orders', [StaffOrderController::class, 'index']);
+    Route::get('orders/{order}', [StaffOrderController::class, 'show'])->whereNumber('order');
+    Route::patch('orders/{order}', [StaffOrderController::class, 'update'])->whereNumber('order');
 });

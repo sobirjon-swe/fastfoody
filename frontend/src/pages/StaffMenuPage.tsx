@@ -31,7 +31,7 @@ import { apiErrorMessage } from '@/lib/api'
 import { formatPrepTime, formatPrice } from '@/lib/format'
 import type { MenuItem } from '@/types/api'
 
-export function StaffDashboardPage() {
+export function StaffMenuPage() {
   const { user } = useAuth()
   const restaurant = user?.restaurant
 
