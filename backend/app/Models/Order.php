@@ -41,6 +41,7 @@ class Order extends Model
             'prep_minutes' => 'integer',
             'ready_at' => 'datetime',
             'paid_at' => 'datetime',
+            'refunded_at' => 'datetime',
         ];
     }
 

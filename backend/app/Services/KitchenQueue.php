@@ -24,13 +24,14 @@ class KitchenQueue
      * queue is due. Never in the past: a queue that is behind schedule still
      * starts the next order now, not retroactively.
      */
-    public function freeAt(Restaurant $restaurant): CarbonImmutable
+    public function freeAt(Restaurant $restaurant, ?Order $excluding = null): CarbonImmutable
     {
         $now = CarbonImmutable::now();
 
         $active = Order::where('restaurant_id', $restaurant->id)
             ->inKitchen()
-            ->get(['ready_at', 'prep_minutes']);
+            ->when($excluding?->exists, fn ($query) => $query->whereKeyNot($excluding->getKey()))
+            ->get(['id', 'ready_at', 'prep_minutes']);
 
         $lastReadyAt = $active
             ->filter(fn (Order $order) => $order->ready_at !== null)
@@ -73,7 +74,10 @@ class KitchenQueue
      */
     public function schedule(Order $order): CarbonImmutable
     {
-        $readyAt = $this->freeAt($order->restaurant)->addMinutes($order->prep_minutes);
+        // Qayta rejalashtirilayotgan buyurtma oʻz navbatining orqasiga tushib
+        // qolmasligi uchun hisobdan chiqariladi.
+        $readyAt = $this->freeAt($order->restaurant, excluding: $order)
+            ->addMinutes($order->prep_minutes);
 
         $order->ready_at = $readyAt;
 

@@ -1,8 +1,9 @@
-import { Clock, Phone, RefreshCw } from 'lucide-react'
+import { Clock, PackageX, Phone, RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { listStaffOrders, updateStaffOrderStatus, type StaffOrder } from '@/api/staff-orders'
+import { OutOfStockDialog } from '@/components/staff/OutOfStockDialog'
 import { useAuth } from '@/auth/use-auth'
 import { OrderStatusBadge } from '@/components/OrderStatusBadge'
 import { Spinner } from '@/components/Spinner'
@@ -26,6 +27,7 @@ const FILTERS: { value: OrderStatus | ''; label: string }[] = [
   { value: '', label: 'Ish taxtasi' },
   { value: 'tolov_qilindi', label: 'Toʻlangan' },
   { value: 'tayyorlanmoqda', label: 'Tayyorlanmoqda' },
+  { value: 'mijoz_qarori_kutilmoqda', label: 'Mijoz javobi kutilmoqda' },
   { value: 'tayyor', label: 'Tayyor' },
   { value: 'olib_ketildi', label: 'Berilgan' },
 ]
@@ -37,6 +39,7 @@ export function StaffOrdersPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<number | null>(null)
+  const [outOfStockFor, setOutOfStockFor] = useState<StaffOrder | null>(null)
 
   const requestRef = useRef(0)
 
@@ -167,6 +170,9 @@ export function StaffOrdersPage() {
                     <li key={item.id} className="flex justify-between gap-3">
                       <span className="font-medium">
                         {item.quantity} × {item.name}
+                        {item.is_out_of_stock && (
+                          <span className="text-destructive ml-2 text-xs font-normal">tugadi</span>
+                        )}
                       </span>
                       <span className="text-muted-foreground whitespace-nowrap">
                         {formatPrice(item.line_total)}
@@ -178,6 +184,16 @@ export function StaffOrdersPage() {
                 <div className="flex items-center justify-between gap-3 border-t pt-3">
                   <span className="font-medium">{formatPrice(order.total_price)}</span>
                   <div className="flex gap-2">
+                    {order.can_report_out_of_stock && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={busyId === order.id}
+                        onClick={() => setOutOfStockFor(order)}
+                      >
+                        <PackageX /> Mahsulot tugadi
+                      </Button>
+                    )}
                     {order.next_statuses.map((next) => (
                       <Button
                         key={next}
@@ -195,6 +211,12 @@ export function StaffOrdersPage() {
           ))}
         </div>
       )}
+
+      <OutOfStockDialog
+        order={outOfStockFor}
+        onOpenChange={(open) => !open && setOutOfStockFor(null)}
+        onReported={() => load(true)}
+      />
     </div>
   )
 }

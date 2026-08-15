@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api\Staff;
 
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Staff\ReportOutOfStockRequest;
 use App\Http\Requests\Staff\UpdateOrderStatusRequest;
 use App\Http\Resources\StaffOrderResource;
 use App\Models\Order;
+use App\Services\OutOfStockFlow;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -75,6 +77,26 @@ class OrderController extends Controller
         return response()->json([
             'order' => StaffOrderResource::make($found),
         ]);
+    }
+
+    /**
+     * «Mahsulot tugadi»: buyurtma navbatdan chiqadi va mijozning qarorini
+     * kutadi (almashtirish yoki pul qaytarish).
+     */
+    public function reportOutOfStock(
+        ReportOutOfStockRequest $request,
+        int $order,
+        OutOfStockFlow $flow,
+    ): JsonResponse {
+        $found = $this->find($request, $order);
+
+        $item = $found->items->firstWhere('id', $request->integer('order_item_id'));
+
+        abort_if($item === null, Response::HTTP_NOT_FOUND);
+
+        $updated = $flow->report($found, $item, $request->boolean('mark_menu_item_unavailable'));
+
+        return response()->json(['order' => StaffOrderResource::make($updated)]);
     }
 
     private function find(Request $request, int $order): Order

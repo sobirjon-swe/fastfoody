@@ -33,6 +33,7 @@ class StaffOrderResource extends JsonResource
             'prep_minutes' => $this->prep_minutes,
             'ready_at' => $this->ready_at,
             'paid_at' => $this->paid_at,
+            'can_report_out_of_stock' => $this->status->canReportOutOfStock(),
             'created_at' => $this->created_at,
             'customer' => [
                 'name' => $this->whenLoaded('customer', fn () => $this->customer->name),

@@ -44,6 +44,7 @@ export type OrderStatus =
   | 'tolov_qilindi'
   | 'tayyorlanmoqda'
   | 'tayyor'
+  | 'mijoz_qarori_kutilmoqda'
   | 'olib_ketildi'
   | 'bekor_qilindi_mahsulot_yoq'
   | 'muddati_otdi'
@@ -56,6 +57,8 @@ export interface OrderItem {
   quantity: number
   line_total: string
   prep_minutes: number
+  /** Oshxona shu qatordagi taom tugaganini belgilagan. */
+  is_out_of_stock: boolean
 }
 
 export interface Order {
@@ -70,6 +73,7 @@ export interface Order {
   /** Toʻlanmagan buyurtma uchun jonli baho. */
   estimated_ready_at: string | null
   paid_at: string | null
+  refunded_at: string | null
   created_at: string
   items?: OrderItem[]
 }
@@ -79,6 +83,7 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   tolov_qilindi: 'Toʻlandi',
   tayyorlanmoqda: 'Tayyorlanmoqda',
   tayyor: 'Tayyor',
+  mijoz_qarori_kutilmoqda: 'Mahsulot tugadi — javobingiz kutilmoqda',
   olib_ketildi: 'Olib ketildi',
   bekor_qilindi_mahsulot_yoq: 'Bekor qilindi (mahsulot yoʻq)',
   muddati_otdi: 'Muddati oʻtdi',

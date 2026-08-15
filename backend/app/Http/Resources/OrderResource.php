@@ -29,6 +29,7 @@ class OrderResource extends JsonResource
             // Toʻlanmagan buyurtma uchun jonli baho, toʻlangani uchun null.
             'estimated_ready_at' => $this->resource->estimatedReadyAt,
             'paid_at' => $this->paid_at,
+            'refunded_at' => $this->refunded_at,
             'created_at' => $this->created_at,
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
         ];

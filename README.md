@@ -112,6 +112,7 @@ Oshxona oʻchirilmaydi — `is_active: false` qilinadi, tarixi saqlanib qoladi.
 | GET | `/api/staff/orders` | Ish taxtasi: toʻlangan, tayyorlanayotgan va tayyor buyurtmalar (eng eskisi birinchi); `?status=` bilan istalgan holat |
 | GET | `/api/staff/orders/{id}` | Bitta buyurtma: tarkibi, mijoz ismi va telefoni |
 | PATCH | `/api/staff/orders/{id}` | Holatni bir qadam oldinga surish (`{"status": "tayyorlanmoqda"}`) |
+| POST | `/api/staff/orders/{id}/out-of-stock` | «Mahsulot tugadi»: `order_item_id` + ixtiyoriy `mark_menu_item_unavailable` |
 
 Javobdagi `next_statuses` — shu buyurtma uchun ruxsat etilgan keyingi qadamlar; interfeys
 tugmalarni shundan chizadi, qoidalar esa faqat serverda yashaydi.
@@ -131,6 +132,8 @@ mavjudligini ham tasdiqlamaydi.
 | GET | `/api/orders` | mijoz | Faqat oʻz buyurtmalari |
 | GET | `/api/orders/{id}` | mijoz | Tarkibi bilan (begonasi 404) |
 | POST | `/api/orders/{id}/pay` | mijoz | Toʻlov **simulyatsiyasi**; qayta toʻlashga 409 |
+| POST | `/api/orders/{id}/replace-item` | mijoz | Tugagan taomni menyudagi boshqasiga almashtirish |
+| POST | `/api/orders/{id}/cancel` | mijoz | Bekor qilish va pul qaytarish (simulyatsiya) |
 
 Narx va tayyorlash vaqti **savatchadan olinmaydi** — server menyudan oʻqiydi, shuning uchun
 mijoz yuborgan `unit_price` eʼtiborga olinmaydi. Butun savatcha bitta tranzaksiyada
@@ -176,12 +179,30 @@ Oʻtish qoidalari bitta joyda — `OrderStatus::nextForStaff()`:
 | Oshxona | `tolov_qilindi → tayyorlanmoqda → tayyor → olib_ketildi` |
 
 Zanjir faqat **oldinga** yuradi: sakrash ham, ortga qaytish ham 422 bilan rad etiladi.
-Toʻlanmagan buyurtmani oshxona qoʻzgʻata olmaydi. Bekor qilish oqimi 5-bosqichda qoʻshiladi.
+Toʻlanmagan buyurtmani oshxona qoʻzgʻata olmaydi.
+
+## Mahsulot tugaganda (5-bosqich)
+
+Toʻlangan buyurtmadagi taom tugab qolsa:
+
+1. **Oshxona** buyurtmadagi qaysi qator tugaganini belgilaydi (ixtiyoriy ravishda taomni
+   menyudan ham «mavjud emas» qilib qoʻyadi). Buyurtma `mijoz_qarori_kutilmoqda` holatiga
+   oʻtadi, `ready_at` boʻshatiladi va u **navbatdan chiqadi** — keyingi mijozlar bu
+   buyurtma tufayli kutmaydi.
+2. **Mijoz** ikkitadan birini tanlaydi:
+   - **Almashtirish** — tugagan taom oʻrniga menyudan boshqasini oladi (miqdor oʻsha-oʻsha).
+     Narx va tayyorlash vaqti yangi taomdan olinadi, buyurtma `tolov_qilindi` holatiga
+     qaytadi va **navbatga qayta rejalashtiriladi**.
+   - **Bekor qilish** — buyurtma `bekor_qilindi_mahsulot_yoq` boʻladi, `refunded_at`
+     yoziladi (pul qaytarish ham MVP'da simulyatsiya).
+
+Bloklangan buyurtma oshxona taxtasida koʻrinib turadi (`next_statuses` boʻsh) — xodim uning
+mijoz javobini kutayotganini biladi, lekin uni oldinga sura olmaydi.
 
 ## Testlar
 
 ```bash
-cd backend && php artisan test      # 98 ta test (auth, rollar, menyu, buyurtma, navbat, holatlar)
+cd backend && php artisan test      # 110 ta test (auth, rollar, menyu, buyurtma, navbat, holatlar, mahsulot tugashi)
 cd frontend && npm run build        # tsc + vite build
 cd frontend && npm run lint
 ```
@@ -228,5 +249,8 @@ Testlar SQLite (`:memory:`) da ishlaydi, ishlab chiqarish va lokal muhit — MyS
       oldingi baho, toʻlovda navbatga qoʻshilish, savatchada jonli koʻrsatish.
 - [x] **4-bosqich** — oshxona paneli: buyurtmalar taxtasi (mijoz, tarkib, tayyor boʻlish
       vaqti), holatni oldinga surish, 15 soniyalik avtomatik yangilanish.
-- [ ] **5-bosqich** — mahsulot tugagan holat va bekor qilish oqimi.
+- [x] **5-bosqich** — mahsulot tugagan holat: oshxona bildiradi, mijoz almashtiradi yoki
+      bekor qilib pulini qaytarib oladi; bloklangan buyurtma navbatni band qilmaydi.
+
+**MVP toʻliq bajarildi.**
 - [ ] Keyingi bosqichlar — Payme/Click integratsiyasi, real-time bildirishnoma.

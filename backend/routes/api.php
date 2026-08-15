@@ -48,6 +48,10 @@ Route::middleware(['auth:sanctum', 'role:customer'])->group(function () {
     Route::post('orders', [OrderController::class, 'store']);
     Route::get('orders/{order}', [OrderController::class, 'show'])->whereNumber('order');
     Route::post('orders/{order}/pay', [OrderController::class, 'pay'])->whereNumber('order');
+
+    // Mahsulot tugaganda mijozning tanlovi (5-bosqich)
+    Route::post('orders/{order}/replace-item', [OrderController::class, 'replaceItem'])->whereNumber('order');
+    Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])->whereNumber('order');
 });
 
 /*
@@ -83,4 +87,6 @@ Route::middleware(['auth:sanctum', 'role:restaurant_staff'])->prefix('staff')->g
     Route::get('orders', [StaffOrderController::class, 'index']);
     Route::get('orders/{order}', [StaffOrderController::class, 'show'])->whereNumber('order');
     Route::patch('orders/{order}', [StaffOrderController::class, 'update'])->whereNumber('order');
+    Route::post('orders/{order}/out-of-stock', [StaffOrderController::class, 'reportOutOfStock'])
+        ->whereNumber('order');
 });

@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 
 import { getOrder, payOrder } from '@/api/orders'
 import { OrderStatusBadge } from '@/components/OrderStatusBadge'
+import { OutOfStockDecision } from '@/components/OutOfStockDecision'
 import { Spinner } from '@/components/Spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -20,7 +21,13 @@ import type { Order } from '@/types/api'
 function ReadyTimeCard({ order }: { order: Order }) {
   const time = order.ready_at ?? order.estimated_ready_at
 
-  if (!time || order.status === 'olib_ketildi' || order.status.startsWith('bekor')) {
+  const hidden =
+    !time ||
+    order.status === 'olib_ketildi' ||
+    order.status === 'mijoz_qarori_kutilmoqda' ||
+    order.status.startsWith('bekor')
+
+  if (hidden) {
     return null
   }
 
@@ -122,6 +129,19 @@ export function OrderDetailPage() {
         </p>
       </div>
 
+      {order.status === 'mijoz_qarori_kutilmoqda' && (
+        <OutOfStockDecision order={order} onResolved={setOrder} />
+      )}
+
+      {order.status === 'bekor_qilindi_mahsulot_yoq' && (
+        <Alert>
+          <AlertDescription>
+            Buyurtma bekor qilindi, {formatPrice(order.total_price)} qaytariladi (MVP'da
+            simulyatsiya).
+          </AlertDescription>
+        </Alert>
+      )}
+
       <ReadyTimeCard order={order} />
 
       <Card>
@@ -135,6 +155,9 @@ export function OrderDetailPage() {
               <li key={item.id} className="flex justify-between gap-3">
                 <span>
                   {item.name} × {item.quantity}
+                  {item.is_out_of_stock && (
+                    <span className="text-destructive ml-2 text-xs">tugadi</span>
+                  )}
                 </span>
                 <span className="whitespace-nowrap">{formatPrice(item.line_total)}</span>
               </li>

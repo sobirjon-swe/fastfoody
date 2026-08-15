@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api\Customer;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customer\EstimateOrderRequest;
+use App\Http\Requests\Customer\ReplaceOrderItemRequest;
 use App\Http\Requests\Customer\StoreOrderRequest;
 use App\Http\Resources\OrderResource;
+use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\Restaurant;
 use App\Services\KitchenQueue;
 use App\Services\OrderPlacer;
+use App\Services\OutOfStockFlow;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -95,6 +98,35 @@ class OrderController extends Controller
 
         return response()->json([
             'order' => OrderResource::make($paid),
+        ]);
+    }
+
+    /**
+     * Mijoz tugagan taomni menyudagi boshqasiga almashtiradi.
+     */
+    public function replaceItem(
+        ReplaceOrderItemRequest $request,
+        int $order,
+        OutOfStockFlow $flow,
+    ): JsonResponse {
+        $found = $this->find($request, $order);
+        $item = $found->items->firstWhere('id', $request->integer('order_item_id'));
+        $replacement = MenuItem::find($request->integer('menu_item_id'));
+
+        abort_if($item === null || $replacement === null, Response::HTTP_NOT_FOUND);
+
+        return response()->json([
+            'order' => OrderResource::make($flow->replace($found, $item, $replacement)),
+        ]);
+    }
+
+    /**
+     * Mijoz buyurtmani bekor qiladi, pul qaytariladi (simulyatsiya).
+     */
+    public function cancel(Request $request, int $order, OutOfStockFlow $flow): JsonResponse
+    {
+        return response()->json([
+            'order' => OrderResource::make($flow->cancel($this->find($request, $order))),
         ]);
     }
 

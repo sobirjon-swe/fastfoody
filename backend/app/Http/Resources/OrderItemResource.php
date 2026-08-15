@@ -26,6 +26,7 @@ class OrderItemResource extends JsonResource
             'quantity' => $this->quantity,
             'line_total' => $this->line_total,
             'prep_minutes' => $this->prep_minutes,
+            'is_out_of_stock' => $this->out_of_stock_at !== null,
         ];
     }
 }

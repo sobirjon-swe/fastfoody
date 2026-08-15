@@ -15,6 +15,11 @@ enum OrderStatus: string
     case Paid = 'tolov_qilindi';
     case Preparing = 'tayyorlanmoqda';
     case Ready = 'tayyor';
+    /**
+     * Oshxona taom tugaganini bildirdi va mijozning qarorini kutmoqda:
+     * almashtirish yoki bekor qilib pulni qaytarish.
+     */
+    case AwaitingCustomerDecision = 'mijoz_qarori_kutilmoqda';
     case PickedUp = 'olib_ketildi';
     case CancelledOutOfStock = 'bekor_qilindi_mahsulot_yoq';
     case Expired = 'muddati_otdi';
@@ -24,6 +29,24 @@ enum OrderStatus: string
      * 3-bosqich sums the work that is in these states.
      */
     public function isActiveInKitchen(): bool
+    {
+        return in_array($this, [self::Paid, self::Preparing], strict: true);
+    }
+
+    /**
+     * Mijozning javobi kutilayotgan buyurtma oshxonada pishmaydi, shuning uchun
+     * navbatda ham joy egallamaydi.
+     */
+    public function isBlocked(): bool
+    {
+        return $this === self::AwaitingCustomerDecision;
+    }
+
+    /**
+     * Oshxona shu holatdagi buyurtma uchun «mahsulot tugadi» deb ayta oladi:
+     * pul olingan, lekin taom hali berilmagan.
+     */
+    public function canReportOutOfStock(): bool
     {
         return in_array($this, [self::Paid, self::Preparing], strict: true);
     }
@@ -64,10 +87,13 @@ enum OrderStatus: string
     /**
      * Oshxona panelining ish taxtasi: hozir eʼtibor talab qiladigan holatlar.
      *
+     * Mijozning javobi kutilayotgan buyurtma ham shu yerda qoladi — u
+     * pishirilmaydi, lekin oshxona uning kutib turganini koʻrishi kerak.
+     *
      * @return array<int, self>
      */
     public static function board(): array
     {
-        return [self::Paid, self::Preparing, self::Ready];
+        return [self::Paid, self::Preparing, self::AwaitingCustomerDecision, self::Ready];
     }
 }

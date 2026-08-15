@@ -6,6 +6,7 @@ const VARIANTS: Record<OrderStatus, 'default' | 'secondary' | 'outline' | 'destr
   tolov_qilindi: 'secondary',
   tayyorlanmoqda: 'secondary',
   tayyor: 'default',
+  mijoz_qarori_kutilmoqda: 'destructive',
   olib_ketildi: 'outline',
   bekor_qilindi_mahsulot_yoq: 'destructive',
   muddati_otdi: 'destructive',

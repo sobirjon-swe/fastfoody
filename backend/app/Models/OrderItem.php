@@ -30,6 +30,7 @@ class OrderItem extends Model
             'line_total' => 'decimal:2',
             'quantity' => 'integer',
             'prep_minutes' => 'integer',
+            'out_of_stock_at' => 'datetime',
         ];
     }
 

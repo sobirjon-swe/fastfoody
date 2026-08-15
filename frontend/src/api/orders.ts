@@ -59,3 +59,20 @@ export async function payOrder(id: number) {
 
   return data.order
 }
+
+/** Mijoz: tugagan taomni boshqasiga almashtiradi. */
+export async function replaceOrderItem(orderId: number, orderItemId: number, menuItemId: number) {
+  const { data } = await api.post<{ order: Order }>(`/orders/${orderId}/replace-item`, {
+    order_item_id: orderItemId,
+    menu_item_id: menuItemId,
+  })
+
+  return data.order
+}
+
+/** Mijoz: buyurtmani bekor qiladi, pul qaytariladi (simulyatsiya). */
+export async function cancelOrder(orderId: number) {
+  const { data } = await api.post<{ order: Order }>(`/orders/${orderId}/cancel`)
+
+  return data.order
+}
