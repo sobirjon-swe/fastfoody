@@ -67,9 +67,11 @@ CORS backend'dagi `FRONTEND_URL` orqali boshqariladi (bir nechta origin vergul b
 - Route'larni rol boʻyicha cheklash uchun `role` middleware alias'i tayyor:
   `Route::middleware(['auth:sanctum', 'role:restaurant_staff'])`.
 
-## API (0-bosqich)
+## API
 
 Barcha javoblar JSON. Token `Authorization: Bearer <token>` sarlavhasida yuboriladi.
+
+**Autentifikatsiya (0-bosqich)**
 
 | Metod | Endpoint | Kirish huquqi | Tavsif |
 |---|---|---|---|
@@ -80,10 +82,37 @@ Barcha javoblar JSON. Token `Authorization: Bearer <token>` sarlavhasida yuboril
 
 `register` va `login` daqiqasiga 10 martaga cheklangan (`throttle:10,1`).
 
+**Oshxona boshqaruvi — super_admin (1-bosqich)**
+
+| Metod | Endpoint | Tavsif |
+|---|---|---|
+| GET | `/api/admin/restaurants` | Roʻyxat; `?q=`, `?status=active\|inactive`, `?page=` (15 tadan) |
+| POST | `/api/admin/restaurants` | Yangi oshxona |
+| GET | `/api/admin/restaurants/{id}` | Bitta oshxona |
+| PATCH | `/api/admin/restaurants/{id}` | Tahrirlash; `is_active` bilan faollashtirish/oʻchirish |
+| GET | `/api/admin/restaurants/{id}/staff` | Shu oshxona xodimlari |
+| POST | `/api/admin/restaurants/{id}/staff` | Xodim hisobini yaratish (rol avtomatik `restaurant_staff`) |
+
+Oshxona oʻchirilmaydi — `is_active: false` qilinadi, tarixi saqlanib qoladi.
+
+**Menyu boshqaruvi — restaurant_staff (1-bosqich)**
+
+| Metod | Endpoint | Tavsif |
+|---|---|---|
+| GET | `/api/staff/menu-items` | Faqat oʻz oshxonasi menyusi |
+| POST | `/api/staff/menu-items` | Taom qoʻshish |
+| GET | `/api/staff/menu-items/{id}` | Bitta taom |
+| PATCH | `/api/staff/menu-items/{id}` | Tahrirlash, `is_available` bilan «tugadi» belgisi |
+| DELETE | `/api/staff/menu-items/{id}` | Oʻchirish |
+
+Taom qaysi oshxonaga tegishli ekani **soʻrovdan olinmaydi** — u har doim kirgan xodimning
+oshxonasi. Boshqa oshxona taomiga murojaat qilinsa 403 emas, **404** qaytadi: API uning
+mavjudligini ham tasdiqlamaydi.
+
 ## Testlar
 
 ```bash
-cd backend && php artisan test      # 14 ta feature testi (auth + rol middleware)
+cd backend && php artisan test      # 44 ta test (auth, rollar, oshxona va menyu boshqaruvi)
 cd frontend && npm run build        # tsc + vite build
 cd frontend && npm run lint
 ```
@@ -97,8 +126,16 @@ Testlar SQLite (`:memory:`) da ishlaydi, ishlab chiqarish va lokal muhit — MyS
   jadval oʻzgarmasdan kengaytiriladi.
 - **Xodim va super admin oʻzi roʻyxatdan oʻta olmaydi** — bunday hisoblarni super admin yaratadi
   (1-bosqich).
-- **`opens_at` / `closes_at`** oddiy `time` ustunlari; hozircha faqat maʼlumot sifatida
-  koʻrsatiladi, buyurtma qabul qilish oynasi 3-bosqichda ishlatiladi.
+- **`opens_at` / `closes_at`** bazada `time`, API'da esa doim `"HH:MM"` koʻrinishida
+  (model accessor'i normallashtiradi); buyurtma qabul qilish oynasi sifatida 3-bosqichda
+  ishlatiladi.
+- **Menyuni faqat oshxona xodimi boshqaradi.** Super admin oshxona va xodim hisobini
+  yaratadi, menyuni esa xodim toʻldiradi — shunda tenant chegarasi bitta joyda
+  (`users.restaurant_id`) qoladi.
+- **Narx `decimal(12,2)`** — API'da `"32000.00"` satri sifatida qaytadi (float yaxlitlash
+  xatolarisiz), frontend uni `formatPrice` bilan `32 000 soʻm` koʻrinishida chizadi.
+- **Taom oʻchirilmasin, «mavjud emas» qilinsin** — vaqtincha tugagan mahsulot uchun
+  `is_available: false`; 5-bosqichdagi «mahsulot yoʻq» oqimi shunga tayanadi.
 - **shadcn/ui komponentlari** loyiha ichiga koʻchirilgan (`src/components/ui`), `components.json`
   ham saqlangan — yangi komponentni `npx shadcn@latest add <name>` bilan qoʻshish mumkin.
 
@@ -106,7 +143,9 @@ Testlar SQLite (`:memory:`) da ishlaydi, ishlab chiqarish va lokal muhit — MyS
 
 - [x] **0-bosqich** — loyiha skeleti: Laravel API + React SPA, Sanctum autentifikatsiyasi,
       rollar, `restaurants` jadvali, rol boʻyicha himoyalangan sahifalar.
-- [ ] **1-bosqich** — oshxona va menyu boshqaruvi (super_admin + restaurant_staff).
+- [x] **1-bosqich** — oshxona boshqaruvi (super_admin paneli: qidiruv, faollashtirish,
+      xodim hisobi) va menyu boshqaruvi (`menu_items`, oshxona xodimi paneli:
+      qoʻshish/tahrirlash/oʻchirish, «mavjud emas» belgisi, tayyorlash vaqti).
 - [ ] **2-bosqich** — mijoz tomoni: menyu, savatcha, buyurtma berish.
 - [ ] **3-bosqich** — tayyor boʻlish vaqtini hisoblash (miqdor + navbat).
 - [ ] **4-bosqich** — buyurtma holatlarini boshqarish (oshxona paneli).

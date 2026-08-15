@@ -5,9 +5,13 @@ export interface Restaurant {
   name: string
   address: string
   phone: string | null
+  /** "HH:MM" */
   opens_at: string
+  /** "HH:MM" */
   closes_at: string
   is_active: boolean
+  menu_items_count?: number
+  staff_count?: number
 }
 
 export interface User {
@@ -19,6 +23,27 @@ export interface User {
   restaurant_id: number | null
   restaurant?: Restaurant
   created_at: string
+}
+
+export interface MenuItem {
+  id: number
+  restaurant_id: number
+  name: string
+  description: string | null
+  /** Decimal string from the API, e.g. "32000.00". */
+  price: string
+  base_prep_minutes: number
+  extra_prep_minutes: number
+  is_available: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface PaginationMeta {
+  current_page: number
+  last_page: number
+  per_page: number
+  total: number
 }
 
 export interface AuthResponse {

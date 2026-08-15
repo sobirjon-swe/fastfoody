@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\RestaurantController;
+use App\Http\Controllers\Api\Admin\RestaurantStaffController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\Staff\MenuItemController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,9 +27,31 @@ Route::prefix('auth')->group(function () {
 });
 
 /*
-| Role restricted routes are added from 1-bosqich onwards and hang off the
-| 'role' middleware alias, e.g.:
-|
-|   Route::middleware(['auth:sanctum', 'role:super_admin'])->prefix('admin')
-|   Route::middleware(['auth:sanctum', 'role:restaurant_staff'])->prefix('staff')
+|--------------------------------------------------------------------------
+| Super admin: restaurants and their staff accounts (1-bosqich)
+|--------------------------------------------------------------------------
 */
+
+Route::middleware(['auth:sanctum', 'role:super_admin'])->prefix('admin')->group(function () {
+    Route::get('restaurants', [RestaurantController::class, 'index']);
+    Route::post('restaurants', [RestaurantController::class, 'store']);
+    Route::get('restaurants/{restaurant}', [RestaurantController::class, 'show']);
+    Route::patch('restaurants/{restaurant}', [RestaurantController::class, 'update']);
+
+    Route::get('restaurants/{restaurant}/staff', [RestaurantStaffController::class, 'index']);
+    Route::post('restaurants/{restaurant}/staff', [RestaurantStaffController::class, 'store']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Restaurant staff: the menu of their own restaurant (1-bosqich)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth:sanctum', 'role:restaurant_staff'])->prefix('staff')->group(function () {
+    Route::get('menu-items', [MenuItemController::class, 'index']);
+    Route::post('menu-items', [MenuItemController::class, 'store']);
+    Route::get('menu-items/{menuItem}', [MenuItemController::class, 'show'])->whereNumber('menuItem');
+    Route::patch('menu-items/{menuItem}', [MenuItemController::class, 'update'])->whereNumber('menuItem');
+    Route::delete('menu-items/{menuItem}', [MenuItemController::class, 'destroy'])->whereNumber('menuItem');
+});

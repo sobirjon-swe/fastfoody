@@ -26,6 +26,8 @@ class RestaurantResource extends JsonResource
             'opens_at' => $this->opens_at,
             'closes_at' => $this->closes_at,
             'is_active' => $this->is_active,
+            'menu_items_count' => $this->whenCounted('menuItems'),
+            'staff_count' => $this->whenCounted('staff'),
         ];
     }
 }
