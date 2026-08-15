@@ -4,6 +4,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Mahalliy vaqt mintaqasi
+    |--------------------------------------------------------------------------
+    |
+    | Vaqtlar bazada UTC'da saqlanadi, lekin oshxonaning ish vaqti mahalliy
+    | soatda yoziladi ("09:00" — Toshkent vaqti bilan). Ochiq-yopiqligini
+    | tekshirishda shu mintaqa ishlatiladi.
+    |
+    */
+
+    'timezone' => env('FASTFOODY_TIMEZONE', 'Asia/Tashkent'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Buyurtma muddati
     |--------------------------------------------------------------------------
     |

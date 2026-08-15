@@ -1,12 +1,20 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 import { AuthContext, type AuthContextValue } from '@/auth/auth-context'
-import { api, getToken, setToken } from '@/lib/api'
+import { api, getToken, setToken, setUnauthorizedHandler } from '@/lib/api'
 import type { AuthResponse, LoginPayload, RegisterPayload, User } from '@/types/api'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [initialising, setInitialising] = useState(true)
+
+  // Har qanday soʻrov 401 bilan qaytsa, foydalanuvchi seansi shu yerda
+  // tozalanadi — sahifalar buni alohida oʻylab oʻtirmaydi.
+  useEffect(() => {
+    setUnauthorizedHandler(() => setUser(null))
+
+    return () => setUnauthorizedHandler(null)
+  }, [])
 
   // A token in localStorage only means "possibly signed in": it is verified
   // against the API once on boot, and dropped if the server rejects it.

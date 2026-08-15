@@ -29,12 +29,22 @@ class OrderController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $orders = $this->query($request)->with('restaurant')->latest()->get();
+        $orders = $this->query($request)
+            ->with('restaurant')
+            ->latest()
+            ->paginate(perPage: 10)
+            ->withQueryString();
 
-        $orders->each(fn (Order $order) => $this->attachEstimate($order));
+        collect($orders->items())->each(fn (Order $order) => $this->attachEstimate($order));
 
         return response()->json([
-            'orders' => OrderResource::collection($orders),
+            'orders' => OrderResource::collection($orders->items()),
+            'meta' => [
+                'current_page' => $orders->currentPage(),
+                'last_page' => $orders->lastPage(),
+                'per_page' => $orders->perPage(),
+                'total' => $orders->total(),
+            ],
         ]);
     }
 

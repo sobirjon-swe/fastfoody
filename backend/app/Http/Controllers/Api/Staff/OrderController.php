@@ -38,11 +38,17 @@ class OrderController extends Controller
             ->with('items', 'customer')
             ->orderBy('paid_at')
             ->orderBy('id')
-            ->limit(100)
-            ->get();
+            ->paginate(perPage: 30)
+            ->withQueryString();
 
         return response()->json([
-            'orders' => StaffOrderResource::collection($orders),
+            'orders' => StaffOrderResource::collection($orders->items()),
+            'meta' => [
+                'current_page' => $orders->currentPage(),
+                'last_page' => $orders->lastPage(),
+                'per_page' => $orders->perPage(),
+                'total' => $orders->total(),
+            ],
         ]);
     }
 

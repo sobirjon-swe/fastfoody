@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+import { RefreshCw } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 
 import { listMyOrders } from '@/api/orders'
@@ -9,29 +10,53 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { apiErrorMessage } from '@/lib/api'
 import { formatClock, formatPrice } from '@/lib/format'
-import type { Order } from '@/types/api'
+import { POLL_MS, usePolling } from '@/lib/use-polling'
+import type { Order, PaginationMeta } from '@/types/api'
 
 export function MyOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
+  const [meta, setMeta] = useState<PaginationMeta | null>(null)
+  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+  // Faqat eng oxirgi soʻrov roʻyxatga yozadi.
+  const requestRef = useRef(0)
 
-    try {
-      setOrders(await listMyOrders())
-    } catch (caught) {
-      setError(apiErrorMessage(caught, 'Buyurtmalarni yuklab boʻlmadi.'))
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const load = useCallback(
+    async (quiet = false) => {
+      const requestId = ++requestRef.current
+
+      if (!quiet) {
+        setLoading(true)
+      }
+
+      try {
+        const { orders: data, meta: pagination } = await listMyOrders(page)
+
+        if (requestId === requestRef.current) {
+          setOrders(data)
+          setMeta(pagination)
+          setError(null)
+        }
+      } catch (caught) {
+        if (requestId === requestRef.current) {
+          setError(apiErrorMessage(caught, 'Buyurtmalarni yuklab boʻlmadi.'))
+        }
+      } finally {
+        if (requestId === requestRef.current) {
+          setLoading(false)
+        }
+      }
+    },
+    [page],
+  )
 
   useEffect(() => {
     void load()
   }, [load])
+
+  usePolling(() => void load(true), POLL_MS)
 
   return (
     <div className="grid gap-6">
@@ -39,12 +64,11 @@ export function MyOrdersPage() {
         <div>
           <h1 className="text-2xl font-semibold">Buyurtmalarim</h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            Holatni koʻrish uchun buyurtmani oching. Sahifani yangilab turing — jonli
-            bildirishnoma keyingi bosqichlarda qoʻshiladi.
+            Holat oʻzi yangilanib turadi. Batafsil koʻrish uchun buyurtmani oching.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={load}>
-          Yangilash
+        <Button variant="outline" size="sm" onClick={() => load()}>
+          <RefreshCw /> Yangilash
         </Button>
       </div>
 
@@ -58,7 +82,10 @@ export function MyOrdersPage() {
         <Spinner />
       ) : orders.length === 0 ? (
         <p className="text-muted-foreground py-10 text-center text-sm">
-          Hozircha buyurtma yoʻq. <Link to="/" className="underline">Oshxonalarni koʻring.</Link>
+          Hozircha buyurtma yoʻq.{' '}
+          <Link to="/" className="underline">
+            Oshxonalarni koʻring.
+          </Link>
         </p>
       ) : (
         <div className="grid gap-3">
@@ -91,6 +118,32 @@ export function MyOrdersPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {meta && meta.last_page > 1 && (
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">
+            {meta.current_page}/{meta.last_page} — jami {meta.total} ta
+          </span>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={loading || page <= 1}
+              onClick={() => setPage((current) => current - 1)}
+            >
+              Oldingi
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={loading || page >= meta.last_page}
+              onClick={() => setPage((current) => current + 1)}
+            >
+              Keyingi
+            </Button>
+          </div>
         </div>
       )}
     </div>

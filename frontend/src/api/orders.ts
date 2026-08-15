@@ -1,5 +1,5 @@
 import { api } from '@/lib/api'
-import type { MenuItem, Order, OrderEstimate, Restaurant } from '@/types/api'
+import type { MenuItem, Order, OrderEstimate, PaginationMeta, Restaurant } from '@/types/api'
 
 export interface CartLine {
   menu_item_id: number
@@ -41,10 +41,12 @@ export async function placeOrder(restaurantId: number, items: CartLine[]) {
   return data.order
 }
 
-export async function listMyOrders() {
-  const { data } = await api.get<{ orders: Order[] }>('/orders')
+export async function listMyOrders(page = 1) {
+  const { data } = await api.get<{ orders: Order[]; meta: PaginationMeta }>('/orders', {
+    params: { page },
+  })
 
-  return data.orders
+  return data
 }
 
 export async function getOrder(id: number) {

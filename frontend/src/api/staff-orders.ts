@@ -1,5 +1,5 @@
 import { api } from '@/lib/api'
-import type { OrderItem, OrderStatus } from '@/types/api'
+import type { OrderItem, OrderStatus, PaginationMeta } from '@/types/api'
 
 export interface StaffOrder {
   id: number
@@ -16,12 +16,12 @@ export interface StaffOrder {
   items?: OrderItem[]
 }
 
-export async function listStaffOrders(status?: OrderStatus | '') {
-  const { data } = await api.get<{ orders: StaffOrder[] }>('/staff/orders', {
-    params: { status: status || undefined },
+export async function listStaffOrders(status?: OrderStatus | '', page = 1) {
+  const { data } = await api.get<{ orders: StaffOrder[]; meta: PaginationMeta }>('/staff/orders', {
+    params: { status: status || undefined, page },
   })
 
-  return data.orders
+  return data
 }
 
 export async function updateStaffOrderStatus(id: number, status: OrderStatus) {

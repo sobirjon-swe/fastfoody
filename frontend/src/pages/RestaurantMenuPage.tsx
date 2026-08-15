@@ -82,7 +82,7 @@ export function RestaurantMenuPage() {
   // rather than guessed here. Debounced: tapping "+" five times must not fire
   // five requests, and a stale answer must never overwrite a newer one.
   useEffect(() => {
-    if (lines.length === 0) {
+    if (lines.length === 0 || restaurant?.is_open_now === false) {
       setEstimate(null)
 
       return
@@ -105,7 +105,7 @@ export function RestaurantMenuPage() {
       clearTimeout(timer)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, cartKey])
+  }, [id, cartKey, restaurant?.is_open_now])
 
   async function submit() {
     setPlacing(true)
@@ -163,6 +163,15 @@ export function RestaurantMenuPage() {
             {restaurant.address} · {restaurant.opens_at}–{restaurant.closes_at}
           </p>
         </div>
+
+        {!restaurant.is_open_now && (
+          <Alert>
+            <AlertDescription>
+              Oshxona hozir yopiq. Buyurtma faqat {restaurant.opens_at}–{restaurant.closes_at}{' '}
+              oraligʻida qabul qilinadi.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {error && (
           <Alert variant="destructive">
@@ -274,8 +283,15 @@ export function RestaurantMenuPage() {
             </>
           )}
 
-          <Button disabled={lines.length === 0 || placing} onClick={submit}>
-            {placing ? 'Yuborilmoqda...' : 'Buyurtma berish'}
+          <Button
+            disabled={lines.length === 0 || placing || !restaurant.is_open_now}
+            onClick={submit}
+          >
+            {restaurant.is_open_now
+              ? placing
+                ? 'Yuborilmoqda...'
+                : 'Buyurtma berish'
+              : 'Oshxona yopiq'}
           </Button>
         </CardContent>
       </Card>

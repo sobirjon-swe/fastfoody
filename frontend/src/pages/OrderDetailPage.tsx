@@ -1,5 +1,5 @@
 import { ArrowLeft, Clock } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { toast } from 'sonner'
 
@@ -11,8 +11,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { apiErrorMessage } from '@/lib/api'
+import { POLL_MS, usePolling } from '@/lib/use-polling'
 import { formatClock, formatPrice, minutesFromNow } from '@/lib/format'
-import type { Order } from '@/types/api'
+import { ORDER_STATUS_LABELS, type Order } from '@/types/api'
 
 /**
  * Toʻlangan buyurtma uchun qatʼiy vaqt (ready_at), toʻlanmagani uchun jonli
@@ -62,22 +63,46 @@ export function OrderDetailPage() {
 
   const id = Number(orderId)
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+  // Oxirgi koʻrilgan holat: fon yangilanishida oʻzgargani sezilsa, mijozga
+  // xabar beriladi — mahsulot tugagani yoki taom tayyor boʻlgani shu tariqa
+  // sahifani ochib turgan mijozga yetib boradi.
+  const seenStatus = useRef<string | null>(null)
 
-    try {
-      setOrder(await getOrder(id))
-    } catch (caught) {
-      setError(apiErrorMessage(caught, 'Buyurtmani yuklab boʻlmadi.'))
-    } finally {
-      setLoading(false)
-    }
-  }, [id])
+  const load = useCallback(
+    async (quiet = false) => {
+      if (!quiet) {
+        setLoading(true)
+      }
+
+      try {
+        const fresh = await getOrder(id)
+
+        if (quiet && seenStatus.current && seenStatus.current !== fresh.status) {
+          toast.info(`Buyurtma holati: ${ORDER_STATUS_LABELS[fresh.status]}`)
+        }
+
+        seenStatus.current = fresh.status
+        setOrder(fresh)
+        setError(null)
+      } catch (caught) {
+        setError(apiErrorMessage(caught, 'Buyurtmani yuklab boʻlmadi.'))
+      } finally {
+        setLoading(false)
+      }
+    },
+    [id],
+  )
 
   useEffect(() => {
     void load()
   }, [load])
+
+  // Tugagan buyurtmani soʻrab turishning maʼnosi yoʻq.
+  const live =
+    order !== null &&
+    !['olib_ketildi', 'bekor_qilindi_mahsulot_yoq', 'muddati_otdi'].includes(order.status)
+
+  usePolling(() => void load(true), POLL_MS, live)
 
   async function pay() {
     setPaying(true)
@@ -87,7 +112,7 @@ export function OrderDetailPage() {
       toast.success('Toʻlov qabul qilindi (simulyatsiya).')
     } catch (caught) {
       toast.error(apiErrorMessage(caught, 'Toʻlovni amalga oshirib boʻlmadi.'))
-      void load()
+      void load(true)
     } finally {
       setPaying(false)
     }

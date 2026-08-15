@@ -109,7 +109,7 @@ Oshxona oʻchirilmaydi — `is_active: false` qilinadi, tarixi saqlanib qoladi.
 
 | Metod | Endpoint | Tavsif |
 |---|---|---|
-| GET | `/api/staff/orders` | Ish taxtasi: toʻlangan, tayyorlanayotgan va tayyor buyurtmalar (eng eskisi birinchi); `?status=` bilan istalgan holat |
+| GET | `/api/staff/orders` | `?page=` (30 tadan, `meta` bilan). Ish taxtasi: toʻlangan, tayyorlanayotgan va tayyor buyurtmalar (eng eskisi birinchi); `?status=` bilan istalgan holat |
 | GET | `/api/staff/orders/{id}` | Bitta buyurtma: tarkibi, mijoz ismi va telefoni |
 | PATCH | `/api/staff/orders/{id}` | Holatni bir qadam oldinga surish (`{"status": "tayyorlanmoqda"}`) |
 | POST | `/api/staff/orders/{id}/out-of-stock` | «Mahsulot tugadi»: `order_item_id` + ixtiyoriy `mark_menu_item_unavailable` |
@@ -125,11 +125,11 @@ mavjudligini ham tasdiqlamaydi.
 
 | Metod | Endpoint | Kirish huquqi | Tavsif |
 |---|---|---|---|
-| GET | `/api/restaurants` | ochiq | Faqat faol oshxonalar; `?q=` bilan qidiruv |
+| GET | `/api/restaurants` | ochiq | Faqat faol oshxonalar; `?q=` bilan qidiruv; javobda `is_open_now` |
 | GET | `/api/restaurants/{id}` | ochiq | Oshxona + faqat mavjud taomlari (nofaol boʻlsa 404) |
 | POST | `/api/orders/estimate` | mijoz | **Toʻlovdan oldin** tayyor boʻlish vaqti; hech narsa saqlanmaydi |
 | POST | `/api/orders` | mijoz | Savatchadan buyurtma: `restaurant_id` + `items[{menu_item_id, quantity}]` |
-| GET | `/api/orders` | mijoz | Faqat oʻz buyurtmalari |
+| GET | `/api/orders` | mijoz | Faqat oʻz buyurtmalari; `?page=` (10 tadan, `meta` bilan) |
 | GET | `/api/orders/{id}` | mijoz | Tarkibi bilan (begonasi 404) |
 | POST | `/api/orders/{id}/pay` | mijoz | Toʻlov **simulyatsiyasi**; qayta toʻlashga 409 |
 | POST | `/api/orders/{id}/replace-item` | mijoz | Tugagan taomni menyudagi boshqasiga almashtirish |
@@ -183,6 +183,17 @@ Oʻtish qoidalari bitta joyda — `OrderStatus::nextForStaff()`:
 Zanjir faqat **oldinga** yuradi: sakrash ham, ortga qaytish ham 422 bilan rad etiladi.
 Toʻlanmagan buyurtmani oshxona qoʻzgʻata olmaydi.
 
+## Ish vaqti
+
+Oshxonaning `opens_at`/`closes_at` maydonlari **majburiy**: yopiq oshxona buyurtmani ham,
+tayyor boʻlish vaqti bahosini ham bermaydi (`422`). Mijoz roʻyxatida «Hozir yopiq» belgisi,
+menyu sahifasida esa ogohlantirish koʻrinadi va «Buyurtma berish» tugmasi oʻchadi.
+
+- Vaqtlar bazada **UTC**'da saqlanadi, ish vaqti esa mahalliy soatda yoziladi. Solishtirish
+  `config/fastfoody.php` dagi `timezone` (sukut boʻyicha `Asia/Tashkent`) boʻyicha bajariladi.
+- Yarim tundan oshadigan ish vaqti (`22:00–03:00`) toʻgʻri tushuniladi.
+- Nofaol (`is_active: false`) oshxona soatdan qatʼi nazar yopiq.
+
 ## Osilib qolgan buyurtmalar
 
 `php artisan orders:expire` toʻlanmay qolgan savatchalarni va olib ketilmagan taomlarni
@@ -227,6 +238,17 @@ cd frontend && npm run lint
 ```
 
 Testlar SQLite (`:memory:`) da ishlaydi, ishlab chiqarish va lokal muhit — MySQL.
+
+## Interfeys xulq-atvori
+
+- **Avtomatik yangilanish:** mijozning buyurtma sahifasi, buyurtmalar roʻyxati va oshxona
+  taxtasi har 15 soniyada jimgina yangilanadi (`usePolling`). Holat oʻzgarsa mijozga
+  bildirishnoma chiqadi — «mahsulot tugadi» xabari ham shu tariqa yetib boradi. Tugagan
+  buyurtma soʻralmaydi.
+- **Seans tugashi:** har qanday `401` javobida token tozalanadi va foydalanuvchi kirish
+  sahifasiga qaytariladi (`api.ts` dagi yagona interceptor).
+- **Sahifalash:** mijoz buyurtmalari 10 tadan, oshxona taxtasi 30 tadan. Tugmalar yuklanish
+  paytida oʻchadi va eskirgan javob roʻyxatni bosib ketmaydi.
 
 ## Qabul qilingan qarorlar
 

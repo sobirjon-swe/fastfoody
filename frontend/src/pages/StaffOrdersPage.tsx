@@ -11,11 +11,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { apiErrorMessage } from '@/lib/api'
+import { POLL_MS, usePolling } from '@/lib/use-polling'
 import { formatClock, formatPrice, minutesFromNow } from '@/lib/format'
-import { ORDER_STATUS_LABELS, type OrderStatus } from '@/types/api'
-
-/** MVP'da jonli bildirishnoma yoʻq, shuning uchun taxta shu oraliqda yangilanadi. */
-const POLL_MS = 15_000
+import { ORDER_STATUS_LABELS, type OrderStatus, type PaginationMeta } from '@/types/api'
 
 const ACTIONS: Partial<Record<OrderStatus, string>> = {
   tayyorlanmoqda: 'Tayyorlashni boshlash',
@@ -38,6 +36,8 @@ export function StaffOrdersPage() {
   const { user } = useAuth()
   const [orders, setOrders] = useState<StaffOrder[]>([])
   const [filter, setFilter] = useState<OrderStatus | ''>('')
+  const [meta, setMeta] = useState<PaginationMeta | null>(null)
+  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<number | null>(null)
@@ -54,10 +54,11 @@ export function StaffOrdersPage() {
       }
 
       try {
-        const data = await listStaffOrders(filter)
+        const { orders: data, meta: pagination } = await listStaffOrders(filter, page)
 
         if (requestId === requestRef.current) {
           setOrders(data)
+          setMeta(pagination)
           setError(null)
         }
       } catch (caught) {
@@ -70,19 +71,15 @@ export function StaffOrdersPage() {
         }
       }
     },
-    [filter],
+    [filter, page],
   )
 
   useEffect(() => {
     void load()
   }, [load])
 
-  // Polling: quiet refreshes, so the board does not flash a spinner every 15s.
-  useEffect(() => {
-    const timer = setInterval(() => void load(true), POLL_MS)
-
-    return () => clearInterval(timer)
-  }, [load])
+  // Jimgina yangilanish: taxta har 15 soniyada spinner koʻrsatib yonib-oʻchmaydi.
+  usePolling(() => void load(true), POLL_MS)
 
   async function move(order: StaffOrder, status: OrderStatus) {
     setBusyId(order.id)
@@ -119,7 +116,10 @@ export function StaffOrdersPage() {
             key={option.value || 'board'}
             size="sm"
             variant={filter === option.value ? 'default' : 'outline'}
-            onClick={() => setFilter(option.value)}
+            onClick={() => {
+              setFilter(option.value)
+              setPage(1)
+            }}
           >
             {option.label}
           </Button>
@@ -212,6 +212,32 @@ export function StaffOrdersPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {meta && meta.last_page > 1 && (
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">
+            {meta.current_page}/{meta.last_page} — jami {meta.total} ta
+          </span>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={loading || page <= 1}
+              onClick={() => setPage((current) => current - 1)}
+            >
+              Oldingi
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={loading || page >= meta.last_page}
+              onClick={() => setPage((current) => current + 1)}
+            >
+              Keyingi
+            </Button>
+          </div>
         </div>
       )}
 

@@ -10,6 +10,8 @@ export interface Restaurant {
   /** "HH:MM" */
   closes_at: string
   is_active: boolean
+  /** Ayni damda ish vaqtida va faolmi. */
+  is_open_now: boolean
   menu_items_count?: number
   staff_count?: number
 }

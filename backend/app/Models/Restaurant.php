@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Database\Factories\RestaurantFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -81,6 +83,28 @@ class Restaurant extends Model
     public function menuItems(): HasMany
     {
         return $this->hasMany(MenuItem::class);
+    }
+
+    /**
+     * Oshxona shu daqiqada buyurtma qabul qiladimi.
+     *
+     * Ish vaqti mahalliy soatda yoziladi, vaqtlar esa UTC'da saqlanadi, shuning
+     * uchun solishtirishdan oldin mahalliy mintaqaga oʻtkaziladi. Yarim tundan
+     * oshadigan ish vaqti (masalan 10:00–02:00) ham toʻgʻri ishlaydi.
+     */
+    public function isOpenAt(?CarbonInterface $moment = null): bool
+    {
+        if (! $this->is_active) {
+            return false;
+        }
+
+        $now = ($moment ?? CarbonImmutable::now())
+            ->setTimezone(config('fastfoody.timezone'))
+            ->format('H:i');
+
+        return $this->opens_at <= $this->closes_at
+            ? $now >= $this->opens_at && $now < $this->closes_at
+            : $now >= $this->opens_at || $now < $this->closes_at;
     }
 
     /**

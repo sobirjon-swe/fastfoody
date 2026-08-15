@@ -7,6 +7,7 @@ import { useAuth } from '@/auth/use-auth'
 import { Spinner } from '@/components/Spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { apiErrorMessage } from '@/lib/api'
@@ -81,9 +82,10 @@ export function CustomerHomePage() {
           {restaurants.map((restaurant) => (
             <Card key={restaurant.id}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex flex-wrap items-center gap-2">
                   <UtensilsCrossed className="size-4" />
                   {restaurant.name}
+                  {!restaurant.is_open_now && <Badge variant="outline">Hozir yopiq</Badge>}
                 </CardTitle>
                 <CardDescription>{restaurant.address}</CardDescription>
               </CardHeader>

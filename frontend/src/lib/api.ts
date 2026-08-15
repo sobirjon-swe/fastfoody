@@ -31,6 +31,29 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+let onUnauthorized: (() => void) | null = null
+
+/**
+ * Token eskirsa yoki bekor qilinsa API 401 qaytaradi. Har bir sahifada alohida
+ * ushlash oʻrniga shu yerda bir marta hal qilinadi: seans tozalanadi va
+ * ProtectedRoute foydalanuvchini kirish sahifasiga oʻzi qaytaradi.
+ */
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  onUnauthorized = handler
+}
+
+api.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (error instanceof AxiosError && error.response?.status === 401 && getToken()) {
+      setToken(null)
+      onUnauthorized?.()
+    }
+
+    return Promise.reject(error)
+  },
+)
+
 interface LaravelErrorBody {
   message?: string
   errors?: Record<string, string[]>
@@ -54,6 +77,10 @@ export function apiErrorMessage(error: unknown, fallback = 'Nomaʼlum xatolik yu
 
     if (data?.message) {
       return data.message
+    }
+
+    if (error.response?.status === 401) {
+      return 'Seans tugadi. Iltimos, qaytadan kiring.'
     }
 
     if (error.code === AxiosError.ERR_NETWORK) {

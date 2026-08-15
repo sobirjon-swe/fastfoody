@@ -96,11 +96,24 @@ class OrderPlacer
         });
     }
 
+    /**
+     * Oshxona faol boʻlishi ham, ayni damda ish vaqtida boʻlishi ham shart:
+     * yopiq oshxonaga berilgan buyurtma uchun tayyor boʻlish vaqti maʼnosiz.
+     */
     private function assertOpen(Restaurant $restaurant): void
     {
         if (! $restaurant->is_active) {
             throw ValidationException::withMessages([
                 'restaurant_id' => __('Bu oshxona hozir buyurtma qabul qilmaydi.'),
+            ]);
+        }
+
+        if (! $restaurant->isOpenAt()) {
+            throw ValidationException::withMessages([
+                'restaurant_id' => __('Oshxona hozir yopiq. Ish vaqti: :opens–:closes.', [
+                    'opens' => $restaurant->opens_at,
+                    'closes' => $restaurant->closes_at,
+                ]),
             ]);
         }
     }

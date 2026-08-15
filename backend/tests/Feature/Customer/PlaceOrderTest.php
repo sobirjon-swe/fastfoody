@@ -9,6 +9,7 @@ use App\Models\OrderItem;
 use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class PlaceOrderTest extends TestCase
@@ -27,6 +28,10 @@ class PlaceOrderTest extends TestCase
     {
         parent::setUp();
 
+        // Oshxona ish vaqti ichidagi aniq daqiqa (Toshkent vaqti bilan 17:00),
+        // aks holda test qaysi soatda ishlashiga bogʻliq boʻlib qolardi.
+        Carbon::setTestNow('2026-08-15 12:00:00');
+
         $this->restaurant = Restaurant::factory()->create();
         $this->customer = User::factory()->customer()->create();
 
@@ -43,6 +48,13 @@ class PlaceOrderTest extends TestCase
             'base_prep_minutes' => 1,
             'extra_prep_minutes' => 0,
         ]);
+    }
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+
+        parent::tearDown();
     }
 
     public function test_a_customer_can_place_an_order(): void
