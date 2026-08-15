@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 
 import { createRestaurantStaff, listRestaurantStaff } from '@/api/restaurants'
@@ -29,22 +29,28 @@ export function RestaurantStaffDialog({
   onOpenChange: (open: boolean) => void
   onChanged: () => void
 }) {
-  const [staff, setStaff] = useState<User[]>([])
+  // The staff list is stored together with the restaurant it belongs to, so a
+  // previously opened restaurant's people can never be rendered under another
+  // restaurant's name — not on the first frame, and not when a slow response
+  // arrives after the dialog has moved on.
+  const [loaded, setLoaded] = useState<{ restaurantId: number; staff: User[] } | null>(null)
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState(EMPTY)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  // The dialog keeps rendering while it animates out, so the last restaurant is
-  // remembered to stop the title from flashing without a name.
-  const [shown, setShown] = useState<Restaurant | null>(restaurant)
 
   const restaurantId = restaurant?.id
+  const staff = loaded && loaded.restaurantId === restaurantId ? loaded.staff : []
 
-  useEffect(() => {
-    if (restaurant) {
-      setShown(restaurant)
-    }
-  }, [restaurant])
+  // The dialog keeps rendering while it animates out; remembering the last
+  // restaurant during render stops the title from flashing without a name.
+  const shownRef = useRef<Restaurant | null>(restaurant)
+
+  if (restaurant) {
+    shownRef.current = restaurant
+  }
+
+  const shown = shownRef.current
 
   const load = useCallback(async () => {
     if (!restaurantId) {
@@ -54,7 +60,9 @@ export function RestaurantStaffDialog({
     setLoading(true)
 
     try {
-      setStaff(await listRestaurantStaff(restaurantId))
+      const list = await listRestaurantStaff(restaurantId)
+
+      setLoaded({ restaurantId, staff: list })
     } catch (caught) {
       setError(apiErrorMessage(caught, 'Xodimlarni yuklab boʻlmadi.'))
     } finally {

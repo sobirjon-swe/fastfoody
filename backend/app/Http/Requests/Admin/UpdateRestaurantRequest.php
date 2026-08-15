@@ -2,34 +2,24 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\NormalisesWorkingHours;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateRestaurantRequest extends FormRequest
 {
-    /**
-     * A partial update may send only one side of the working hours; the stored
-     * value fills in the other one so "different" still compares real times.
-     */
+    use NormalisesWorkingHours;
+
     protected function prepareForValidation(): void
     {
-        $restaurant = $this->route('restaurant');
-
-        if (! $restaurant) {
-            return;
-        }
-
-        if ($this->has('closes_at') && ! $this->has('opens_at')) {
-            $this->merge(['opens_at' => $restaurant->opens_at]);
-        }
-
-        if ($this->has('opens_at') && ! $this->has('closes_at')) {
-            $this->merge(['closes_at' => $restaurant->closes_at]);
-        }
+        $this->normaliseWorkingHours();
     }
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * Only the fields the client actually sent are validated and written, so a
+     * partial update never rewrites the other working hour.
      *
      * @return array<string, array<int, mixed>>
      */
@@ -42,8 +32,14 @@ class UpdateRestaurantRequest extends FormRequest
             ],
             'address' => ['sometimes', 'required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:32'],
-            'opens_at' => ['sometimes', 'required', 'date_format:H:i,H:i:s'],
-            'closes_at' => ['sometimes', 'required', 'date_format:H:i,H:i:s', 'different:opens_at'],
+            'opens_at' => [
+                'sometimes', 'required', 'date_format:H:i',
+                $this->differentFromWorkingHour('closes_at'),
+            ],
+            'closes_at' => [
+                'sometimes', 'required', 'date_format:H:i',
+                $this->differentFromWorkingHour('opens_at'),
+            ],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }

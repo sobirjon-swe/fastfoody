@@ -22,9 +22,14 @@ class RestaurantController extends Controller
         $restaurants = Restaurant::query()
             ->withCount(['menuItems', 'staff'])
             ->when($request->filled('q'), function ($query) use ($request) {
-                $term = '%'.$request->string('q')->trim().'%';
+                // "%" and "_" typed by the admin are literal characters, not
+                // wildcards, so they are escaped before building the pattern.
+                $term = addcslashes($request->string('q')->trim()->toString(), '%_\\');
+                $pattern = "%{$term}%";
 
-                $query->where(fn ($q) => $q->where('name', 'like', $term)->orWhere('address', 'like', $term));
+                $query->where(fn ($q) => $q
+                    ->whereRaw('name LIKE ? ESCAPE ?', [$pattern, '\\'])
+                    ->orWhereRaw('address LIKE ? ESCAPE ?', [$pattern, '\\']));
             })
             ->when($request->filled('status'), fn ($query) => $query->where(
                 'is_active',

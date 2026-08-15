@@ -112,7 +112,7 @@ mavjudligini ham tasdiqlamaydi.
 ## Testlar
 
 ```bash
-cd backend && php artisan test      # 44 ta test (auth, rollar, oshxona va menyu boshqaruvi)
+cd backend && php artisan test      # 47 ta test (auth, rollar, oshxona va menyu boshqaruvi)
 cd frontend && npm run build        # tsc + vite build
 cd frontend && npm run lint
 ```

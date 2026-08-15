@@ -60,6 +60,28 @@ class RestaurantManagementTest extends TestCase
             ->assertJsonPath('meta.total', 2);
     }
 
+    public function test_search_treats_like_wildcards_as_plain_characters(): void
+    {
+        Restaurant::factory()->create(['name' => '100% Halol', 'address' => 'Toshkent']);
+        Restaurant::factory()->create(['name' => 'Boshqa Joy', 'address' => 'Toshkent 100']);
+
+        $this->actingAs($this->admin(), 'sanctum')
+            ->getJson('/api/admin/restaurants?q='.urlencode('100%'))
+            ->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.name', '100% Halol');
+
+        $this->actingAs($this->admin(), 'sanctum')
+            ->getJson('/api/admin/restaurants?q='.urlencode('%'))
+            ->assertOk()
+            ->assertJsonPath('meta.total', 1);
+
+        $this->actingAs($this->admin(), 'sanctum')
+            ->getJson('/api/admin/restaurants?q='.urlencode('Boshqa_Joy'))
+            ->assertOk()
+            ->assertJsonPath('meta.total', 0);
+    }
+
     public function test_super_admin_can_create_a_restaurant(): void
     {
         $response = $this->actingAs($this->admin(), 'sanctum')
@@ -132,6 +154,46 @@ class RestaurantManagementTest extends TestCase
             ->patchJson("/api/admin/restaurants/{$restaurant->id}", ['closes_at' => '09:00'])
             ->assertStatus(422)
             ->assertJsonValidationErrors('closes_at');
+    }
+
+    public function test_seconds_cannot_be_used_to_slip_past_the_working_hour_comparison(): void
+    {
+        $restaurant = Restaurant::factory()->create(['opens_at' => '09:00:00', 'closes_at' => '22:00:00']);
+
+        // "09:00:00" and "09:00" are the same instant, so this must be rejected
+        // exactly like the plain "09:00" form.
+        $this->actingAs($this->admin(), 'sanctum')
+            ->patchJson("/api/admin/restaurants/{$restaurant->id}", ['closes_at' => '09:00:00'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('closes_at');
+
+        $this->actingAs($this->admin(), 'sanctum')
+            ->postJson('/api/admin/restaurants', [
+                'name' => 'Nol Uzunlikdagi Ish Vaqti',
+                'address' => 'Toshkent',
+                'opens_at' => '09:00',
+                'closes_at' => '09:00:00',
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('closes_at');
+
+        $this->assertSame('22:00', $restaurant->fresh()->closes_at);
+        $this->assertDatabaseMissing('restaurants', ['name' => 'Nol Uzunlikdagi Ish Vaqti']);
+    }
+
+    public function test_a_partial_update_does_not_rewrite_the_untouched_working_hour(): void
+    {
+        $restaurant = Restaurant::factory()->create(['opens_at' => '09:30:45', 'closes_at' => '22:00:00']);
+
+        $this->actingAs($this->admin(), 'sanctum')
+            ->patchJson("/api/admin/restaurants/{$restaurant->id}", ['closes_at' => '23:15'])
+            ->assertOk();
+
+        $this->assertDatabaseHas('restaurants', [
+            'id' => $restaurant->id,
+            'opens_at' => '09:30:45',
+            'closes_at' => '23:15:00',
+        ]);
     }
 
     public function test_updating_can_keep_the_restaurants_own_name(): void
