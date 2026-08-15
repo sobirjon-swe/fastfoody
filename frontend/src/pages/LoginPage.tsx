@@ -90,6 +90,12 @@ export function LoginPage() {
             </Button>
 
             <p className="text-muted-foreground text-center text-sm">
+              <Link to="/parolni-unutdim" className="underline underline-offset-4">
+                Parolni unutdingizmi?
+              </Link>
+            </p>
+
+            <p className="text-muted-foreground text-center text-sm">
               Hisobingiz yoʻqmi?{' '}
               <Link to="/register" className="text-foreground underline underline-offset-4">
                 Roʻyxatdan oʻtish

@@ -4,11 +4,14 @@ import { ProtectedRoute } from '@/auth/ProtectedRoute'
 import { AppLayout } from '@/components/AppLayout'
 import { AdminDashboardPage } from '@/pages/AdminDashboardPage'
 import { CustomerHomePage } from '@/pages/CustomerHomePage'
+import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { MyOrdersPage } from '@/pages/MyOrdersPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { ProfilePage } from '@/pages/ProfilePage'
 import { OrderDetailPage } from '@/pages/OrderDetailPage'
 import { RegisterPage } from '@/pages/RegisterPage'
+import { ResetPasswordPage } from '@/pages/ResetPasswordPage'
 import { RestaurantMenuPage } from '@/pages/RestaurantMenuPage'
 import { StaffMenuPage } from '@/pages/StaffMenuPage'
 import { StaffOrdersPage } from '@/pages/StaffOrdersPage'
@@ -18,9 +21,14 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/parolni-unutdim" element={<ForgotPasswordPage />} />
+      <Route path="/parolni-tiklash" element={<ResetPasswordPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
+          {/* Profil har uchala rol uchun ochiq. */}
+          <Route path="profil" element={<ProfilePage />} />
+
           <Route element={<ProtectedRoute roles={['customer']} />}>
             <Route index element={<CustomerHomePage />} />
             <Route path="restaurants/:restaurantId" element={<RestaurantMenuPage />} />

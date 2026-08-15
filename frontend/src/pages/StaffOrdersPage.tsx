@@ -3,10 +3,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { listStaffOrders, updateStaffOrderStatus, type StaffOrder } from '@/api/staff-orders'
+import { getStaffStatistics, type StatisticsWindow } from '@/api/statistics'
 import { OutOfStockDialog } from '@/components/staff/OutOfStockDialog'
 import { useAuth } from '@/auth/use-auth'
 import { OrderStatusBadge } from '@/components/OrderStatusBadge'
 import { Spinner } from '@/components/Spinner'
+import { StatisticsCards } from '@/components/StatisticsCards'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -45,8 +47,21 @@ export function StaffOrdersPage() {
   const [error, setError] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<number | null>(null)
   const [outOfStockFor, setOutOfStockFor] = useState<StaffOrder | null>(null)
+  const [stats, setStats] = useState<{ today: StatisticsWindow; week: StatisticsWindow } | null>(
+    null,
+  )
 
   const requestRef = useRef(0)
+
+  // Koʻrsatkichlar roʻyxatdan mustaqil yuklanadi: xatosi taxtani toʻsmasligi
+  // uchun jimgina eʼtiborsiz qoldiriladi.
+  const loadStats = useCallback(async () => {
+    try {
+      setStats(await getStaffStatistics())
+    } catch {
+      // Koʻrsatkichlar ikkinchi darajali — buyurtmalar baribir koʻrinadi.
+    }
+  }, [])
 
   const load = useCallback(
     async (quiet = false) => {
@@ -81,8 +96,15 @@ export function StaffOrdersPage() {
     void load()
   }, [load])
 
+  useEffect(() => {
+    void loadStats()
+  }, [loadStats])
+
   // Jimgina yangilanish: taxta har 15 soniyada spinner koʻrsatib yonib-oʻchmaydi.
-  usePolling(() => void load(true), POLL_MS)
+  usePolling(() => {
+    void load(true)
+    void loadStats()
+  }, POLL_MS)
 
   async function move(order: StaffOrder, status: OrderStatus) {
     setBusyId(order.id)
@@ -91,6 +113,7 @@ export function StaffOrdersPage() {
       await updateStaffOrderStatus(order.id, status)
       toast.success(`#${order.id}: ${ORDER_STATUS_LABELS[status]}`)
       await load(true)
+      void loadStats()
     } catch (caught) {
       toast.error(apiErrorMessage(caught, 'Holatni oʻzgartirib boʻlmadi.'))
       await load(true)
@@ -112,6 +135,8 @@ export function StaffOrdersPage() {
           <RefreshCw /> Yangilash
         </Button>
       </div>
+
+      {stats && <StatisticsCards today={stats.today} week={stats.week} />}
 
       <form
         className="flex gap-2"

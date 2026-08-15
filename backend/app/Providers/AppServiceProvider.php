@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\ServiceProvider;
@@ -28,5 +29,13 @@ class AppServiceProvider extends ServiceProvider
         // Fail loudly in development instead of silently returning null for a
         // relation that was never eager loaded.
         Model::preventLazyLoading($this->app->isLocal());
+
+        // Tiklash havolasi API'ga emas, SPA sahifasiga olib boradi.
+        ResetPassword::createUrlUsing(fn (object $user, string $token) => sprintf(
+            '%s/parolni-tiklash?token=%s&email=%s',
+            rtrim((string) config('fastfoody.frontend_url'), '/'),
+            $token,
+            urlencode($user->getEmailForPasswordReset()),
+        ));
     }
 }

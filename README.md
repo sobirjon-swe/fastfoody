@@ -30,6 +30,7 @@ cp .env.example .env
 php artisan key:generate
 # .env ichida DB_DATABASE / DB_USERNAME / DB_PASSWORD ni toʻldiring, keyin:
 php artisan migrate --seed
+php artisan storage:link          # taom rasmlari uchun (bir marta)
 php artisan serve
 ```
 
@@ -51,6 +52,10 @@ CORS backend'dagi `FRONTEND_URL` orqali boshqariladi (bir nechta origin vergul b
 | Tizim egasi (super_admin) | admin@fastfoody.uz | password |
 | Oshxona xodimi (restaurant_staff) | staff@fastfoody.uz | password |
 | Mijoz (customer) | customer@fastfoody.uz | password |
+
+Seed ikkita oshxona yaratadi: **Oq Tepa Fastfood** (sutka boʻyi, demo menyu va ikkita
+buyurtma bilan) va **Chorsu Lavash** (09:00–23:00) — ikkinchisi yopiq oshxona mijozga qanday
+koʻrinishini tekshirish uchun.
 
 ## Rollar va multi-tenancy
 
@@ -78,9 +83,15 @@ Barcha javoblar JSON. Token `Authorization: Bearer <token>` sarlavhasida yuboril
 | POST | `/api/auth/register` | ochiq | Mijoz hisobini yaratadi va token qaytaradi |
 | POST | `/api/auth/login` | ochiq | Har qanday roldagi foydalanuvchini kiritadi |
 | GET | `/api/auth/me` | token | Joriy foydalanuvchi + biriktirilgan oshxona |
+| PATCH | `/api/auth/profile` | token | Ism, email va telefonni yangilash (rol va oshxona oʻzgarmaydi) |
+| PUT | `/api/auth/password` | token | Parolni almashtirish; joriy paroldan tashqari hamma token oʻchadi |
+| POST | `/api/auth/forgot-password` | ochiq | Emailga tiklash havolasi (SPA'dagi `/parolni-tiklash`) |
+| POST | `/api/auth/reset-password` | ochiq | `token` + yangi parol; barcha seanslar yopiladi |
 | POST | `/api/auth/logout` | token | Faqat joriy qurilma tokenini oʻchiradi |
 
-`register` va `login` daqiqasiga 10 martaga cheklangan (`throttle:10,1`).
+`register` va `login` daqiqasiga 10 martaga, parol tiklash esa 5 martaga cheklangan.
+`forgot-password` hisob bor-yoʻqligidan qatʼi nazar **bir xil javob** qaytaradi — shu orqali
+qaysi emaillar roʻyxatdan oʻtganini aniqlab boʻlmaydi.
 
 **Oshxona boshqaruvi — super_admin (1-bosqich)**
 
@@ -92,8 +103,13 @@ Barcha javoblar JSON. Token `Authorization: Bearer <token>` sarlavhasida yuboril
 | PATCH | `/api/admin/restaurants/{id}` | Tahrirlash; `is_active` bilan faollashtirish/oʻchirish |
 | GET | `/api/admin/restaurants/{id}/staff` | Shu oshxona xodimlari |
 | POST | `/api/admin/restaurants/{id}/staff` | Xodim hisobini yaratish (rol avtomatik `restaurant_staff`) |
+| DELETE | `/api/admin/restaurants/{id}/staff/{staff}` | Xodim hisobini oʻchirib qoʻyish (tokenlari bekor qilinadi) |
+| POST | `/api/admin/restaurants/{id}/staff/{staff}/restore` | Oʻchirilgan xodimni qaytarish |
+| GET | `/api/admin/statistics` | Butun tizim + har bir oshxona kesimida koʻrsatkichlar |
 
-Oshxona oʻchirilmaydi — `is_active: false` qilinadi, tarixi saqlanib qoladi.
+Oshxona oʻchirilmaydi — `is_active: false` qilinadi, tarixi saqlanib qoladi. Xodim hisobi ham
+oʻchirilmaydi: `deactivated_at` qoʻyiladi, tokenlari bekor qilinadi va u tizimga kira olmaydi,
+lekin uning buyurtmalardagi izi saqlanadi.
 
 **Menyu boshqaruvi — restaurant_staff (1-bosqich)**
 
@@ -104,12 +120,20 @@ Oshxona oʻchirilmaydi — `is_active: false` qilinadi, tarixi saqlanib qoladi.
 | GET | `/api/staff/menu-items/{id}` | Bitta taom |
 | PATCH | `/api/staff/menu-items/{id}` | Tahrirlash, `is_available` bilan «tugadi» belgisi |
 | DELETE | `/api/staff/menu-items/{id}` | Oʻchirish |
+| POST | `/api/staff/menu-items/{id}/image` | Rasm yuklash (`multipart/form-data`, `image`, ≤2 MB) |
+| DELETE | `/api/staff/menu-items/{id}/image` | Rasmni olib tashlash |
+| GET | `/api/staff/statistics` | Faqat oʻz oshxonasi koʻrsatkichlari |
+
+Taomni **kategoriyaga** ajratish mumkin (`category`, masalan «Ichimliklar»): mijoz menyusi
+kategoriyalar boʻyicha guruhlanadi, xodim panelida esa kategoriya boʻyicha filtr bor.
+Rasmlar `storage/app/public/menu-items` ichida saqlanadi, shuning uchun bir marta
+`php artisan storage:link` bajarish kerak; eskisi yangisi bilan almashtirilganda oʻchiriladi.
 
 **Buyurtmalar taxtasi — restaurant_staff (4-bosqich)**
 
 | Metod | Endpoint | Tavsif |
 |---|---|---|
-| GET | `/api/staff/orders` | `?page=` (30 tadan, `meta` bilan). Ish taxtasi: toʻlangan, tayyorlanayotgan va tayyor buyurtmalar (eng eskisi birinchi); `?status=` bilan istalgan holat |
+| GET | `/api/staff/orders` | `?page=` (30 tadan, `meta` bilan). Ish taxtasi: toʻlangan, tayyorlanayotgan va tayyor buyurtmalar (eng eskisi birinchi); `?status=` bilan istalgan holat; `?code=` bilan olib ketish kodi boʻyicha qidiruv |
 | GET | `/api/staff/orders/{id}` | Bitta buyurtma: tarkibi, mijoz ismi va telefoni |
 | PATCH | `/api/staff/orders/{id}` | Holatni bir qadam oldinga surish (`{"status": "tayyorlanmoqda"}`) |
 | POST | `/api/staff/orders/{id}/out-of-stock` | «Mahsulot tugadi»: `order_item_id` + ixtiyoriy `mark_menu_item_unavailable` |
@@ -137,7 +161,19 @@ mavjudligini ham tasdiqlamaydi.
 
 Narx va tayyorlash vaqti **savatchadan olinmaydi** — server menyudan oʻqiydi, shuning uchun
 mijoz yuborgan `unit_price` eʼtiborga olinmaydi. Butun savatcha bitta tranzaksiyada
-yoziladi: bitta taom tugagan boʻlsa, buyurtma umuman yaratilmaydi.
+yoziladi: bitta taom tugagan boʻlsa, buyurtma umuman yaratilmaydi. Savatchada koʻpi bilan
+50 xil taom, har biridan 50 tagacha boʻlishi mumkin — bitta soʻrov bilan oshxonaning butun
+navbatini band qilib boʻlmaydi.
+
+## Olib ketish kodi
+
+Toʻlov amalga oshgan zahoti buyurtmaga **4 xonali kod** beriladi (`orders.pickup_code`).
+Mijoz uni buyurtma sahifasida koʻradi, xodim esa taxtadagi qidiruv maydoniga kiritib
+buyurtmani darrov topadi — «familiyangiz nima edi?» degan savolga hojat qolmaydi.
+
+Kod bitta oshxonaning **ochiq** buyurtmalari orasida takrorlanmaydi; yopilgan buyurtmalarning
+kodlari qayta ishlatilaveradi, shuning uchun 4 xona umrbod yetadi. Boʻsh kod topilmasa
+(nazariy holat) 6 belgili zaxira kod beriladi.
 
 ## Tayyor boʻlish vaqti (3-bosqich)
 
@@ -229,15 +265,35 @@ Toʻlangan buyurtmadagi taom tugab qolsa:
 Bloklangan buyurtma oshxona taxtasida koʻrinib turadi (`next_statuses` boʻsh) — xodim uning
 mijoz javobini kutayotganini biladi, lekin uni oldinga sura olmaydi.
 
+## Statistika
+
+Oshxona xodimi oʻz taxtasida, super admin esa panelida bugungi va soʻnggi 7 kunlik
+koʻrsatkichlarni koʻradi: buyurtmalar soni, tushum, oʻrtacha tayyorlash vaqti, bekor
+qilingan va muddati oʻtgan buyurtmalar. Super admin roʻyxatida har bir oshxonaning bugungi
+raqami alohida ustunda turadi.
+
+Tushumga **faqat pul kelgan** buyurtmalar kiradi: toʻlangandan olib ketilgangacha boʻlgan
+holatlar. Bekor qilingan (pul qaytarilgan) va muddati oʻtgan buyurtmalar tushumga
+qoʻshilmaydi, lekin alohida sanaladi. Sanalar `config/fastfoody.php` dagi mahalliy
+vaqt mintaqasi boʻyicha kesiladi, shuning uchun «bugun» Toshkent yarim tunidan boshlanadi.
+
 ## Testlar
 
 ```bash
-cd backend && php artisan test      # 117 ta test (auth, rollar, menyu, buyurtma, navbat, holatlar, muddat)
+cd backend  && php artisan test     # 156 ta test
+cd backend  && ./vendor/bin/pint    # kod uslubi
+cd frontend && npm run test         # 17 ta test (Vitest + Testing Library)
+cd frontend && npm run lint         # oxlint
 cd frontend && npm run build        # tsc + vite build
-cd frontend && npm run lint
 ```
 
-Testlar SQLite (`:memory:`) da ishlaydi, ishlab chiqarish va lokal muhit — MySQL.
+Backend testlari: auth va rollar, tenant chegarasi, menyu, savatcha va buyurtma, navbat
+hisobi, holat oʻtishlari, ish vaqti, muddati oʻtganlar, olib ketish kodi, rasm yuklash,
+profil, parol tiklash va statistika. SQLite (`:memory:`) da ishlaydi — ishlab chiqarish va
+lokal muhit esa MySQL.
+
+Har bir push va pull request'da GitHub Actions (`.github/workflows/ci.yml`) ikkala loyihani
+ham tekshiradi: backend uchun Pint + PHPUnit, frontend uchun lint + test + build.
 
 ## Interfeys xulq-atvori
 
@@ -296,5 +352,18 @@ Testlar SQLite (`:memory:`) da ishlaydi, ishlab chiqarish va lokal muhit — MyS
 - [x] **Qoʻshimcha** — osilib qolgan buyurtmalarni yopish (`orders:expire`), shu bilan
       `muddati_otdi` holati ham ishlaydi.
 
-**MVP toʻliq bajarildi.**
-- [ ] Keyingi bosqichlar — Payme/Click integratsiyasi, real-time bildirishnoma.
+**MVP toʻliq bajarildi.** Undan keyin qoʻshilganlar:
+
+- [x] Ish vaqti tekshiruvi, jonli yangilanish, `401` da seansni tozalash, sahifalash.
+- [x] CI (GitHub Actions), soʻrov chegaralari, xodim hisobini oʻchirish/qaytarish,
+      frontend testlari.
+- [x] Olib ketish kodi va u boʻyicha qidiruv.
+- [x] Taom rasmlari va menyu kategoriyalari.
+- [x] Profil, parolni oʻzgartirish va parolni tiklash oqimi.
+- [x] Oshxona va tizim statistikasi.
+
+Keyingi bosqichlar:
+
+- [ ] Payme/Click integratsiyasi — merchant hisobi va kalitlari kerak, hozircha toʻlov
+      simulyatsiya qilinadi.
+- [ ] Real vaqtdagi bildirishnoma (WebSocket) — hozircha 15 soniyalik polling yetarli.

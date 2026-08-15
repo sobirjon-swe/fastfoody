@@ -3,9 +3,15 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { listRestaurants, updateRestaurant } from '@/api/restaurants'
+import {
+  getAdminStatistics,
+  type RestaurantStatistics,
+  type StatisticsWindow,
+} from '@/api/statistics'
 import { RestaurantFormDialog } from '@/components/admin/RestaurantFormDialog'
 import { RestaurantStaffDialog } from '@/components/admin/RestaurantStaffDialog'
 import { Spinner } from '@/components/Spinner'
+import { StatisticsCards } from '@/components/StatisticsCards'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,6 +26,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { apiErrorMessage } from '@/lib/api'
+import { formatPrice } from '@/lib/format'
 import type { PaginationMeta, Restaurant } from '@/types/api'
 
 type StatusFilter = '' | 'active' | 'inactive'
@@ -44,6 +51,12 @@ export function AdminDashboardPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Restaurant | null>(null)
   const [staffFor, setStaffFor] = useState<Restaurant | null>(null)
+
+  const [stats, setStats] = useState<{
+    today: StatisticsWindow
+    week: StatisticsWindow
+    restaurants: RestaurantStatistics[]
+  } | null>(null)
 
   // Only the newest request may write to the table: an earlier one resolving
   // last would otherwise leave the rows and the pager describing different
@@ -81,6 +94,20 @@ export function AdminDashboardPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  // Koʻrsatkichlar sahifadan mustaqil: ular yuklanmasa ham jadval ishlaydi.
+  useEffect(() => {
+    void (async () => {
+      try {
+        setStats(await getAdminStatistics())
+      } catch {
+        // Koʻrsatkichlar ikkinchi darajali.
+      }
+    })()
+  }, [])
+
+  // Jadvaldagi qatorga oʻz oshxonasining bugungi raqamlarini biriktirish uchun.
+  const statsById = new Map(stats?.restaurants.map((item) => [item.id, item]) ?? [])
 
   // Search and filter always restart from the first page, otherwise page 3 of
   // an old result set would be requested for a new, shorter list.
@@ -132,6 +159,8 @@ export function AdminDashboardPage() {
         </Button>
       </div>
 
+      {stats && <StatisticsCards today={stats.today} week={stats.week} />}
+
       <div className="flex flex-wrap items-center gap-2">
         <form
           className="flex gap-2"
@@ -174,9 +203,7 @@ export function AdminDashboardPage() {
       {loading ? (
         <Spinner />
       ) : restaurants.length === 0 ? (
-        <p className="text-muted-foreground py-10 text-center text-sm">
-          Oshxona topilmadi.
-        </p>
+        <p className="text-muted-foreground py-10 text-center text-sm">Oshxona topilmadi.</p>
       ) : (
         <div className="rounded-lg border">
           <Table>
@@ -187,6 +214,7 @@ export function AdminDashboardPage() {
                 <TableHead>Ish vaqti</TableHead>
                 <TableHead>Menyu</TableHead>
                 <TableHead>Xodim</TableHead>
+                <TableHead>Bugun</TableHead>
                 <TableHead>Holat</TableHead>
                 <TableHead className="pr-4 text-right">Amallar</TableHead>
               </TableRow>
@@ -201,6 +229,18 @@ export function AdminDashboardPage() {
                   </TableCell>
                   <TableCell>{restaurant.menu_items_count ?? 0}</TableCell>
                   <TableCell>{restaurant.staff_count ?? 0}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {statsById.has(restaurant.id) ? (
+                      <span className="text-sm">
+                        {statsById.get(restaurant.id)!.today.orders} ta
+                        <span className="text-muted-foreground ml-2">
+                          {formatPrice(statsById.get(restaurant.id)!.today.revenue)}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">—</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Switch

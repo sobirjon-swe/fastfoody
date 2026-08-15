@@ -6,6 +6,8 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\UpdatePasswordRequest;
+use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -60,6 +62,37 @@ class AuthController extends Controller
         return response()->json([
             'user' => UserResource::make($user->load('restaurant')),
         ]);
+    }
+
+    /**
+     * Foydalanuvchi oʻz ismi, emaili va telefonini oʻzgartiradi. Rol va oshxona
+     * bu yerdan oʻzgarmaydi — ular tizim egasining ishi.
+     */
+    public function updateProfile(UpdateProfileRequest $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->fill($request->validated());
+        $user->save();
+
+        return response()->json([
+            'user' => UserResource::make($user->load('restaurant')),
+        ]);
+    }
+
+    /**
+     * Parolni oʻzgartirish uchun joriy parol soʻraladi. Yangi parol
+     * qoʻyilgandan keyin boshqa qurilmalardagi seanslar yopiladi.
+     */
+    public function updatePassword(UpdatePasswordRequest $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->password = $request->validated('password');
+        $user->save();
+
+        $current = $user->currentAccessToken();
+        $user->tokens()->whereKeyNot($current->getKey())->delete();
+
+        return response()->json(['message' => __('Parol yangilandi.')]);
     }
 
     /**

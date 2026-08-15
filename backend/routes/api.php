@@ -5,8 +5,10 @@ use App\Http\Controllers\Api\Admin\RestaurantStaffController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Customer\OrderController;
 use App\Http\Controllers\Api\Customer\RestaurantController as CustomerRestaurantController;
+use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\Staff\MenuItemController;
 use App\Http\Controllers\Api\Staff\OrderController as StaffOrderController;
+use App\Http\Controllers\Api\StatisticsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,8 +25,16 @@ Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 
+    // Parolni unutgan foydalanuvchi uchun
+    Route::post('forgot-password', [PasswordResetController::class, 'sendLink'])
+        ->middleware('throttle:5,1');
+    Route::post('reset-password', [PasswordResetController::class, 'reset'])
+        ->middleware('throttle:5,1');
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
+        Route::patch('profile', [AuthController::class, 'updateProfile']);
+        Route::put('password', [AuthController::class, 'updatePassword']);
         Route::post('logout', [AuthController::class, 'logout']);
     });
 });
@@ -64,6 +74,7 @@ Route::middleware(['auth:sanctum', 'role:customer'])->group(function () {
 */
 
 Route::middleware(['auth:sanctum', 'role:super_admin'])->prefix('admin')->group(function () {
+    Route::get('statistics', [StatisticsController::class, 'admin']);
     Route::get('restaurants', [RestaurantController::class, 'index']);
     Route::post('restaurants', [RestaurantController::class, 'store']);
     Route::get('restaurants/{restaurant}', [RestaurantController::class, 'show']);
@@ -82,6 +93,7 @@ Route::middleware(['auth:sanctum', 'role:super_admin'])->prefix('admin')->group(
 */
 
 Route::middleware(['auth:sanctum', 'role:restaurant_staff'])->prefix('staff')->group(function () {
+    Route::get('statistics', [StatisticsController::class, 'staff']);
     Route::get('menu-items', [MenuItemController::class, 'index']);
     Route::post('menu-items', [MenuItemController::class, 'store']);
     Route::get('menu-items/{menuItem}', [MenuItemController::class, 'show'])->whereNumber('menuItem');

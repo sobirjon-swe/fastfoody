@@ -26,11 +26,26 @@ class DatabaseSeeder extends Seeder
     {
         $this->account('Super Admin', 'admin@fastfoody.uz', UserRole::SuperAdmin);
 
+        // Demo oshxona sutka boʻyi ishlaydi: aks holda seeder ish vaqtidan
+        // tashqarida ishga tushirilsa, demo buyurtmalar qabul qilinmasdi.
         $restaurant = Restaurant::firstOrCreate(
             ['name' => 'Oq Tepa Fastfood'],
             [
                 'address' => 'Toshkent, Chilonzor 12',
                 'phone' => '+998901234567',
+                'opens_at' => '00:00:00',
+                'closes_at' => '23:59:00',
+                'is_active' => true,
+            ],
+        );
+
+        // Ikkinchi oshxona odatdagi ish vaqti bilan — yopiq oshxona mijozga
+        // qanday koʻrinishini ham demoda koʻrsatish uchun.
+        $neighbour = Restaurant::firstOrCreate(
+            ['name' => 'Chorsu Lavash'],
+            [
+                'address' => 'Toshkent, Olmazor 4',
+                'phone' => '+998901112233',
                 'opens_at' => '09:00:00',
                 'closes_at' => '23:00:00',
                 'is_active' => true,
@@ -41,6 +56,7 @@ class DatabaseSeeder extends Seeder
         $this->account('Mijoz Aliyev', 'customer@fastfoody.uz', UserRole::Customer);
 
         $this->menu($restaurant);
+        $this->menu($neighbour, limit: 3);
         $this->demoOrders($restaurant);
     }
 
@@ -81,7 +97,7 @@ class DatabaseSeeder extends Seeder
      * A small demo menu: the prep minutes are what the ready-time calculation
      * of 3-bosqich will read.
      */
-    private function menu(Restaurant $restaurant): void
+    private function menu(Restaurant $restaurant, ?int $limit = null): void
     {
         $items = [
             ['Lavash', 'Tovuq goʻshtli klassik lavash', 32000, 4, 2],
@@ -91,7 +107,7 @@ class DatabaseSeeder extends Seeder
             ['Coca-Cola 0.5', 'Sovutilgan', 9000, 1, 0],
         ];
 
-        foreach ($items as [$name, $description, $price, $base, $extra]) {
+        foreach (array_slice($items, 0, $limit ?? count($items)) as [$name, $description, $price, $base, $extra]) {
             $restaurant->menuItems()->firstOrCreate(
                 ['name' => $name],
                 [

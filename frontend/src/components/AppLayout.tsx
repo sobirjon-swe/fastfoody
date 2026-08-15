@@ -77,10 +77,10 @@ export function AppLayout() {
 
           {user && (
             <div className="flex items-center gap-3">
-              <div className="hidden text-right sm:block">
-                <div className="text-sm leading-tight font-medium">{user.name}</div>
+              <Link to="/profil" className="hidden text-right sm:block">
+                <div className="text-sm leading-tight font-medium hover:underline">{user.name}</div>
                 <div className="text-muted-foreground text-xs">{user.email}</div>
-              </div>
+              </Link>
               <Badge variant="secondary">{ROLE_LABELS[user.role]}</Badge>
               <Button variant="ghost" size="icon" onClick={handleLogout} aria-label="Chiqish">
                 <LogOut />

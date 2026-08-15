@@ -17,6 +17,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | SPA manzili
+    |--------------------------------------------------------------------------
+    |
+    | Parolni tiklash havolasi shu manzilga olib boradi. FRONTEND_URL bir
+    | nechta origin boʻlsa, birinchisi olinadi.
+    |
+    */
+
+    'frontend_url' => trim(explode(',', (string) env('FRONTEND_URL', 'http://localhost:5173'))[0]),
+
+    /*
+    |--------------------------------------------------------------------------
     | Buyurtma muddati
     |--------------------------------------------------------------------------
     |
