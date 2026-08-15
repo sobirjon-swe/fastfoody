@@ -24,6 +24,10 @@ class StoreMenuItemRequest extends FormRequest
                     ->where('restaurant_id', $this->user()->restaurant_id),
             ],
             'description' => ['nullable', 'string', 'max:500'],
+            'category' => ['nullable', 'string', 'max:60'],
+            // Rasm alohida soʻrov bilan yuklanadi (multipart), shu sababli bu
+            // yerda faqat uni oʻchirish tanlovi bor.
+            'remove_image' => ['boolean'],
             'price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'base_prep_minutes' => ['required', 'integer', 'min:1', 'max:600'],
             'extra_prep_minutes' => ['required', 'integer', 'min:0', 'max:600'],

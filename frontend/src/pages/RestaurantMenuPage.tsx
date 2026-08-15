@@ -65,6 +65,15 @@ export function RestaurantMenuPage() {
     })
   }
 
+  // Kategoriya boʻyicha guruhlash: nomsizlar oxirida, tartib menyudagidek.
+  const groups = [
+    ...menu.reduce((map, item) => {
+      const key = item.category ?? ''
+
+      return map.set(key, [...(map.get(key) ?? []), item])
+    }, new Map<string, MenuItem[]>()),
+  ].sort(([a], [b]) => (a === '' ? 1 : b === '' ? -1 : a.localeCompare(b)))
+
   const lines = menu
     .filter((item) => cart[item.id])
     .map((item) => ({ item, quantity: cart[item.id] }))
@@ -184,47 +193,64 @@ export function RestaurantMenuPage() {
             Bu oshxonada hozircha mavjud taom yoʻq.
           </p>
         ) : (
-          <div className="grid gap-3">
-            {menu.map((item) => (
-              <Card key={item.id}>
-                <CardContent className="flex items-center justify-between gap-4">
-                  <div>
-                    <div className="font-medium">{item.name}</div>
-                    {item.description && (
-                      <div className="text-muted-foreground text-sm">{item.description}</div>
-                    )}
-                    <div className="text-muted-foreground mt-1 text-sm">
-                      {formatPrice(item.price)} ·{' '}
-                      {formatPrepTime(item.base_prep_minutes, item.extra_prep_minutes)}
+          groups.map(([category, items]) => (
+            <div className="grid gap-3" key={category}>
+              {category && (
+                <h2 className="text-muted-foreground mt-2 text-sm font-medium uppercase">
+                  {category}
+                </h2>
+              )}
+              {items.map((item) => (
+                <Card key={item.id}>
+                  <CardContent className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      {item.image_url && (
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="size-16 shrink-0 rounded-md object-cover"
+                          loading="lazy"
+                        />
+                      )}
+                      <div>
+                        <div className="font-medium">{item.name}</div>
+                        {item.description && (
+                          <div className="text-muted-foreground text-sm">{item.description}</div>
+                        )}
+                        <div className="text-muted-foreground mt-1 text-sm">
+                          {formatPrice(item.price)} ·{' '}
+                          {formatPrepTime(item.base_prep_minutes, item.extra_prep_minutes)}
+                        </div>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex shrink-0 items-center gap-2">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      aria-label={`${item.name} kamaytirish`}
-                      disabled={!cart[item.id]}
-                      onClick={() => changeQuantity(item, -1)}
-                    >
-                      <Minus />
-                    </Button>
-                    <span className="w-6 text-center tabular-nums" data-testid={`qty-${item.id}`}>
-                      {cart[item.id] ?? 0}
-                    </span>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      aria-label={`${item.name} qoʻshish`}
-                      onClick={() => changeQuantity(item, 1)}
-                    >
-                      <Plus />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        aria-label={`${item.name} kamaytirish`}
+                        disabled={!cart[item.id]}
+                        onClick={() => changeQuantity(item, -1)}
+                      >
+                        <Minus />
+                      </Button>
+                      <span className="w-6 text-center tabular-nums" data-testid={`qty-${item.id}`}>
+                        {cart[item.id] ?? 0}
+                      </span>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        aria-label={`${item.name} qoʻshish`}
+                        onClick={() => changeQuantity(item, 1)}
+                      >
+                        <Plus />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ))
         )}
       </div>
 

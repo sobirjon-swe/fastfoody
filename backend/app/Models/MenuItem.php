@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * restaurant_id is not fillable: an item always belongs to the restaurant of
  * the staff member creating it, never to a restaurant named in the request.
  */
-#[Fillable(['name', 'description', 'price', 'base_prep_minutes', 'extra_prep_minutes', 'is_available'])]
+#[Fillable(['name', 'description', 'category', 'price', 'base_prep_minutes', 'extra_prep_minutes', 'is_available'])]
 class MenuItem extends Model
 {
     /** @use HasFactory<MenuItemFactory> */
@@ -32,6 +33,14 @@ class MenuItem extends Model
             'extra_prep_minutes' => 'integer',
             'is_available' => 'boolean',
         ];
+    }
+
+    /**
+     * Rasmning toʻliq manzili; rasm yuklanmagan boʻlsa null.
+     */
+    public function imageUrl(): ?string
+    {
+        return $this->image_path ? Storage::disk('public')->url($this->image_path) : null;
     }
 
     /**

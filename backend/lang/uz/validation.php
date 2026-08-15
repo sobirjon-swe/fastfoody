@@ -18,7 +18,9 @@ return [
     'different' => ':attribute va :other bir xil boʻlmasligi kerak.',
     'email' => ':attribute toʻgʻri email manzil boʻlishi kerak.',
     'exists' => ':attribute notoʻgʻri tanlangan.',
+    'image' => ':attribute rasm boʻlishi kerak.',
     'integer' => ':attribute butun son boʻlishi kerak.',
+    'mimes' => ':attribute quyidagi turlardan biri boʻlishi kerak: :values.',
     'max' => [
         'array' => ':attribute :max tadan ortiq element saqlay olmaydi.',
         'file' => ':attribute :max kilobaytdan katta boʻlmasligi kerak.',

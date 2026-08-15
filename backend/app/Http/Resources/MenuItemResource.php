@@ -23,6 +23,8 @@ class MenuItemResource extends JsonResource
             'restaurant_id' => $this->restaurant_id,
             'name' => $this->name,
             'description' => $this->description,
+            'category' => $this->category,
+            'image_url' => $this->imageUrl(),
             'price' => $this->price,
             'base_prep_minutes' => $this->base_prep_minutes,
             'extra_prep_minutes' => $this->extra_prep_minutes,

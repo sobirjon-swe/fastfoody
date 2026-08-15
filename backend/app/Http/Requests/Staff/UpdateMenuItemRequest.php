@@ -22,6 +22,10 @@ class UpdateMenuItemRequest extends FormRequest
                     ->ignore($this->route('menuItem')),
             ],
             'description' => ['nullable', 'string', 'max:500'],
+            'category' => ['nullable', 'string', 'max:60'],
+            // Rasm alohida soʻrov bilan yuklanadi (multipart), shu sababli bu
+            // yerda faqat uni oʻchirish tanlovi bor.
+            'remove_image' => ['boolean'],
             'price' => ['sometimes', 'required', 'numeric', 'min:0', 'max:99999999.99'],
             'base_prep_minutes' => ['sometimes', 'required', 'integer', 'min:1', 'max:600'],
             'extra_prep_minutes' => ['sometimes', 'required', 'integer', 'min:0', 'max:600'],

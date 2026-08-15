@@ -1,7 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 
-import { createMenuItem, updateMenuItem, type MenuItemPayload } from '@/api/menu-items'
+import {
+  createMenuItem,
+  deleteMenuItemImage,
+  updateMenuItem,
+  uploadMenuItemImage,
+  type MenuItemPayload,
+} from '@/api/menu-items'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,6 +28,7 @@ import type { MenuItem } from '@/types/api'
 interface FormState {
   name: string
   description: string
+  category: string
   price: string
   base_prep_minutes: string
   extra_prep_minutes: string
@@ -31,6 +38,7 @@ interface FormState {
 const EMPTY: FormState = {
   name: '',
   description: '',
+  category: '',
   price: '',
   base_prep_minutes: '3',
   extra_prep_minutes: '1',
@@ -40,18 +48,22 @@ const EMPTY: FormState = {
 export function MenuItemFormDialog({
   open,
   menuItem,
+  categories,
   onOpenChange,
   onSaved,
 }: {
   open: boolean
   /** Null means "add a new item". */
   menuItem: MenuItem | null
+  /** Menyuda allaqachon ishlatilgan kategoriyalar — takliflar uchun. */
+  categories: string[]
   onOpenChange: (open: boolean) => void
   onSaved: () => void
 }) {
   const [form, setForm] = useState<FormState>(EMPTY)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [image, setImage] = useState<File | null>(null)
 
   useEffect(() => {
     if (!open) {
@@ -59,11 +71,13 @@ export function MenuItemFormDialog({
     }
 
     setError(null)
+    setImage(null)
     setForm(
       menuItem
         ? {
             name: menuItem.name,
             description: menuItem.description ?? '',
+            category: menuItem.category ?? '',
             price: String(Number.parseFloat(menuItem.price)),
             base_prep_minutes: String(menuItem.base_prep_minutes),
             extra_prep_minutes: String(menuItem.extra_prep_minutes),
@@ -77,6 +91,21 @@ export function MenuItemFormDialog({
     setForm((current) => ({ ...current, [field]: value }))
   }
 
+  async function removeImage() {
+    if (!menuItem) {
+      return
+    }
+
+    try {
+      await deleteMenuItemImage(menuItem.id)
+      toast.success('Rasm oʻchirildi.')
+      onOpenChange(false)
+      onSaved()
+    } catch (caught) {
+      setError(apiErrorMessage(caught, 'Rasmni oʻchirib boʻlmadi.'))
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
@@ -85,6 +114,7 @@ export function MenuItemFormDialog({
     const payload: MenuItemPayload = {
       name: form.name,
       description: form.description || null,
+      category: form.category || null,
       price: Number(form.price),
       base_prep_minutes: Number(form.base_prep_minutes),
       extra_prep_minutes: Number(form.extra_prep_minutes),
@@ -92,13 +122,15 @@ export function MenuItemFormDialog({
     }
 
     try {
-      if (menuItem) {
-        await updateMenuItem(menuItem.id, payload)
-        toast.success('Taom yangilandi.')
-      } else {
-        await createMenuItem(payload)
-        toast.success('Taom qoʻshildi.')
+      const saved = menuItem
+        ? await updateMenuItem(menuItem.id, payload)
+        : await createMenuItem(payload)
+
+      if (image) {
+        await uploadMenuItemImage(saved.id, image)
       }
+
+      toast.success(menuItem ? 'Taom yangilandi.' : 'Taom qoʻshildi.')
 
       onOpenChange(false)
       onSaved()
@@ -144,6 +176,48 @@ export function MenuItemFormDialog({
               value={form.description}
               onChange={(event) => update('description', event.target.value)}
             />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="item-category">Kategoriya (ixtiyoriy)</Label>
+            <Input
+              id="item-category"
+              list="menu-categories"
+              placeholder="Lavashlar, Ichimliklar..."
+              maxLength={60}
+              value={form.category}
+              onChange={(event) => update('category', event.target.value)}
+            />
+            <datalist id="menu-categories">
+              {categories.map((name) => (
+                <option key={name} value={name} />
+              ))}
+            </datalist>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="item-image">Rasm</Label>
+            {menuItem?.image_url && (
+              <div className="flex items-center gap-3">
+                <img
+                  src={menuItem.image_url}
+                  alt={menuItem.name}
+                  className="size-16 rounded-md object-cover"
+                />
+                <Button type="button" variant="ghost" size="sm" onClick={removeImage}>
+                  Rasmni oʻchirish
+                </Button>
+              </div>
+            )}
+            <Input
+              id="item-image"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => setImage(event.target.files?.[0] ?? null)}
+            />
+            <p className="text-muted-foreground text-xs">
+              JPG, PNG yoki WebP, 4 MB gacha. Rasm taom saqlangandan keyin yuklanadi.
+            </p>
           </div>
 
           <div className="grid gap-2">

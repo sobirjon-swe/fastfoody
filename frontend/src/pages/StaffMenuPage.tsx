@@ -60,6 +60,9 @@ export function StaffMenuPage() {
     void load()
   }, [load])
 
+  // Mavjud kategoriyalar — yangi taom qoʻshishda taklif qilinadi.
+  const categories = [...new Set(items.map((item) => item.category).filter(Boolean))] as string[]
+
   async function toggleAvailability(item: MenuItem, isAvailable: boolean) {
     setItems((current) =>
       current.map((row) => (row.id === item.id ? { ...row, is_available: isAvailable } : row)),
@@ -162,10 +165,24 @@ export function StaffMenuPage() {
               {items.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="pl-4">
-                    <div className="font-medium">{item.name}</div>
-                    {item.description && (
-                      <div className="text-muted-foreground text-xs">{item.description}</div>
-                    )}
+                    <div className="flex items-center gap-3">
+                      {item.image_url && (
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="size-10 shrink-0 rounded-md object-cover"
+                        />
+                      )}
+                      <div>
+                        <div className="font-medium">{item.name}</div>
+                        {item.description && (
+                          <div className="text-muted-foreground text-xs">{item.description}</div>
+                        )}
+                        {item.category && (
+                          <div className="text-muted-foreground text-xs">{item.category}</div>
+                        )}
+                      </div>
+                    </div>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">{formatPrice(item.price)}</TableCell>
                   <TableCell className="whitespace-nowrap">
@@ -211,6 +228,7 @@ export function StaffMenuPage() {
       <MenuItemFormDialog
         open={formOpen}
         menuItem={editing}
+        categories={categories}
         onOpenChange={setFormOpen}
         onSaved={load}
       />
@@ -220,8 +238,8 @@ export function StaffMenuPage() {
           <DialogHeader>
             <DialogTitle>«{deleting?.name}» oʻchirilsinmi?</DialogTitle>
             <DialogDescription>
-              Bu amalni qaytarib boʻlmaydi. Taom vaqtincha tugagan boʻlsa, oʻchirish oʻrniga
-              «mavjud emas» qilib qoʻying.
+              Bu amalni qaytarib boʻlmaydi. Taom vaqtincha tugagan boʻlsa, oʻchirish oʻrniga «mavjud
+              emas» qilib qoʻying.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

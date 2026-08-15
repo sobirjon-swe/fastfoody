@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api\Staff;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Staff\StoreMenuItemRequest;
 use App\Http\Requests\Staff\UpdateMenuItemRequest;
+use App\Http\Requests\Staff\UploadMenuItemImageRequest;
 use App\Http\Resources\MenuItemResource;
 use App\Models\MenuItem;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -63,9 +65,48 @@ class MenuItemController extends Controller
 
     public function destroy(Request $request, int $menuItem): Response
     {
-        $this->find($request, $menuItem)->delete();
+        $item = $this->find($request, $menuItem);
+
+        $this->deleteImage($item);
+        $item->delete();
 
         return response()->noContent();
+    }
+
+    /**
+     * Rasm alohida (multipart) soʻrov bilan yuklanadi. Eski rasm oʻrniga
+     * yangisi kelsa, eskisi diskdan oʻchiriladi — ular yigʻilib qolmasin.
+     */
+    public function uploadImage(
+        UploadMenuItemImageRequest $request,
+        int $menuItem,
+    ): JsonResponse {
+        $item = $this->find($request, $menuItem);
+
+        $this->deleteImage($item);
+
+        $item->image_path = $request->file('image')->store("menu-items/{$item->restaurant_id}", 'public');
+        $item->save();
+
+        return response()->json(['menu_item' => MenuItemResource::make($item)]);
+    }
+
+    public function destroyImage(Request $request, int $menuItem): JsonResponse
+    {
+        $item = $this->find($request, $menuItem);
+
+        $this->deleteImage($item);
+        $item->image_path = null;
+        $item->save();
+
+        return response()->json(['menu_item' => MenuItemResource::make($item)]);
+    }
+
+    private function deleteImage(MenuItem $item): void
+    {
+        if ($item->image_path) {
+            Storage::disk('public')->delete($item->image_path);
+        }
     }
 
     private function find(Request $request, int $menuItem): MenuItem

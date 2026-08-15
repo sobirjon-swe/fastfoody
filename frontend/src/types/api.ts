@@ -33,6 +33,8 @@ export interface MenuItem {
   restaurant_id: number
   name: string
   description: string | null
+  category: string | null
+  image_url: string | null
   /** Decimal string from the API, e.g. "32000.00". */
   price: string
   base_prep_minutes: number
