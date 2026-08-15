@@ -109,10 +109,34 @@ Taom qaysi oshxonaga tegishli ekani **soʻrovdan olinmaydi** — u har doim kirg
 oshxonasi. Boshqa oshxona taomiga murojaat qilinsa 403 emas, **404** qaytadi: API uning
 mavjudligini ham tasdiqlamaydi.
 
+**Mijoz — koʻrish va buyurtma (2-bosqich)**
+
+| Metod | Endpoint | Kirish huquqi | Tavsif |
+|---|---|---|---|
+| GET | `/api/restaurants` | ochiq | Faqat faol oshxonalar; `?q=` bilan qidiruv |
+| GET | `/api/restaurants/{id}` | ochiq | Oshxona + faqat mavjud taomlari (nofaol boʻlsa 404) |
+| POST | `/api/orders` | mijoz | Savatchadan buyurtma: `restaurant_id` + `items[{menu_item_id, quantity}]` |
+| GET | `/api/orders` | mijoz | Faqat oʻz buyurtmalari |
+| GET | `/api/orders/{id}` | mijoz | Tarkibi bilan (begonasi 404) |
+| POST | `/api/orders/{id}/pay` | mijoz | Toʻlov **simulyatsiyasi**; qayta toʻlashga 409 |
+
+Narx va tayyorlash vaqti **savatchadan olinmaydi** — server menyudan oʻqiydi, shuning uchun
+mijoz yuborgan `unit_price` eʼtiborga olinmaydi. Butun savatcha bitta tranzaksiyada
+yoziladi: bitta taom tugagan boʻlsa, buyurtma umuman yaratilmaydi.
+
+**Buyurtma holatlari**
+
+```
+kutilmoqda → tolov_qilindi → tayyorlanmoqda → tayyor → olib_ketildi
+```
+
+Qoʻshimcha: `bekor_qilindi_mahsulot_yoq`, `muddati_otdi`. Hozircha mijoz `kutilmoqda →
+tolov_qilindi` oʻtishini bajaradi, qolgan oʻtishlar 4-bosqichda oshxona paneliga qoʻshiladi.
+
 ## Testlar
 
 ```bash
-cd backend && php artisan test      # 48 ta test (auth, rollar, oshxona va menyu boshqaruvi)
+cd backend && php artisan test      # 76 ta test (auth, rollar, menyu, buyurtma)
 cd frontend && npm run build        # tsc + vite build
 cd frontend && npm run lint
 ```
@@ -134,6 +158,13 @@ Testlar SQLite (`:memory:`) da ishlaydi, ishlab chiqarish va lokal muhit — MyS
   (`users.restaurant_id`) qoladi.
 - **Narx `decimal(12,2)`** — API'da `"32000.00"` satri sifatida qaytadi (float yaxlitlash
   xatolarisiz), frontend uni `formatPrice` bilan `32 000 soʻm` koʻrinishida chizadi.
+- **Buyurtma oʻz nusxasini saqlaydi** — `order_items` da taom nomi, narxi va tayyorlash
+  vaqti buyurtma paytidagi holicha yoziladi, shuning uchun keyingi menyu oʻzgarishi eski
+  buyurtmani oʻzgartirmaydi (taom oʻchirilsa `menu_item_id` null boʻladi, tarix qoladi).
+- **Pul butun tiyinlarda hisoblanadi** (`App\Support\Money`) — float yaxlitlash xatosi ham,
+  hamma joyda mavjud boʻlmagan `bcmath` kengaytmasiga bogʻliqlik ham yoʻq.
+- **Toʻlov simulyatsiya** — `POST /orders/{id}/pay` faqat holatni oʻzgartiradi; Payme/Click
+  integratsiyasi keyingi bosqichlarda.
 - **Taom oʻchirilmasin, «mavjud emas» qilinsin** — vaqtincha tugagan mahsulot uchun
   `is_available: false`; 5-bosqichdagi «mahsulot yoʻq» oqimi shunga tayanadi.
 - **shadcn/ui komponentlari** loyiha ichiga koʻchirilgan (`src/components/ui`), `components.json`
@@ -146,7 +177,8 @@ Testlar SQLite (`:memory:`) da ishlaydi, ishlab chiqarish va lokal muhit — MyS
 - [x] **1-bosqich** — oshxona boshqaruvi (super_admin paneli: qidiruv, faollashtirish,
       xodim hisobi) va menyu boshqaruvi (`menu_items`, oshxona xodimi paneli:
       qoʻshish/tahrirlash/oʻchirish, «mavjud emas» belgisi, tayyorlash vaqti).
-- [ ] **2-bosqich** — mijoz tomoni: menyu, savatcha, buyurtma berish.
+- [x] **2-bosqich** — mijoz tomoni: oshxonalar roʻyxati, menyu, savatcha (miqdor tanlash),
+      buyurtma berish, buyurtmalar roʻyxati va holati, toʻlov simulyatsiyasi.
 - [ ] **3-bosqich** — tayyor boʻlish vaqtini hisoblash (miqdor + navbat).
 - [ ] **4-bosqich** — buyurtma holatlarini boshqarish (oshxona paneli).
 - [ ] **5-bosqich** — mahsulot tugagan holat va bekor qilish oqimi.

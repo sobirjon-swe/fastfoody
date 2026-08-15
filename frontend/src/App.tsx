@@ -5,8 +5,11 @@ import { AppLayout } from '@/components/AppLayout'
 import { AdminDashboardPage } from '@/pages/AdminDashboardPage'
 import { CustomerHomePage } from '@/pages/CustomerHomePage'
 import { LoginPage } from '@/pages/LoginPage'
+import { MyOrdersPage } from '@/pages/MyOrdersPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { OrderDetailPage } from '@/pages/OrderDetailPage'
 import { RegisterPage } from '@/pages/RegisterPage'
+import { RestaurantMenuPage } from '@/pages/RestaurantMenuPage'
 import { StaffDashboardPage } from '@/pages/StaffDashboardPage'
 
 export default function App() {
@@ -19,6 +22,9 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route element={<ProtectedRoute roles={['customer']} />}>
             <Route index element={<CustomerHomePage />} />
+            <Route path="restaurants/:restaurantId" element={<RestaurantMenuPage />} />
+            <Route path="orders" element={<MyOrdersPage />} />
+            <Route path="orders/:orderId" element={<OrderDetailPage />} />
           </Route>
 
           <Route element={<ProtectedRoute roles={['restaurant_staff']} />}>

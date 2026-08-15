@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\Admin\RestaurantController;
 use App\Http\Controllers\Api\Admin\RestaurantStaffController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\Customer\OrderController;
+use App\Http\Controllers\Api\Customer\RestaurantController as CustomerRestaurantController;
 use App\Http\Controllers\Api\Staff\MenuItemController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +26,26 @@ Route::prefix('auth')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('logout', [AuthController::class, 'logout']);
     });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Mijoz: oshxonalar, menyu va buyurtmalar (2-bosqich)
+|--------------------------------------------------------------------------
+|
+| Browsing is open to everyone; ordering requires a signed in customer.
+|
+*/
+
+Route::get('restaurants', [CustomerRestaurantController::class, 'index']);
+Route::get('restaurants/{restaurant}', [CustomerRestaurantController::class, 'show'])
+    ->whereNumber('restaurant');
+
+Route::middleware(['auth:sanctum', 'role:customer'])->group(function () {
+    Route::get('orders', [OrderController::class, 'index']);
+    Route::post('orders', [OrderController::class, 'store']);
+    Route::get('orders/{order}', [OrderController::class, 'show'])->whereNumber('order');
+    Route::post('orders/{order}/pay', [OrderController::class, 'pay'])->whereNumber('order');
 });
 
 /*

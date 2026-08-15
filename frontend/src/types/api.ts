@@ -39,6 +39,49 @@ export interface MenuItem {
   updated_at: string
 }
 
+export type OrderStatus =
+  | 'kutilmoqda'
+  | 'tolov_qilindi'
+  | 'tayyorlanmoqda'
+  | 'tayyor'
+  | 'olib_ketildi'
+  | 'bekor_qilindi_mahsulot_yoq'
+  | 'muddati_otdi'
+
+export interface OrderItem {
+  id: number
+  menu_item_id: number | null
+  name: string
+  unit_price: string
+  quantity: number
+  line_total: string
+  prep_minutes: number
+}
+
+export interface Order {
+  id: number
+  restaurant_id: number
+  restaurant?: Restaurant
+  status: OrderStatus
+  total_price: string
+  prep_minutes: number
+  /** 3-bosqichda toʻldiriladi. */
+  ready_at: string | null
+  paid_at: string | null
+  created_at: string
+  items?: OrderItem[]
+}
+
+export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+  kutilmoqda: 'Toʻlov kutilmoqda',
+  tolov_qilindi: 'Toʻlandi',
+  tayyorlanmoqda: 'Tayyorlanmoqda',
+  tayyor: 'Tayyor',
+  olib_ketildi: 'Olib ketildi',
+  bekor_qilindi_mahsulot_yoq: 'Bekor qilindi (mahsulot yoʻq)',
+  muddati_otdi: 'Muddati oʻtdi',
+}
+
 export interface PaginationMeta {
   current_page: number
   last_page: number

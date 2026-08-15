@@ -26,7 +26,7 @@ class EnsureUserHasRole
         );
 
         if (! $user || ! $user->hasRole(...$allowed)) {
-            abort(Response::HTTP_FORBIDDEN, 'This action is not allowed for your role.');
+            abort(Response::HTTP_FORBIDDEN, __('Bu amal sizning rolingiz uchun ruxsat etilmagan.'));
         }
 
         return $next($request);

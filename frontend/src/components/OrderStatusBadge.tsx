@@ -1,0 +1,16 @@
+import { Badge } from '@/components/ui/badge'
+import { ORDER_STATUS_LABELS, type OrderStatus } from '@/types/api'
+
+const VARIANTS: Record<OrderStatus, 'default' | 'secondary' | 'outline' | 'destructive'> = {
+  kutilmoqda: 'outline',
+  tolov_qilindi: 'secondary',
+  tayyorlanmoqda: 'secondary',
+  tayyor: 'default',
+  olib_ketildi: 'outline',
+  bekor_qilindi_mahsulot_yoq: 'destructive',
+  muddati_otdi: 'destructive',
+}
+
+export function OrderStatusBadge({ status }: { status: OrderStatus }) {
+  return <Badge variant={VARIANTS[status]}>{ORDER_STATUS_LABELS[status]}</Badge>
+}
