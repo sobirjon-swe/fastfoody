@@ -14,6 +14,7 @@ use App\Models\Restaurant;
 use App\Services\KitchenQueue;
 use App\Services\OrderPlacer;
 use App\Services\OutOfStockFlow;
+use App\Services\PickupCode;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -91,7 +92,7 @@ class OrderController extends Controller
      * moment the order enters the kitchen queue and its ready time is fixed —
      * an unpaid cart must not hold up anybody else's food.
      */
-    public function pay(Request $request, int $order): JsonResponse
+    public function pay(Request $request, int $order, PickupCode $codes): JsonResponse
     {
         $paid = $this->find($request, $order);
 
@@ -103,6 +104,8 @@ class OrderController extends Controller
 
         $paid->status = OrderStatus::Paid;
         $paid->paid_at = now();
+        // Kod toʻlovdan keyin beriladi: mijoz oshxonada shuni aytadi.
+        $paid->pickup_code = $codes->generateFor($paid->restaurant);
         $this->queue->schedule($paid);
         $paid->save();
 

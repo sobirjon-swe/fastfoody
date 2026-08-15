@@ -23,6 +23,7 @@ class OrderResource extends JsonResource
             'restaurant_id' => $this->restaurant_id,
             'restaurant' => RestaurantResource::make($this->whenLoaded('restaurant')),
             'status' => $this->status->value,
+            'pickup_code' => $this->pickup_code,
             'total_price' => $this->total_price,
             'prep_minutes' => $this->prep_minutes,
             'ready_at' => $this->ready_at,

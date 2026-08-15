@@ -29,11 +29,19 @@ class OrderController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $statuses = $request->filled('status')
-            ? [OrderStatus::tryFrom($request->string('status')->toString())]
-            : OrderStatus::board();
+        // Kod boʻyicha qidirilganda holat muhim emas: mijoz kelib kodni
+        // aytganda xodim uni istalgan holatda topa olishi kerak.
+        $statuses = $request->filled('code')
+            ? OrderStatus::cases()
+            : ($request->filled('status')
+                ? [OrderStatus::tryFrom($request->string('status')->toString())]
+                : OrderStatus::board());
 
         $orders = $this->query($request)
+            ->when($request->filled('code'), fn ($query) => $query->where(
+                'pickup_code',
+                $request->string('code')->trim()->toString(),
+            ))
             ->whereIn('status', array_filter($statuses))
             ->with('items', 'customer')
             ->orderBy('paid_at')

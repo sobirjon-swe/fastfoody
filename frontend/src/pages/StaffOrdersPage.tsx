@@ -1,4 +1,4 @@
-import { Clock, PackageX, Phone, RefreshCw } from 'lucide-react'
+import { Clock, PackageX, Phone, RefreshCw, Search } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -10,6 +10,7 @@ import { Spinner } from '@/components/Spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { apiErrorMessage } from '@/lib/api'
 import { POLL_MS, usePolling } from '@/lib/use-polling'
 import { formatClock, formatPrice, minutesFromNow } from '@/lib/format'
@@ -37,6 +38,8 @@ export function StaffOrdersPage() {
   const [orders, setOrders] = useState<StaffOrder[]>([])
   const [filter, setFilter] = useState<OrderStatus | ''>('')
   const [meta, setMeta] = useState<PaginationMeta | null>(null)
+  const [search, setSearch] = useState('')
+  const [code, setCode] = useState('')
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -54,7 +57,7 @@ export function StaffOrdersPage() {
       }
 
       try {
-        const { orders: data, meta: pagination } = await listStaffOrders(filter, page)
+        const { orders: data, meta: pagination } = await listStaffOrders(filter, page, code)
 
         if (requestId === requestRef.current) {
           setOrders(data)
@@ -71,7 +74,7 @@ export function StaffOrdersPage() {
         }
       }
     },
-    [filter, page],
+    [filter, page, code],
   )
 
   useEffect(() => {
@@ -110,6 +113,38 @@ export function StaffOrdersPage() {
         </Button>
       </div>
 
+      <form
+        className="flex gap-2"
+        onSubmit={(event) => {
+          event.preventDefault()
+          setCode(search.trim())
+          setPage(1)
+        }}
+      >
+        <Input
+          className="w-44"
+          placeholder="Olib ketish kodi"
+          inputMode="numeric"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+        <Button type="submit" variant="secondary">
+          <Search /> Topish
+        </Button>
+        {code && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setSearch('')
+              setCode('')
+            }}
+          >
+            Tozalash
+          </Button>
+        )}
+      </form>
+
       <div className="flex flex-wrap gap-1">
         {FILTERS.map((option) => (
           <Button
@@ -136,7 +171,11 @@ export function StaffOrdersPage() {
         <Spinner />
       ) : orders.length === 0 ? (
         <p className="text-muted-foreground py-10 text-center text-sm">
-          {filter === '' ? 'Hozircha yangi buyurtma yoʻq.' : 'Bu holatda buyurtma yoʻq.'}
+          {code
+            ? `«${code}» kodli buyurtma topilmadi.`
+            : filter === ''
+              ? 'Hozircha yangi buyurtma yoʻq.'
+              : 'Bu holatda buyurtma yoʻq.'}
         </p>
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
@@ -144,7 +183,14 @@ export function StaffOrdersPage() {
             <Card key={order.id} data-testid={`order-${order.id}`}>
               <CardHeader>
                 <CardTitle className="flex flex-wrap items-center justify-between gap-2">
-                  <span>Buyurtma #{order.id}</span>
+                  <span className="flex items-center gap-2">
+                    Buyurtma #{order.id}
+                    {order.pickup_code && (
+                      <span className="bg-muted rounded px-2 py-0.5 font-mono text-base tracking-widest">
+                        {order.pickup_code}
+                      </span>
+                    )}
+                  </span>
                   <OrderStatusBadge status={order.status} />
                 </CardTitle>
                 <div className="text-muted-foreground grid gap-1 text-sm">

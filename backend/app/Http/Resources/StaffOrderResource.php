@@ -25,6 +25,7 @@ class StaffOrderResource extends JsonResource
         return [
             'id' => $this->id,
             'status' => $this->status->value,
+            'pickup_code' => $this->pickup_code,
             'next_statuses' => array_map(
                 fn ($status) => $status->value,
                 $this->status->nextForStaff(),

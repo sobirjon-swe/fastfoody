@@ -69,6 +69,8 @@ export interface Order {
   restaurant_id: number
   restaurant?: Restaurant
   status: OrderStatus
+  /** Toʻlovdan keyin beriladi; mijoz oshxonada shuni aytadi. */
+  pickup_code: string | null
   total_price: string
   prep_minutes: number
   /** Toʻlangandan keyin qatʼiylashadi. */

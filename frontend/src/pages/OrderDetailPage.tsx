@@ -177,6 +177,22 @@ export function OrderDetailPage() {
         </Alert>
       )}
 
+      {order.pickup_code && (
+        <Card>
+          <CardContent className="flex items-center justify-between gap-4">
+            <div>
+              <div className="text-muted-foreground text-sm">Olib ketish kodi</div>
+              <div className="text-3xl font-semibold tracking-widest" data-testid="pickup-code">
+                {order.pickup_code}
+              </div>
+            </div>
+            <p className="text-muted-foreground max-w-56 text-sm">
+              Oshxonaga kelganingizda shu kodni ayting.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <ReadyTimeCard order={order} />
 
       <Card>

@@ -4,6 +4,7 @@ import type { OrderItem, OrderStatus, PaginationMeta } from '@/types/api'
 export interface StaffOrder {
   id: number
   status: OrderStatus
+  pickup_code: string | null
   /** Bu holatdan oʻtish mumkin boʻlgan holatlar (serverdan). */
   next_statuses: OrderStatus[]
   total_price: string
@@ -16,9 +17,9 @@ export interface StaffOrder {
   items?: OrderItem[]
 }
 
-export async function listStaffOrders(status?: OrderStatus | '', page = 1) {
+export async function listStaffOrders(status?: OrderStatus | '', page = 1, code?: string) {
   const { data } = await api.get<{ orders: StaffOrder[]; meta: PaginationMeta }>('/staff/orders', {
-    params: { status: status || undefined, page },
+    params: { status: status || undefined, page, code: code || undefined },
   })
 
   return data
