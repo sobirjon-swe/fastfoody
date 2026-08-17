@@ -273,10 +273,14 @@ Mijoz tomonini Telegram ichida ochish uchun asos tayyor. Mini App sahifasi Teleg
 tokeni bilan tekshiradi va odatdagi Sanctum tokenini qaytaradi — undan keyingi hamma soʻrov
 oʻzgarishsiz ishlaydi.
 
-- Imzo Telegram hujjatidagi algoritm boʻyicha tekshiriladi: `hash` (va uchinchi tomon uchun
-  moʻljallangan `signature`) chiqarib tashlanadi, qolgan juftliklar alifbo boʻyicha
-  tartiblanib `\n` bilan ulanadi, kalit sifatida `HMAC-SHA256("WebAppData", bot_token)`
-  ishlatiladi.
+- Imzo Telegram hujjatidagi algoritm boʻyicha tekshiriladi: **faqat `hash`** chiqarib
+  tashlanadi, qolgan juftliklar alifbo boʻyicha tartiblanib `\n` bilan ulanadi, kalit sifatida
+  `HMAC-SHA256("WebAppData", bot_token)` ishlatiladi.
+- **Bot API 8.0 dagi `signature` maydoni data-check-string ichida qoladi.** U uchinchi tomon
+  Ed25519 tekshiruvi uchun moʻljallangan, lekin Telegram `hash` ni oʻsha maydon bilan birga
+  hisoblaydi. Uni chiqarib tashlash imzoni zamonaviy Telegram ilovalarining hech birida mos
+  kelmaydigan qiladi — yaʼni Mini App hech kimda ishlamaydi. Shu holat alohida test bilan
+  qoplangan (`signature` bor initData qabul qilinadi, uning qiymati oʻzgartirilsa rad etiladi).
 - `auth_date` yoshi cheklangan (`TELEGRAM_MAX_AUTH_AGE_MINUTES`, sukut 24 soat) — yopilgan
   oynadan qolgan eski `initData` qayta ishlatilmaydi.
 - Hisob birinchi kirishda oʻzi ochiladi va **doim `customer`** boʻladi; mavjud hisob topilsa
@@ -305,7 +309,7 @@ vaqt mintaqasi boʻyicha kesiladi, shuning uchun «bugun» Toshkent yarim tunida
 ## Testlar
 
 ```bash
-cd backend  && php artisan test     # 165 ta test
+cd backend  && php artisan test     # 167 ta test
 cd backend  && ./vendor/bin/pint    # kod uslubi
 cd frontend && npm run test         # 17 ta test (Vitest + Testing Library)
 cd frontend && npm run lint         # oxlint

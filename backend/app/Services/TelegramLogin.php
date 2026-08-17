@@ -65,9 +65,12 @@ class TelegramLogin
         $pairs = $this->parse($initData);
         $hash = $pairs['hash'] ?? null;
 
-        // `signature` — uchinchi tomon tekshiruvi uchun qoʻshimcha maydon;
-        // u ham hisobga kirmaydi, aks holda imzo mos kelmaydi.
-        unset($pairs['hash'], $pairs['signature']);
+        // Faqat `hash` chiqariladi. Bot API 8.0 dan beri Telegram initData'ga
+        // `signature` maydonini ham qoʻshadi — u uchinchi tomon Ed25519
+        // tekshiruvi uchun, lekin hash oʻsha maydon bilan birga hisoblanadi.
+        // Uni bu yerda chiqarib tashlash data-check-string'ni oʻzgartiradi va
+        // imzo zamonaviy Telegram ilovalarining hech birida mos kelmaydi.
+        unset($pairs['hash']);
 
         if (! is_string($hash) || $pairs === []) {
             $this->reject();

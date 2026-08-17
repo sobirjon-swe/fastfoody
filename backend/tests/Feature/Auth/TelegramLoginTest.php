@@ -25,11 +25,20 @@ class TelegramLoginTest extends TestCase
      * Telegram initData'ni oʻsha bot tokeni bilan imzolab beradi — Mini App
      * bizga aynan shunday satr yuboradi.
      *
+     * `$extra` orqali Telegram qoʻshadigan boshqa maydonlarni ham qoʻshish
+     * mumkin; ular imzo hisobiga kiradi, chunki Telegram hash'ni oʻzi
+     * yuborayotgan hamma maydon ustidan hisoblaydi.
+     *
      * @param  array<string, mixed>  $user
+     * @param  array<string, string>  $extra
      */
-    private function initData(array $user = [], ?int $authDate = null, ?string $token = null): string
-    {
-        $pairs = [
+    private function initData(
+        array $user = [],
+        ?int $authDate = null,
+        ?string $token = null,
+        array $extra = [],
+    ): string {
+        $pairs = $extra + [
             'auth_date' => (string) ($authDate ?? now()->timestamp),
             'query_id' => 'AAF-test',
             'user' => json_encode($user + ['id' => 5551234, 'first_name' => 'Aziz'], JSON_UNESCAPED_UNICODE),
@@ -80,6 +89,35 @@ class TelegramLoginTest extends TestCase
         ])->assertOk()->assertJsonPath('user.name', 'Aziz Yangi');
 
         $this->assertSame(1, User::where('telegram_id', 5551234)->count());
+    }
+
+    /**
+     * Bot API 8.0 dan boshlab Telegram initData'ga `signature` maydonini ham
+     * qoʻshadi (uchinchi tomon Ed25519 tekshiruvi uchun). U hash hisobiga
+     * KIRADI: faqat `hash` chiqarib tashlanadi. Zamonaviy Telegram ilovalari
+     * shu maydonni yuboradi, shuning uchun bu test aslida asosiy holat.
+     */
+    public function test_init_data_with_a_signature_field_is_accepted(): void
+    {
+        $this->postJson('/api/auth/telegram', [
+            'init_data' => $this->initData(extra: ['signature' => 'ZmFrZS1lZDI1NTE5LXNpZ25hdHVyZQ']),
+        ])
+            ->assertOk()
+            ->assertJsonPath('user.name', 'Aziz');
+
+        $this->assertDatabaseHas('users', ['telegram_id' => 5551234]);
+    }
+
+    public function test_tampered_signature_field_is_rejected(): void
+    {
+        $signed = $this->initData(extra: ['signature' => 'ZmFrZS1lZDI1NTE5LXNpZ25hdHVyZQ']);
+        $forged = str_replace('ZmFrZS1lZDI1NTE5LXNpZ25hdHVyZQ', 'YnVzaGdhLXNpZ25hdHVyZS12YWx1ZQ', $signed);
+
+        $this->postJson('/api/auth/telegram', ['init_data' => $forged])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('init_data');
+
+        $this->assertDatabaseCount('users', 0);
     }
 
     public function test_tampered_init_data_is_rejected(): void
