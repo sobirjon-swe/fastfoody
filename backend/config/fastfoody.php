@@ -41,6 +41,20 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Telegram Mini App
+    |--------------------------------------------------------------------------
+    |
+    | Telegram initData'ni imzo bilan birga `auth_date` ham yuboradi. Eski
+    | initData qayta ishlatilmasligi uchun uning yoshi cheklanadi.
+    |
+    */
+
+    'telegram' => [
+        'max_auth_age_minutes' => (int) env('TELEGRAM_MAX_AUTH_AGE_MINUTES', 1440),
+    ],
+
     'expiry' => [
         // Toʻlov qilinmagan buyurtma shuncha daqiqadan keyin bekor boʻladi.
         'unpaid_after_minutes' => (int) env('FASTFOODY_UNPAID_EXPIRY_MINUTES', 15),

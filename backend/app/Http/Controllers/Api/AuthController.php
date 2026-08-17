@@ -6,14 +6,17 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\TelegramLoginRequest;
 use App\Http\Requests\Auth\UpdatePasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\TelegramLogin;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
@@ -37,7 +40,10 @@ class AuthController extends Controller
     {
         $user = User::where('email', $request->string('email'))->first();
 
-        if (! $user || ! Hash::check($request->string('password')->toString(), $user->password)) {
+        // Telegram orqali ochilgan hisobda parol boʻlmasligi mumkin — bunday
+        // hisobga email va parol bilan kirib boʻlmaydi.
+        if (! $user || $user->password === null
+            || ! Hash::check($request->string('password')->toString(), $user->password)) {
             throw ValidationException::withMessages([
                 'email' => [__('auth.failed')],
             ]);
@@ -47,6 +53,25 @@ class AuthController extends Controller
             throw ValidationException::withMessages([
                 'email' => [__('Bu hisob faolsizlantirilgan. Tizim egasiga murojaat qiling.')],
             ]);
+        }
+
+        return $this->tokenResponse($user, $request->string('device_name')->toString());
+    }
+
+    /**
+     * Telegram Mini App ichidan kirish: parol soʻralmaydi, ishonch Telegram
+     * imzosiga asoslanadi. Hisob birinchi kirishda oʻzi ochiladi.
+     */
+    public function telegram(TelegramLoginRequest $request, TelegramLogin $telegram): JsonResponse
+    {
+        try {
+            $user = $telegram->authenticate($request->string('init_data')->toString());
+        } catch (RuntimeException) {
+            // Bot tokeni sozlanmagan — bu mijozning emas, serverning kamchiligi.
+            return response()->json(
+                ['message' => __('Telegram orqali kirish hozircha sozlanmagan.')],
+                Response::HTTP_SERVICE_UNAVAILABLE,
+            );
         }
 
         return $this->tokenResponse($user, $request->string('device_name')->toString());

@@ -25,6 +25,9 @@ Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 
+    // Telegram Mini App ichidan kirish (7-bosqich)
+    Route::post('telegram', [AuthController::class, 'telegram'])->middleware('throttle:20,1');
+
     // Parolni unutgan foydalanuvchi uchun
     Route::post('forgot-password', [PasswordResetController::class, 'sendLink'])
         ->middleware('throttle:5,1');

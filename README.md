@@ -87,6 +87,7 @@ Barcha javoblar JSON. Token `Authorization: Bearer <token>` sarlavhasida yuboril
 | PUT | `/api/auth/password` | token | Parolni almashtirish; joriy paroldan tashqari hamma token oʻchadi |
 | POST | `/api/auth/forgot-password` | ochiq | Emailga tiklash havolasi (SPA'dagi `/parolni-tiklash`) |
 | POST | `/api/auth/reset-password` | ochiq | `token` + yangi parol; barcha seanslar yopiladi |
+| POST | `/api/auth/telegram` | ochiq | Telegram Mini App'dan kirish: `init_data` imzosi tekshiriladi, token qaytadi |
 | POST | `/api/auth/logout` | token | Faqat joriy qurilma tokenini oʻchiradi |
 
 `register` va `login` daqiqasiga 10 martaga, parol tiklash esa 5 martaga cheklangan.
@@ -265,6 +266,30 @@ Toʻlangan buyurtmadagi taom tugab qolsa:
 Bloklangan buyurtma oshxona taxtasida koʻrinib turadi (`next_statuses` boʻsh) — xodim uning
 mijoz javobini kutayotganini biladi, lekin uni oldinga sura olmaydi.
 
+## Telegram Mini App (7-bosqich)
+
+Mijoz tomonini Telegram ichida ochish uchun asos tayyor. Mini App sahifasi Telegram'dan
+`initData` satrini oladi va uni `POST /api/auth/telegram` ga yuboradi; server imzoni bot
+tokeni bilan tekshiradi va odatdagi Sanctum tokenini qaytaradi — undan keyingi hamma soʻrov
+oʻzgarishsiz ishlaydi.
+
+- Imzo Telegram hujjatidagi algoritm boʻyicha tekshiriladi: `hash` (va uchinchi tomon uchun
+  moʻljallangan `signature`) chiqarib tashlanadi, qolgan juftliklar alifbo boʻyicha
+  tartiblanib `\n` bilan ulanadi, kalit sifatida `HMAC-SHA256("WebAppData", bot_token)`
+  ishlatiladi.
+- `auth_date` yoshi cheklangan (`TELEGRAM_MAX_AUTH_AGE_MINUTES`, sukut 24 soat) — yopilgan
+  oynadan qolgan eski `initData` qayta ishlatilmaydi.
+- Hisob birinchi kirishda oʻzi ochiladi va **doim `customer`** boʻladi; mavjud hisob topilsa
+  uning roli va oshxonasi saqlanadi. Rol hech qachon Telegram maʼlumotidan olinmaydi.
+- Telegram orqali ochilgan hisobda email ham, parol ham boʻlmasligi mumkin (`users.email` va
+  `users.password` endi nullable). Bunday hisobga email+parol bilan kirib boʻlmaydi; foydalanuvchi
+  keyinchalik profilidan email qoʻshsa, parolni tiklash orqali oddiy kirishni ham yoqadi.
+- `TELEGRAM_BOT_TOKEN` sozlanmagan boʻlsa endpoint `503` qaytaradi — mijozga imzo xatosi
+  koʻrsatilmaydi.
+
+Xodim va tizim egasi paneli Mini App'ga koʻchirilmaydi: ular kun boʻyi katta ekranda
+ishlaydi, ikkalasi ham xuddi shu API'ga ulanaveradi.
+
 ## Statistika
 
 Oshxona xodimi oʻz taxtasida, super admin esa panelida bugungi va soʻnggi 7 kunlik
@@ -280,7 +305,7 @@ vaqt mintaqasi boʻyicha kesiladi, shuning uchun «bugun» Toshkent yarim tunida
 ## Testlar
 
 ```bash
-cd backend  && php artisan test     # 156 ta test
+cd backend  && php artisan test     # 165 ta test
 cd backend  && ./vendor/bin/pint    # kod uslubi
 cd frontend && npm run test         # 17 ta test (Vitest + Testing Library)
 cd frontend && npm run lint         # oxlint
@@ -289,7 +314,7 @@ cd frontend && npm run build        # tsc + vite build
 
 Backend testlari: auth va rollar, tenant chegarasi, menyu, savatcha va buyurtma, navbat
 hisobi, holat oʻtishlari, ish vaqti, muddati oʻtganlar, olib ketish kodi, rasm yuklash,
-profil, parol tiklash va statistika. SQLite (`:memory:`) da ishlaydi — ishlab chiqarish va
+profil, parol tiklash, statistika va Telegram imzosi. SQLite (`:memory:`) da ishlaydi — ishlab chiqarish va
 lokal muhit esa MySQL.
 
 Har bir push va pull request'da GitHub Actions (`.github/workflows/ci.yml`) ikkala loyihani
@@ -361,9 +386,14 @@ ham tekshiradi: backend uchun Pint + PHPUnit, frontend uchun lint + test + build
 - [x] Taom rasmlari va menyu kategoriyalari.
 - [x] Profil, parolni oʻzgartirish va parolni tiklash oqimi.
 - [x] Oshxona va tizim statistikasi.
+- [x] **7-bosqich (1-qism)** — Telegram Mini App uchun `initData` autentifikatsiyasi.
 
 Keyingi bosqichlar:
 
+- [ ] **7-bosqich (2-qism)** — Telegram boti: menyu tugmasi va buyurtma holati haqida xabar
+      yuborish (mijoz uchun pollingning oʻrnini bosadi).
+- [ ] **7-bosqich (3-qism)** — interfeysni Telegram qobigʻiga moslash: `MainButton`,
+      `BackButton`, Telegram mavzu ranglari.
 - [ ] Payme/Click integratsiyasi — merchant hisobi va kalitlari kerak, hozircha toʻlov
       simulyatsiya qilinadi.
 - [ ] Real vaqtdagi bildirishnoma (WebSocket) — hozircha 15 soniyalik polling yetarli.
