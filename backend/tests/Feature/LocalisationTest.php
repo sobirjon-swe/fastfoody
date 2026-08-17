@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 /**
- * 8-bosqich: interfeys uch tilda — oʻzbekcha lotin, oʻzbekcha kirill va
- * inglizcha.
+ * 8-bosqich: interfeys toʻrt tilda — oʻzbekcha lotin, oʻzbekcha kirill,
+ * ruscha va inglizcha.
  */
 class LocalisationTest extends TestCase
 {
@@ -33,7 +33,7 @@ class LocalisationTest extends TestCase
     {
         parent::setUp();
 
-        // Oshxona yopiq boʻlgan payt: xato xabari uch tilda tekshiriladi.
+        // Oshxona yopiq boʻlgan payt: xato xabari har bir tilda tekshiriladi.
         Carbon::setTestNow('2026-08-15 00:00:00');
 
         $this->restaurant = Restaurant::factory()->create([
@@ -75,6 +75,15 @@ class LocalisationTest extends TestCase
             ->postJson(self::CLOSED_ORDER_PATH, $this->cart())
             ->assertStatus(422)
             ->assertJsonPath('errors.restaurant_id.0', 'Ошхона ҳозир ёпиқ. Иш вақти: 09:00–22:00.');
+    }
+
+    public function test_russian_is_supported_too(): void
+    {
+        $this->actingAs($this->customer)
+            ->withHeader('Accept-Language', 'ru-RU,ru;q=0.9')
+            ->postJson(self::CLOSED_ORDER_PATH, $this->cart())
+            ->assertStatus(422)
+            ->assertJsonPath('errors.restaurant_id.0', 'Заведение сейчас закрыто. Часы работы: 09:00–22:00.');
     }
 
     public function test_an_unsupported_browser_language_falls_back_to_uzbek(): void
@@ -132,7 +141,7 @@ class LocalisationTest extends TestCase
 
         $pairs = [
             'auth_date' => (string) now()->timestamp,
-            'user' => json_encode(['id' => 991122, 'first_name' => 'Alyona', 'language_code' => 'en-GB']),
+            'user' => json_encode(['id' => 991122, 'first_name' => 'Alyona', 'language_code' => 'ru']),
         ];
         ksort($pairs);
         $check = implode("\n", array_map(fn ($k, $v) => "{$k}={$v}", array_keys($pairs), $pairs));
@@ -141,7 +150,7 @@ class LocalisationTest extends TestCase
 
         $this->postJson('/api/auth/telegram', ['init_data' => http_build_query($pairs)])
             ->assertOk()
-            ->assertJsonPath('user.locale', 'en');
+            ->assertJsonPath('user.locale', 'ru');
     }
 
     public function test_the_bot_writes_in_the_customers_language_not_the_staffs(): void

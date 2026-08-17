@@ -46,14 +46,14 @@ return [
     | Tillar
     |--------------------------------------------------------------------------
     |
-    | Interfeys uch tilda: oʻzbekcha lotin (asosiy), oʻzbekcha kirill va
-    | inglizcha. Tarjima kalitlari — oʻzbekcha lotin jumlalarning oʻzi, lekin
+    | Interfeys toʻrt tilda: oʻzbekcha lotin (asosiy), oʻzbekcha kirill,
+    | ruscha va inglizcha. Tarjima kalitlari — oʻzbekcha lotin jumlalarning oʻzi, lekin
     | `lang/uz.json` baribir kerak: usiz `uz` tili zaxira tilga (en) tushib
     | ketadi va oʻzbek foydalanuvchi inglizcha xabar koʻradi.
     |
     */
 
-    'locales' => ['uz', 'uz_Cyrl', 'en'],
+    'locales' => ['uz', 'uz_Cyrl', 'ru', 'en'],
 
     /*
     |--------------------------------------------------------------------------
