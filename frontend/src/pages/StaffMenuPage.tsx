@@ -27,11 +27,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { useT } from '@/i18n/use-i18n'
+import { useMoney } from '@/i18n/use-money'
 import { apiErrorMessage } from '@/lib/api'
-import { formatPrepTime, formatPrice } from '@/lib/format'
+import { formatPrepTime } from '@/lib/format'
 import type { MenuItem } from '@/types/api'
 
 export function StaffMenuPage() {
+  const t = useT()
+  const money = useMoney()
   const { user } = useAuth()
   const restaurant = user?.restaurant
 
@@ -50,15 +54,15 @@ export function StaffMenuPage() {
     try {
       setItems(await listMenuItems())
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Menyuni yuklab boʻlmadi.'))
+      setError(apiErrorMessage(caught, t('Menyuni yuklab boʻlmadi.')))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     void load()
-  }, [load])
+  }, [load, t])
 
   // Mavjud kategoriyalar — yangi taom qoʻshishda taklif qilinadi.
   const categories = [...new Set(items.map((item) => item.category).filter(Boolean))] as string[]
@@ -76,7 +80,7 @@ export function StaffMenuPage() {
           row.id === item.id ? { ...row, is_available: item.is_available } : row,
         ),
       )
-      toast.error(apiErrorMessage(caught, 'Holatni oʻzgartirib boʻlmadi.'))
+      toast.error(apiErrorMessage(caught, t('Holatni oʻzgartirib boʻlmadi.')))
     }
   }
 
@@ -87,11 +91,11 @@ export function StaffMenuPage() {
 
     try {
       await deleteMenuItem(deleting.id)
-      toast.success('Taom oʻchirildi.')
+      toast.success(t('Taom oʻchirildi.'))
       setDeleting(null)
       await load()
     } catch (caught) {
-      toast.error(apiErrorMessage(caught, 'Oʻchirib boʻlmadi.'))
+      toast.error(apiErrorMessage(caught, t('Oʻchirib boʻlmadi.')))
     }
   }
 
@@ -100,30 +104,33 @@ export function StaffMenuPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {restaurant?.name ?? 'Oshxona biriktirilmagan'}
+            {restaurant?.name ?? t('Oshxona biriktirilmagan')}
             {restaurant && (
               <Badge variant={restaurant.is_active ? 'secondary' : 'destructive'}>
-                {restaurant.is_active ? 'Faol' : 'Nofaol'}
+                {restaurant.is_active ? t('Faol') : t('Nofaol')}
               </Badge>
             )}
           </CardTitle>
           <CardDescription>
-            {restaurant?.address ?? 'Tizim egasi sizni oshxonaga biriktirishi kerak.'}
+            {restaurant?.address ?? t('Tizim egasi sizni oshxonaga biriktirishi kerak.')}
           </CardDescription>
         </CardHeader>
         {restaurant && (
           <CardContent className="text-muted-foreground text-sm">
-            Ish vaqti: {restaurant.opens_at}–{restaurant.closes_at}
-            {restaurant.phone && <> · Telefon: {restaurant.phone}</>}
+            {t('Ish vaqti: :opens–:closes', {
+              opens: restaurant.opens_at,
+              closes: restaurant.closes_at,
+            })}
+            {restaurant.phone && <> · {t('Telefon: :phone', { phone: restaurant.phone })}</>}
           </CardContent>
         )}
       </Card>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Menyu</h1>
+          <h1 className="text-2xl font-semibold">{t('Menyu')}</h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            Taom tugagan boʻlsa, uni oʻchirmasdan «mavjud emas» qilib qoʻying.
+            {t('Taom tugagan boʻlsa, uni oʻchirmasdan «mavjud emas» qilib qoʻying.')}
           </p>
         </div>
         <Button
@@ -133,7 +140,7 @@ export function StaffMenuPage() {
             setFormOpen(true)
           }}
         >
-          <Plus /> Yangi taom
+          <Plus /> {t('Yangi taom')}
         </Button>
       </div>
 
@@ -147,18 +154,18 @@ export function StaffMenuPage() {
         <Spinner />
       ) : items.length === 0 ? (
         <p className="text-muted-foreground py-10 text-center text-sm">
-          Menyu boʻsh — birinchi taomni qoʻshing.
+          {t('Menyu boʻsh — birinchi taomni qoʻshing.')}
         </p>
       ) : (
         <div className="rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-4">Nomi</TableHead>
-                <TableHead>Narxi</TableHead>
-                <TableHead>Tayyorlash</TableHead>
-                <TableHead>Mavjud</TableHead>
-                <TableHead className="pr-4 text-right">Amallar</TableHead>
+                <TableHead className="pl-4">{t('Nomi')}</TableHead>
+                <TableHead>{t('Narxi')}</TableHead>
+                <TableHead>{t('Tayyorlash')}</TableHead>
+                <TableHead>{t('Mavjud')}</TableHead>
+                <TableHead className="pr-4 text-right">{t('Amallar')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -184,7 +191,7 @@ export function StaffMenuPage() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">{formatPrice(item.price)}</TableCell>
+                  <TableCell className="whitespace-nowrap">{money(item.price)}</TableCell>
                   <TableCell className="whitespace-nowrap">
                     {formatPrepTime(item.base_prep_minutes, item.extra_prep_minutes)}
                   </TableCell>
@@ -192,7 +199,7 @@ export function StaffMenuPage() {
                     <Switch
                       checked={item.is_available}
                       onCheckedChange={(checked) => toggleAvailability(item, checked)}
-                      aria-label={`${item.name} mavjudligi`}
+                      aria-label={t(':name mavjudligi', { name: item.name })}
                     />
                   </TableCell>
                   <TableCell className="pr-4">
@@ -200,7 +207,7 @@ export function StaffMenuPage() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        aria-label={`${item.name} tahrirlash`}
+                        aria-label={t(':name tahrirlash', { name: item.name })}
                         onClick={() => {
                           setEditing(item)
                           setFormOpen(true)
@@ -211,7 +218,7 @@ export function StaffMenuPage() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        aria-label={`${item.name} oʻchirish`}
+                        aria-label={t(':name oʻchirish', { name: item.name })}
                         onClick={() => setDeleting(item)}
                       >
                         <Trash2 />

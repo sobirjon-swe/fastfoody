@@ -3,7 +3,7 @@
  * locale data is not present in every runtime, and a fallback locale would
  * render "32,000".
  */
-export function formatPrice(price: string | number): string {
+export function formatPrice(price: string | number, currency = 'soʻm'): string {
   const value = typeof price === 'string' ? Number.parseFloat(price) : price
 
   if (Number.isNaN(value)) {
@@ -15,7 +15,7 @@ export function formatPrice(price: string | number): string {
 
   // Tiyin are shown only when they exist, so an ordinary price stays "32 000
   // soʻm" while 12 500,75 is not silently rounded away.
-  return fraction === '00' ? `${grouped} soʻm` : `${grouped},${fraction} soʻm`
+  return fraction === '00' ? `${grouped} ${currency}` : `${grouped},${fraction} ${currency}`
 }
 
 /** Prep time of one portion and of each additional portion. */

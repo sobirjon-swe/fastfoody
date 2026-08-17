@@ -1,5 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card'
-import { formatPrice } from '@/lib/format'
+import { useT } from '@/i18n/use-i18n'
+import { useMoney } from '@/i18n/use-money'
+
 import type { StatisticsWindow } from '@/api/statistics'
 
 /** Bugungi va haftalik koʻrsatkichlar bir qatorda. */
@@ -10,11 +12,17 @@ export function StatisticsCards({
   today: StatisticsWindow
   week: StatisticsWindow
 }) {
+  const t = useT()
+  const money = useMoney()
+
   const tiles = [
-    { label: 'Bugungi buyurtmalar', value: String(today.orders) },
-    { label: 'Bugungi tushum', value: formatPrice(today.revenue) },
-    { label: 'Oʻrtacha tayyorlash', value: `${today.average_prep_minutes} daq` },
-    { label: '7 kunlik tushum', value: formatPrice(week.revenue) },
+    { label: t('Bugungi buyurtmalar'), value: String(today.orders) },
+    { label: t('Bugungi tushum'), value: money(today.revenue) },
+    {
+      label: t('Oʻrtacha tayyorlash'),
+      value: t(':minutes daq', { minutes: today.average_prep_minutes }),
+    },
+    { label: t('7 kunlik tushum'), value: money(week.revenue) },
   ]
 
   return (
@@ -31,7 +39,10 @@ export function StatisticsCards({
       {(today.cancelled > 0 || today.expired > 0) && (
         <Card className="sm:col-span-2 lg:col-span-4">
           <CardContent className="text-muted-foreground text-sm">
-            Bugun bekor qilingan: {today.cancelled} · muddati oʻtgan: {today.expired}
+            {t('Bugun bekor qilingan: :cancelled · muddati oʻtgan: :expired', {
+              cancelled: today.cancelled,
+              expired: today.expired,
+            })}
           </CardContent>
         </Card>
       )}

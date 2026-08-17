@@ -7,8 +7,10 @@ import { Spinner } from '@/components/Spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useT } from '@/i18n/use-i18n'
+import { useMoney } from '@/i18n/use-money'
 import { apiErrorMessage } from '@/lib/api'
-import { formatPrepTime, formatPrice } from '@/lib/format'
+import { formatPrepTime } from '@/lib/format'
 import type { MenuItem, Order } from '@/types/api'
 
 /**
@@ -22,6 +24,8 @@ export function OutOfStockDecision({
   order: Order
   onResolved: (order: Order) => void
 }) {
+  const t = useT()
+  const money = useMoney()
   const missing = order.items?.find((item) => item.is_out_of_stock)
 
   const [menu, setMenu] = useState<MenuItem[]>([])
@@ -39,15 +43,15 @@ export function OutOfStockDecision({
 
       setMenu(data.menu_items)
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Menyuni yuklab boʻlmadi.'))
+      setError(apiErrorMessage(caught, t('Menyuni yuklab boʻlmadi.')))
     } finally {
       setLoading(false)
     }
-  }, [restaurantId])
+  }, [restaurantId, t])
 
   useEffect(() => {
     void load()
-  }, [load])
+  }, [load, t])
 
   async function replace(menuItem: MenuItem) {
     if (!missing) {
@@ -63,7 +67,7 @@ export function OutOfStockDecision({
       toast.success(`«${missing.name}» oʻrniga «${menuItem.name}» tanlandi.`)
       onResolved(updated)
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Almashtirib boʻlmadi.'))
+      setError(apiErrorMessage(caught, t('Almashtirib boʻlmadi.')))
       void load()
     } finally {
       setBusy(false)
@@ -77,10 +81,10 @@ export function OutOfStockDecision({
     try {
       const updated = await cancelOrder(order.id)
 
-      toast.success('Buyurtma bekor qilindi, pul qaytariladi.')
+      toast.success(t('Buyurtma bekor qilindi, pul qaytariladi.'))
       onResolved(updated)
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Bekor qilib boʻlmadi.'))
+      setError(apiErrorMessage(caught, t('Bekor qilib boʻlmadi.')))
     } finally {
       setBusy(false)
     }
@@ -94,11 +98,12 @@ export function OutOfStockDecision({
       <CardHeader>
         <CardTitle className="text-destructive flex items-center gap-2">
           <PackageX className="size-5" />
-          «{missing?.name}» tugab qolibdi
+          {t('«:name» tugab qolibdi', { name: missing?.name ?? '' })}
         </CardTitle>
         <CardDescription>
-          Kechirasiz, oshxonada bu taom qolmagan. Boshqa taomga almashtirasizmi yoki buyurtmani
-          bekor qilib pulni qaytarib olasizmi?
+          {t(
+            'Kechirasiz, oshxonada bu taom qolmagan. Boshqa taomga almashtirasizmi yoki buyurtmani bekor qilib pulni qaytarib olasizmi?',
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
@@ -112,7 +117,7 @@ export function OutOfStockDecision({
           <Spinner className="py-4" />
         ) : alternatives.length === 0 ? (
           <p className="text-muted-foreground text-sm">
-            Hozircha almashtirish uchun boshqa taom yoʻq.
+            {t('Hozircha almashtirish uchun boshqa taom yoʻq.')}
           </p>
         ) : (
           <div className="grid gap-2" data-testid="alternatives">
@@ -124,12 +129,12 @@ export function OutOfStockDecision({
                 <div>
                   <div className="text-sm font-medium">{item.name}</div>
                   <div className="text-muted-foreground text-xs">
-                    {formatPrice(item.price)} ·{' '}
+                    {money(item.price)} ·{' '}
                     {formatPrepTime(item.base_prep_minutes, item.extra_prep_minutes)}
                   </div>
                 </div>
                 <Button size="sm" disabled={busy} onClick={() => replace(item)}>
-                  {missing?.quantity} dona olish
+                  {t(':count dona olish', { count: missing?.quantity ?? 0 })}
                 </Button>
               </div>
             ))}
@@ -137,7 +142,7 @@ export function OutOfStockDecision({
         )}
 
         <Button variant="destructive" disabled={busy} onClick={cancel}>
-          Bekor qilish va pulni qaytarish
+          {t('Bekor qilish va pulni qaytarish')}
         </Button>
       </CardContent>
     </Card>

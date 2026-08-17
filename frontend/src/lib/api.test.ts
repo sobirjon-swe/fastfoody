@@ -27,8 +27,9 @@ describe('apiErrorMessage', () => {
   })
 
   it('serverning xabarini ishlatadi', () => {
-    expect(apiErrorMessage(axiosErrorWith(409, { message: 'Allaqachon toʻlangan.' })))
-      .toBe('Allaqachon toʻlangan.')
+    expect(apiErrorMessage(axiosErrorWith(409, { message: 'Allaqachon toʻlangan.' }))).toBe(
+      'Allaqachon toʻlangan.',
+    )
   })
 
   it('401 uchun seans tugagani aytiladi', () => {

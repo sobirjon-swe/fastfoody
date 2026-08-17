@@ -25,19 +25,25 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { useT } from '@/i18n/use-i18n'
+import { useMoney } from '@/i18n/use-money'
 import { apiErrorMessage } from '@/lib/api'
-import { formatPrice } from '@/lib/format'
+
+import type { TranslationKey } from '@/i18n/uz'
 import type { PaginationMeta, Restaurant } from '@/types/api'
 
 type StatusFilter = '' | 'active' | 'inactive'
 
-const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
+/** Yorliqlar — tarjima kalitlari. */
+const STATUS_FILTERS: { value: StatusFilter; label: TranslationKey }[] = [
   { value: '', label: 'Barchasi' },
   { value: 'active', label: 'Faol' },
   { value: 'inactive', label: 'Nofaol' },
 ]
 
 export function AdminDashboardPage() {
+  const t = useT()
+  const money = useMoney()
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
   const [meta, setMeta] = useState<PaginationMeta | null>(null)
   const [loading, setLoading] = useState(true)
@@ -83,17 +89,17 @@ export function AdminDashboardPage() {
         return
       }
 
-      setError(apiErrorMessage(caught, 'Oshxonalarni yuklab boʻlmadi.'))
+      setError(apiErrorMessage(caught, t('Oshxonalarni yuklab boʻlmadi.')))
     } finally {
       if (requestId === requestRef.current) {
         setLoading(false)
       }
     }
-  }, [query, status, page])
+  }, [query, status, page, t])
 
   useEffect(() => {
     void load()
-  }, [load])
+  }, [load, t])
 
   // Koʻrsatkichlar sahifadan mustaqil: ular yuklanmasa ham jadval ishlaydi.
   useEffect(() => {
@@ -104,7 +110,7 @@ export function AdminDashboardPage() {
         // Koʻrsatkichlar ikkinchi darajali.
       }
     })()
-  }, [])
+  }, [t])
 
   // Jadvaldagi qatorga oʻz oshxonasining bugungi raqamlarini biriktirish uchun.
   const statsById = new Map(stats?.restaurants.map((item) => [item.id, item]) ?? [])
@@ -129,14 +135,14 @@ export function AdminDashboardPage() {
 
     try {
       await updateRestaurant(restaurant.id, { is_active: isActive })
-      toast.success(isActive ? 'Oshxona faollashtirildi.' : 'Oshxona nofaol qilindi.')
+      toast.success(isActive ? t('Oshxona faollashtirildi.') : t('Oshxona nofaol qilindi.'))
     } catch (caught) {
       setRestaurants((current) =>
         current.map((item) =>
           item.id === restaurant.id ? { ...item, is_active: restaurant.is_active } : item,
         ),
       )
-      toast.error(apiErrorMessage(caught, 'Holatni oʻzgartirib boʻlmadi.'))
+      toast.error(apiErrorMessage(caught, t('Holatni oʻzgartirib boʻlmadi.')))
     }
   }
 
@@ -144,9 +150,9 @@ export function AdminDashboardPage() {
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Oshxonalar</h1>
+          <h1 className="text-2xl font-semibold">{t('Oshxonalar')}</h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            Oshxona qoʻshing, ish vaqtini tahrirlang va xodim hisoblarini yarating.
+            {t('Oshxona qoʻshing, ish vaqtini tahrirlang va xodim hisoblarini yarating.')}
           </p>
         </div>
         <Button
@@ -155,7 +161,7 @@ export function AdminDashboardPage() {
             setFormOpen(true)
           }}
         >
-          <Plus /> Yangi oshxona
+          <Plus /> {t('Yangi oshxona')}
         </Button>
       </div>
 
@@ -171,12 +177,12 @@ export function AdminDashboardPage() {
         >
           <Input
             className="w-56"
-            placeholder="Nomi yoki manzili"
+            placeholder={t('Nomi yoki manzili')}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
           <Button type="submit" variant="secondary">
-            Qidirish
+            {t('Qidirish')}
           </Button>
         </form>
 
@@ -188,7 +194,7 @@ export function AdminDashboardPage() {
               variant={status === filter.value ? 'default' : 'outline'}
               onClick={() => applyStatus(filter.value)}
             >
-              {filter.label}
+              {t(filter.label)}
             </Button>
           ))}
         </div>
@@ -203,20 +209,20 @@ export function AdminDashboardPage() {
       {loading ? (
         <Spinner />
       ) : restaurants.length === 0 ? (
-        <p className="text-muted-foreground py-10 text-center text-sm">Oshxona topilmadi.</p>
+        <p className="text-muted-foreground py-10 text-center text-sm">{t('Oshxona topilmadi.')}</p>
       ) : (
         <div className="rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-4">Nomi</TableHead>
-                <TableHead>Manzil</TableHead>
-                <TableHead>Ish vaqti</TableHead>
-                <TableHead>Menyu</TableHead>
-                <TableHead>Xodim</TableHead>
-                <TableHead>Bugun</TableHead>
-                <TableHead>Holat</TableHead>
-                <TableHead className="pr-4 text-right">Amallar</TableHead>
+                <TableHead className="pl-4">{t('Nomi')}</TableHead>
+                <TableHead>{t('Manzil')}</TableHead>
+                <TableHead>{t('Ish vaqti')}</TableHead>
+                <TableHead>{t('Menyu')}</TableHead>
+                <TableHead>{t('Xodim')}</TableHead>
+                <TableHead>{t('Bugun')}</TableHead>
+                <TableHead>{t('Holat')}</TableHead>
+                <TableHead className="pr-4 text-right">{t('Amallar')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -232,9 +238,9 @@ export function AdminDashboardPage() {
                   <TableCell className="whitespace-nowrap">
                     {statsById.has(restaurant.id) ? (
                       <span className="text-sm">
-                        {statsById.get(restaurant.id)!.today.orders} ta
+                        {t(':count ta', { count: statsById.get(restaurant.id)!.today.orders })}
                         <span className="text-muted-foreground ml-2">
-                          {formatPrice(statsById.get(restaurant.id)!.today.revenue)}
+                          {money(statsById.get(restaurant.id)!.today.revenue)}
                         </span>
                       </span>
                     ) : (
@@ -246,10 +252,10 @@ export function AdminDashboardPage() {
                       <Switch
                         checked={restaurant.is_active}
                         onCheckedChange={(checked) => toggleActive(restaurant, checked)}
-                        aria-label={`${restaurant.name} holati`}
+                        aria-label={t(':name holati', { name: restaurant.name })}
                       />
                       <Badge variant={restaurant.is_active ? 'secondary' : 'outline'}>
-                        {restaurant.is_active ? 'Faol' : 'Nofaol'}
+                        {restaurant.is_active ? t('Faol') : t('Nofaol')}
                       </Badge>
                     </div>
                   </TableCell>
@@ -258,7 +264,7 @@ export function AdminDashboardPage() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        aria-label={`${restaurant.name} xodimlari`}
+                        aria-label={t(':name xodimlari', { name: restaurant.name })}
                         onClick={() => setStaffFor(restaurant)}
                       >
                         <Users />
@@ -266,7 +272,7 @@ export function AdminDashboardPage() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        aria-label={`${restaurant.name} tahrirlash`}
+                        aria-label={t(':name tahrirlash', { name: restaurant.name })}
                         onClick={() => {
                           setEditing(restaurant)
                           setFormOpen(true)
@@ -286,7 +292,11 @@ export function AdminDashboardPage() {
       {meta && meta.last_page > 1 && (
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">
-            {meta.current_page}/{meta.last_page} — jami {meta.total} ta
+            {t(':current/:last — jami :total ta', {
+              current: meta.current_page,
+              last: meta.last_page,
+              total: meta.total,
+            })}
           </span>
           {/*
             The buttons are gated on the page counter they mutate — not on the
@@ -301,7 +311,7 @@ export function AdminDashboardPage() {
               disabled={loading || page <= 1}
               onClick={() => setPage((current) => current - 1)}
             >
-              Oldingi
+              {t('Oldingi')}
             </Button>
             <Button
               size="sm"
@@ -309,7 +319,7 @@ export function AdminDashboardPage() {
               disabled={loading || page >= meta.last_page}
               onClick={() => setPage((current) => current + 1)}
             >
-              Keyingi
+              {t('Keyingi')}
             </Button>
           </div>
         </div>

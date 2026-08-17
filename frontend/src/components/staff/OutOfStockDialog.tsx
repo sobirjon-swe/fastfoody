@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { useT } from '@/i18n/use-i18n'
 import { apiErrorMessage } from '@/lib/api'
 
 /**
@@ -30,6 +31,7 @@ export function OutOfStockDialog({
   onOpenChange: (open: boolean) => void
   onReported: () => void
 }) {
+  const t = useT()
   const [selected, setSelected] = useState<number | null>(null)
   const [removeFromMenu, setRemoveFromMenu] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -57,7 +59,7 @@ export function OutOfStockDialog({
       onOpenChange(false)
       onReported()
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Belgilab boʻlmadi.'))
+      setError(apiErrorMessage(caught, t('Belgilab boʻlmadi.')))
     } finally {
       setSaving(false)
     }
@@ -67,10 +69,11 @@ export function OutOfStockDialog({
     <Dialog open={order !== null} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Qaysi taom tugadi?</DialogTitle>
+          <DialogTitle>{t('Qaysi taom tugadi?')}</DialogTitle>
           <DialogDescription>
-            Buyurtma navbatdan chiqariladi va mijoz almashtirish yoki pulni qaytarish orasidan
-            tanlaydi.
+            {t(
+              'Buyurtma navbatdan chiqariladi va mijoz almashtirish yoki pulni qaytarish orasidan tanlaydi.',
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -102,7 +105,7 @@ export function OutOfStockDialog({
 
         <div className="flex items-center justify-between rounded-md border p-3">
           <Label htmlFor="remove-from-menu" className="font-normal">
-            Menyudan ham «mavjud emas» qilinsin
+            {t('Menyudan ham «mavjud emas» qilinsin')}
           </Label>
           <Switch
             id="remove-from-menu"
@@ -113,10 +116,10 @@ export function OutOfStockDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Bekor qilish
+            {t('Bekor qilish')}
           </Button>
           <Button variant="destructive" onClick={submit} disabled={saving || selected === null}>
-            {saving ? 'Yuborilmoqda...' : 'Tugadi deb belgilash'}
+            {saving ? t('Yuborilmoqda...') : t('Tugadi deb belgilash')}
           </Button>
         </DialogFooter>
       </DialogContent>

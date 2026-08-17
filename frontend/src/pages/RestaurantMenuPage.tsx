@@ -9,7 +9,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { apiErrorMessage } from '@/lib/api'
-import { formatClock, formatPrepTime, formatPrice, minutesFromNow } from '@/lib/format'
+import { formatClock, formatPrepTime, minutesFromNow } from '@/lib/format'
+import { useT } from '@/i18n/use-i18n'
+import { useMoney } from '@/i18n/use-money'
 import { useTelegramBackButton, useTelegramMainButton } from '@/lib/use-telegram'
 import type { MenuItem, OrderEstimate, Restaurant } from '@/types/api'
 
@@ -17,6 +19,8 @@ import type { MenuItem, OrderEstimate, Restaurant } from '@/types/api'
 type Cart = Record<number, number>
 
 export function RestaurantMenuPage() {
+  const t = useT()
+  const money = useMoney()
   const { restaurantId } = useParams()
   const navigate = useNavigate()
 
@@ -41,15 +45,15 @@ export function RestaurantMenuPage() {
       setRestaurant(data.restaurant)
       setMenu(data.menu_items)
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Menyuni yuklab boʻlmadi.'))
+      setError(apiErrorMessage(caught, t('Menyuni yuklab boʻlmadi.')))
     } finally {
       setLoading(false)
     }
-  }, [id])
+  }, [id, t])
 
   useEffect(() => {
     void load()
-  }, [load])
+  }, [load, t])
 
   function changeQuantity(item: MenuItem, delta: number) {
     setCart((current) => {
@@ -115,7 +119,7 @@ export function RestaurantMenuPage() {
       clearTimeout(timer)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, cartKey, restaurant?.is_open_now])
+  }, [id, cartKey, restaurant?.is_open_now, t])
 
   async function submit() {
     setPlacing(true)
@@ -126,10 +130,10 @@ export function RestaurantMenuPage() {
         lines.map((line) => ({ menu_item_id: line.item.id, quantity: line.quantity })),
       )
 
-      toast.success('Buyurtma qabul qilindi.')
+      toast.success(t('Buyurtma qabul qilindi.'))
       navigate(`/orders/${order.id}`)
     } catch (caught) {
-      const message = apiErrorMessage(caught, 'Buyurtma berishda xatolik yuz berdi.')
+      const message = apiErrorMessage(caught, t('Buyurtma berishda xatolik yuz berdi.'))
 
       setError(message)
       toast.error(message)
@@ -143,7 +147,7 @@ export function RestaurantMenuPage() {
   // Telegram ichida buyurtma tugmasi pastdagi asosiy tugmaga chiqadi —
   // barmoq yetadigan joyda. Brauzerda kartadagi tugma oʻz oʻrnida qoladi.
   useTelegramMainButton({
-    text: restaurant?.is_open_now === false ? 'Oshxona yopiq' : 'Buyurtma berish',
+    text: restaurant?.is_open_now === false ? t('Oshxona yopiq') : t('Buyurtma berish'),
     visible: lines.length > 0,
     disabled: placing || restaurant?.is_open_now === false,
     onClick: submit,
@@ -159,11 +163,11 @@ export function RestaurantMenuPage() {
     return (
       <div className="grid gap-4">
         <Alert variant="destructive">
-          <AlertDescription>{error ?? 'Oshxona topilmadi.'}</AlertDescription>
+          <AlertDescription>{error ?? t('Oshxona topilmadi.')}</AlertDescription>
         </Alert>
         <Button asChild variant="outline" className="w-fit">
           <Link to="/">
-            <ArrowLeft /> Oshxonalar
+            <ArrowLeft /> {t('Oshxonalar')}
           </Link>
         </Button>
       </div>
@@ -176,7 +180,7 @@ export function RestaurantMenuPage() {
         <div>
           <Button asChild variant="ghost" size="sm" className="-ml-2 mb-2">
             <Link to="/">
-              <ArrowLeft /> Oshxonalar
+              <ArrowLeft /> {t('Oshxonalar')}
             </Link>
           </Button>
           <h1 className="text-2xl font-semibold">{restaurant.name}</h1>
@@ -188,8 +192,10 @@ export function RestaurantMenuPage() {
         {!restaurant.is_open_now && (
           <Alert>
             <AlertDescription>
-              Oshxona hozir yopiq. Buyurtma faqat {restaurant.opens_at}–{restaurant.closes_at}{' '}
-              oraligʻida qabul qilinadi.
+              {t('Oshxona hozir yopiq. Buyurtma faqat :opens–:closes oraligʻida qabul qilinadi.', {
+                opens: restaurant.opens_at,
+                closes: restaurant.closes_at,
+              })}
             </AlertDescription>
           </Alert>
         )}
@@ -202,7 +208,7 @@ export function RestaurantMenuPage() {
 
         {menu.length === 0 ? (
           <p className="text-muted-foreground py-10 text-center text-sm">
-            Bu oshxonada hozircha mavjud taom yoʻq.
+            {t('Bu oshxonada hozircha mavjud taom yoʻq.')}
           </p>
         ) : (
           groups.map(([category, items]) => (
@@ -230,7 +236,7 @@ export function RestaurantMenuPage() {
                           <div className="text-muted-foreground text-sm">{item.description}</div>
                         )}
                         <div className="text-muted-foreground mt-1 text-sm">
-                          {formatPrice(item.price)} ·{' '}
+                          {money(item.price)} ·{' '}
                           {formatPrepTime(item.base_prep_minutes, item.extra_prep_minutes)}
                         </div>
                       </div>
@@ -240,7 +246,7 @@ export function RestaurantMenuPage() {
                       <Button
                         size="icon"
                         variant="outline"
-                        aria-label={`${item.name} kamaytirish`}
+                        aria-label={t(':name kamaytirish', { name: item.name })}
                         disabled={!cart[item.id]}
                         onClick={() => changeQuantity(item, -1)}
                       >
@@ -252,7 +258,7 @@ export function RestaurantMenuPage() {
                       <Button
                         size="icon"
                         variant="outline"
-                        aria-label={`${item.name} qoʻshish`}
+                        aria-label={t(':name qoʻshish', { name: item.name })}
                         onClick={() => changeQuantity(item, 1)}
                       >
                         <Plus />
@@ -269,12 +275,12 @@ export function RestaurantMenuPage() {
       <Card className="h-fit lg:sticky lg:top-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ShoppingCart className="size-4" /> Savatcha
+            <ShoppingCart className="size-4" /> {t('Savatcha')}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3">
           {lines.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Savatcha boʻsh.</p>
+            <p className="text-muted-foreground text-sm">{t('Savatcha boʻsh.')}</p>
           ) : (
             <>
               <ul className="grid gap-2 text-sm">
@@ -284,15 +290,15 @@ export function RestaurantMenuPage() {
                       {item.name} × {quantity}
                     </span>
                     <span className="whitespace-nowrap">
-                      {formatPrice(Number.parseFloat(item.price) * quantity)}
+                      {money(Number.parseFloat(item.price) * quantity)}
                     </span>
                   </li>
                 ))}
               </ul>
 
               <div className="flex justify-between border-t pt-3 font-medium">
-                <span>Jami</span>
-                <span data-testid="cart-total">{formatPrice(total)}</span>
+                <span>{t('Jami')}</span>
+                <span data-testid="cart-total">{money(total)}</span>
               </div>
 
               <div className="bg-muted/50 grid gap-1 rounded-md p-3 text-sm" data-testid="estimate">
@@ -300,21 +306,23 @@ export function RestaurantMenuPage() {
                   <>
                     <div className="flex items-center gap-2 font-medium">
                       <Clock className="size-4" />
-                      Taxminan {formatClock(estimate.ready_at)} da tayyor
+                      {t('Taxminan :time da tayyor', { time: formatClock(estimate.ready_at) })}
                       <span className="text-muted-foreground font-normal">
-                        (~{minutesFromNow(estimate.ready_at)} daq)
+                        {t('(~:minutes daq)', { minutes: minutesFromNow(estimate.ready_at) })}
                       </span>
                     </div>
                     <p className="text-muted-foreground text-xs">
-                      Tayyorlash {estimate.prep_minutes} daq
+                      {t('Tayyorlash :minutes daq', { minutes: estimate.prep_minutes })}
                       {estimate.queue_minutes > 0
-                        ? ` · oldingizda ${estimate.queue_minutes} daqiqalik navbat bor`
-                        : ' · navbat boʻsh'}
+                        ? ` · ${t('oldingizda :minutes daqiqalik navbat bor', {
+                            minutes: estimate.queue_minutes,
+                          })}`
+                        : ` · ${t('navbat boʻsh')}`}
                     </p>
                   </>
                 ) : (
                   <span className="text-muted-foreground text-xs">
-                    {estimating ? 'Vaqt hisoblanmoqda...' : 'Vaqt hisoblab boʻlinmadi.'}
+                    {estimating ? t('Vaqt hisoblanmoqda...') : t('Vaqt hisoblab boʻlinmadi.')}
                   </span>
                 )}
               </div>
@@ -327,9 +335,9 @@ export function RestaurantMenuPage() {
           >
             {restaurant.is_open_now
               ? placing
-                ? 'Yuborilmoqda...'
-                : 'Buyurtma berish'
-              : 'Oshxona yopiq'}
+                ? t('Yuborilmoqda...')
+                : t('Buyurtma berish')
+              : t('Oshxona yopiq')}
           </Button>
         </CardContent>
       </Card>

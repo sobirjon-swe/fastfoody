@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { useT } from '@/i18n/use-i18n'
 import { apiErrorMessage } from '@/lib/api'
 import type { MenuItem } from '@/types/api'
 
@@ -60,6 +61,7 @@ export function MenuItemFormDialog({
   onOpenChange: (open: boolean) => void
   onSaved: () => void
 }) {
+  const t = useT()
   const [form, setForm] = useState<FormState>(EMPTY)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -98,11 +100,11 @@ export function MenuItemFormDialog({
 
     try {
       await deleteMenuItemImage(menuItem.id)
-      toast.success('Rasm oʻchirildi.')
+      toast.success(t('Rasm oʻchirildi.'))
       onOpenChange(false)
       onSaved()
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Rasmni oʻchirib boʻlmadi.'))
+      setError(apiErrorMessage(caught, t('Rasmni oʻchirib boʻlmadi.')))
     }
   }
 
@@ -130,12 +132,12 @@ export function MenuItemFormDialog({
         await uploadMenuItemImage(saved.id, image)
       }
 
-      toast.success(menuItem ? 'Taom yangilandi.' : 'Taom qoʻshildi.')
+      toast.success(menuItem ? t('Taom yangilandi.') : t('Taom qoʻshildi.'))
 
       onOpenChange(false)
       onSaved()
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Saqlashda xatolik yuz berdi.'))
+      setError(apiErrorMessage(caught, t('Saqlashda xatolik yuz berdi.')))
     } finally {
       setSaving(false)
     }
@@ -145,7 +147,7 @@ export function MenuItemFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{menuItem ? 'Taomni tahrirlash' : 'Yangi taom'}</DialogTitle>
+          <DialogTitle>{menuItem ? t('Taomni tahrirlash') : t('Yangi taom')}</DialogTitle>
           <DialogDescription>
             Tayyorlash vaqti buyurtma qachon tayyor boʻlishini hisoblashda ishlatiladi.
           </DialogDescription>
@@ -159,7 +161,7 @@ export function MenuItemFormDialog({
           )}
 
           <div className="grid gap-2">
-            <Label htmlFor="item-name">Nomi</Label>
+            <Label htmlFor="item-name">{t('Nomi')}</Label>
             <Input
               id="item-name"
               required
@@ -169,7 +171,7 @@ export function MenuItemFormDialog({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="item-description">Tavsif (ixtiyoriy)</Label>
+            <Label htmlFor="item-description">{t('Tavsif (ixtiyoriy)')}</Label>
             <Textarea
               id="item-description"
               maxLength={500}
@@ -179,11 +181,11 @@ export function MenuItemFormDialog({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="item-category">Kategoriya (ixtiyoriy)</Label>
+            <Label htmlFor="item-category">{t('Kategoriya (ixtiyoriy)')}</Label>
             <Input
               id="item-category"
               list="menu-categories"
-              placeholder="Lavashlar, Ichimliklar..."
+              placeholder={t('Lavashlar, Ichimliklar...')}
               maxLength={60}
               value={form.category}
               onChange={(event) => update('category', event.target.value)}
@@ -196,7 +198,7 @@ export function MenuItemFormDialog({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="item-image">Rasm</Label>
+            <Label htmlFor="item-image">{t('Rasm')}</Label>
             {menuItem?.image_url && (
               <div className="flex items-center gap-3">
                 <img
@@ -205,7 +207,7 @@ export function MenuItemFormDialog({
                   className="size-16 rounded-md object-cover"
                 />
                 <Button type="button" variant="ghost" size="sm" onClick={removeImage}>
-                  Rasmni oʻchirish
+                  {t('Rasmni oʻchirish')}
                 </Button>
               </div>
             )}
@@ -216,12 +218,12 @@ export function MenuItemFormDialog({
               onChange={(event) => setImage(event.target.files?.[0] ?? null)}
             />
             <p className="text-muted-foreground text-xs">
-              JPG, PNG yoki WebP, 4 MB gacha. Rasm taom saqlangandan keyin yuklanadi.
+              {t('JPG, PNG yoki WebP, 4 MB gacha. Rasm taom saqlangandan keyin yuklanadi.')}
             </p>
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="item-price">Narxi (soʻm)</Label>
+            <Label htmlFor="item-price">{t('Narxi (soʻm)')}</Label>
             {/*
               step must stay "any": a numeric step is a validity constraint, so
               step={500} would make the browser silently refuse to submit an
@@ -241,7 +243,7 @@ export function MenuItemFormDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="item-base">1-dona (daqiqa)</Label>
+              <Label htmlFor="item-base">{t('1-dona (daqiqa)')}</Label>
               <Input
                 id="item-base"
                 type="number"
@@ -253,7 +255,7 @@ export function MenuItemFormDialog({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="item-extra">Har keyingi dona</Label>
+              <Label htmlFor="item-extra">{t('Har keyingi dona')}</Label>
               <Input
                 id="item-extra"
                 type="number"
@@ -282,7 +284,7 @@ export function MenuItemFormDialog({
               Bekor qilish
             </Button>
             <Button type="submit" disabled={saving}>
-              {saving ? 'Saqlanmoqda...' : 'Saqlash'}
+              {saving ? t('Saqlanmoqda...') : t('Saqlash')}
             </Button>
           </DialogFooter>
         </form>

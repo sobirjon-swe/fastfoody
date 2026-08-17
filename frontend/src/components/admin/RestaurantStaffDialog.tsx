@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useT } from '@/i18n/use-i18n'
 import { apiErrorMessage } from '@/lib/api'
 import type { Restaurant, User } from '@/types/api'
 
@@ -34,6 +35,7 @@ export function RestaurantStaffDialog({
   onOpenChange: (open: boolean) => void
   onChanged: () => void
 }) {
+  const t = useT()
   // The staff list is stored together with the restaurant it belongs to, so a
   // previously opened restaurant's people can never be rendered under another
   // restaurant's name — not on the first frame, and not when a slow response
@@ -70,17 +72,17 @@ export function RestaurantStaffDialog({
 
       setLoaded({ restaurantId, staff: list })
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Xodimlarni yuklab boʻlmadi.'))
+      setError(apiErrorMessage(caught, t('Xodimlarni yuklab boʻlmadi.')))
     } finally {
       setLoading(false)
     }
-  }, [restaurantId])
+  }, [restaurantId, t])
 
   useEffect(() => {
     setForm(EMPTY)
     setError(null)
     void load()
-  }, [load])
+  }, [load, t])
 
   /** Faolsizlantirilgan xodim tizimga kira olmaydi; hisobi esa saqlanadi. */
   async function toggleAccess(member: User) {
@@ -102,7 +104,7 @@ export function RestaurantStaffDialog({
       await load()
       onChanged()
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Amalni bajarib boʻlmadi.'))
+      setError(apiErrorMessage(caught, t('Amalni bajarib boʻlmadi.')))
     } finally {
       setBusyId(null)
     }
@@ -120,12 +122,12 @@ export function RestaurantStaffDialog({
 
     try {
       await createRestaurantStaff(restaurantId, { ...form, phone: form.phone || null })
-      toast.success('Xodim hisobi yaratildi.')
+      toast.success(t('Xodim hisobi yaratildi.'))
       setForm(EMPTY)
       await load()
       onChanged()
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Xodim qoʻshishda xatolik yuz berdi.'))
+      setError(apiErrorMessage(caught, t('Xodim qoʻshishda xatolik yuz berdi.')))
     } finally {
       setSaving(false)
     }
@@ -135,10 +137,11 @@ export function RestaurantStaffDialog({
     <Dialog open={restaurant !== null} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{shown?.name} — xodimlar</DialogTitle>
+          <DialogTitle>{t(':name — xodimlar', { name: shown?.name ?? '' })}</DialogTitle>
           <DialogDescription>
-            Xodim oʻzi roʻyxatdan oʻta olmaydi; hisobni siz yaratasiz va u faqat shu oshxona
-            menyusini boshqaradi.
+            {t(
+              'Xodim oʻzi roʻyxatdan oʻta olmaydi; hisobni siz yaratasiz va u faqat shu oshxona menyusini boshqaradi.',
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -161,13 +164,13 @@ export function RestaurantStaffDialog({
                   disabled={busyId === member.id}
                   onClick={() => toggleAccess(member)}
                 >
-                  {member.is_deactivated ? 'Tiklash' : 'Oʻchirish'}
+                  {member.is_deactivated ? t('Tiklash') : t('Oʻchirish')}
                 </Button>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-muted-foreground text-sm">Hozircha xodim yoʻq.</p>
+          <p className="text-muted-foreground text-sm">{t('Hozircha xodim yoʻq.')}</p>
         )}
 
         <form className="grid gap-3 border-t pt-4" onSubmit={handleSubmit}>
@@ -178,7 +181,7 @@ export function RestaurantStaffDialog({
           )}
 
           <div className="grid gap-2">
-            <Label htmlFor="staff-name">Ism</Label>
+            <Label htmlFor="staff-name">{t('Ism')}</Label>
             <Input
               id="staff-name"
               required
@@ -188,7 +191,7 @@ export function RestaurantStaffDialog({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="staff-email">Email</Label>
+            <Label htmlFor="staff-email">{t('Email')}</Label>
             <Input
               id="staff-email"
               type="email"
@@ -199,7 +202,7 @@ export function RestaurantStaffDialog({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="staff-phone">Telefon (ixtiyoriy)</Label>
+            <Label htmlFor="staff-phone">{t('Telefon (ixtiyoriy)')}</Label>
             <Input
               id="staff-phone"
               type="tel"
@@ -210,7 +213,7 @@ export function RestaurantStaffDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-2">
-              <Label htmlFor="staff-password">Parol</Label>
+              <Label htmlFor="staff-password">{t('Parol')}</Label>
               <Input
                 id="staff-password"
                 type="password"
@@ -220,7 +223,7 @@ export function RestaurantStaffDialog({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="staff-password-confirm">Takrorlang</Label>
+              <Label htmlFor="staff-password-confirm">{t('Takrorlang')}</Label>
               <Input
                 id="staff-password-confirm"
                 type="password"
@@ -234,7 +237,7 @@ export function RestaurantStaffDialog({
           </div>
 
           <Button type="submit" disabled={saving}>
-            {saving ? 'Yaratilmoqda...' : 'Xodim qoʻshish'}
+            {saving ? t('Yaratilmoqda...') : t('Xodim qoʻshish')}
           </Button>
         </form>
       </DialogContent>

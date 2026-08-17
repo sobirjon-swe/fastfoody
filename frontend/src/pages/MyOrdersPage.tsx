@@ -8,12 +8,16 @@ import { Spinner } from '@/components/Spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { useT } from '@/i18n/use-i18n'
+import { useMoney } from '@/i18n/use-money'
 import { apiErrorMessage } from '@/lib/api'
-import { formatClock, formatPrice } from '@/lib/format'
+import { formatClock } from '@/lib/format'
 import { POLL_MS, usePolling } from '@/lib/use-polling'
 import type { Order, PaginationMeta } from '@/types/api'
 
 export function MyOrdersPage() {
+  const t = useT()
+  const money = useMoney()
   const [orders, setOrders] = useState<Order[]>([])
   const [meta, setMeta] = useState<PaginationMeta | null>(null)
   const [page, setPage] = useState(1)
@@ -41,7 +45,7 @@ export function MyOrdersPage() {
         }
       } catch (caught) {
         if (requestId === requestRef.current) {
-          setError(apiErrorMessage(caught, 'Buyurtmalarni yuklab boʻlmadi.'))
+          setError(apiErrorMessage(caught, t('Buyurtmalarni yuklab boʻlmadi.')))
         }
       } finally {
         if (requestId === requestRef.current) {
@@ -49,7 +53,7 @@ export function MyOrdersPage() {
         }
       }
     },
-    [page],
+    [page, t],
   )
 
   useEffect(() => {
@@ -62,13 +66,13 @@ export function MyOrdersPage() {
     <div className="grid gap-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Buyurtmalarim</h1>
+          <h1 className="text-2xl font-semibold">{t('Buyurtmalarim')}</h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            Holat oʻzi yangilanib turadi. Batafsil koʻrish uchun buyurtmani oching.
+            {t('Holat oʻzi yangilanib turadi. Batafsil koʻrish uchun buyurtmani oching.')}
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => load()}>
-          <RefreshCw /> Yangilash
+          <RefreshCw /> {t('Yangilash')}
         </Button>
       </div>
 
@@ -82,9 +86,9 @@ export function MyOrdersPage() {
         <Spinner />
       ) : orders.length === 0 ? (
         <p className="text-muted-foreground py-10 text-center text-sm">
-          Hozircha buyurtma yoʻq.{' '}
+          {t('Hozircha buyurtma yoʻq.')}{' '}
           <Link to="/" className="underline">
-            Oshxonalarni koʻring.
+            {t('Oshxonalarni koʻring.')}
           </Link>
         </p>
       ) : (
@@ -94,15 +98,15 @@ export function MyOrdersPage() {
               <CardContent className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <div className="font-medium">
-                    #{order.id} · {order.restaurant?.name ?? 'Oshxona'}
+                    #{order.id} · {order.restaurant?.name ?? t('Oshxona')}
                   </div>
                   <div className="text-muted-foreground text-sm">
                     {new Date(order.created_at).toLocaleString('uz-UZ')} ·{' '}
-                    {formatPrice(order.total_price)}
+                    {money(order.total_price)}
                   </div>
                   {(order.ready_at ?? order.estimated_ready_at) && (
                     <div className="mt-1 text-sm">
-                      {order.ready_at ? 'Tayyor boʻladi' : 'Taxminan'}:{' '}
+                      {order.ready_at ? t('Tayyor boʻladi') : t('Taxminan')}:{' '}
                       <span className="font-medium">
                         {formatClock(order.ready_at ?? order.estimated_ready_at!)}
                       </span>
@@ -112,7 +116,7 @@ export function MyOrdersPage() {
                 <div className="flex items-center gap-3">
                   <OrderStatusBadge status={order.status} />
                   <Button asChild size="sm" variant="outline">
-                    <Link to={`/orders/${order.id}`}>Batafsil</Link>
+                    <Link to={`/orders/${order.id}`}>{t('Batafsil')}</Link>
                   </Button>
                 </div>
               </CardContent>
@@ -124,7 +128,11 @@ export function MyOrdersPage() {
       {meta && meta.last_page > 1 && (
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">
-            {meta.current_page}/{meta.last_page} — jami {meta.total} ta
+            {t(':current/:last — jami :total ta', {
+              current: meta.current_page,
+              last: meta.last_page,
+              total: meta.total,
+            })}
           </span>
           <div className="flex gap-2">
             <Button
@@ -133,7 +141,7 @@ export function MyOrdersPage() {
               disabled={loading || page <= 1}
               onClick={() => setPage((current) => current - 1)}
             >
-              Oldingi
+              {t('Oldingi')}
             </Button>
             <Button
               size="sm"
@@ -141,7 +149,7 @@ export function MyOrdersPage() {
               disabled={loading || page >= meta.last_page}
               onClick={() => setPage((current) => current + 1)}
             >
-              Keyingi
+              {t('Keyingi')}
             </Button>
           </div>
         </div>

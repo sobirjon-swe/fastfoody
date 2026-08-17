@@ -15,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { useT } from '@/i18n/use-i18n'
 import { apiErrorMessage } from '@/lib/api'
 import type { Restaurant } from '@/types/api'
 
@@ -39,6 +40,7 @@ export function RestaurantFormDialog({
   onOpenChange: (open: boolean) => void
   onSaved: () => void
 }) {
+  const t = useT()
   const [form, setForm] = useState<RestaurantPayload>(EMPTY)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -77,16 +79,16 @@ export function RestaurantFormDialog({
     try {
       if (restaurant) {
         await updateRestaurant(restaurant.id, payload)
-        toast.success('Oshxona yangilandi.')
+        toast.success(t('Oshxona yangilandi.'))
       } else {
         await createRestaurant(payload)
-        toast.success('Yangi oshxona qoʻshildi.')
+        toast.success(t('Yangi oshxona qoʻshildi.'))
       }
 
       onOpenChange(false)
       onSaved()
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Saqlashda xatolik yuz berdi.'))
+      setError(apiErrorMessage(caught, t('Saqlashda xatolik yuz berdi.')))
     } finally {
       setSaving(false)
     }
@@ -96,7 +98,7 @@ export function RestaurantFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{restaurant ? 'Oshxonani tahrirlash' : 'Yangi oshxona'}</DialogTitle>
+          <DialogTitle>{restaurant ? t('Oshxonani tahrirlash') : t('Yangi oshxona')}</DialogTitle>
           <DialogDescription>
             Nofaol oshxona mijozlarga koʻrinmaydi, lekin maʼlumotlari saqlanib qoladi.
           </DialogDescription>
@@ -110,7 +112,7 @@ export function RestaurantFormDialog({
           )}
 
           <div className="grid gap-2">
-            <Label htmlFor="restaurant-name">Nomi</Label>
+            <Label htmlFor="restaurant-name">{t('Nomi')}</Label>
             <Input
               id="restaurant-name"
               required
@@ -120,7 +122,7 @@ export function RestaurantFormDialog({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="restaurant-address">Manzil</Label>
+            <Label htmlFor="restaurant-address">{t('Manzil')}</Label>
             <Input
               id="restaurant-address"
               required
@@ -130,7 +132,7 @@ export function RestaurantFormDialog({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="restaurant-phone">Telefon</Label>
+            <Label htmlFor="restaurant-phone">{t('Telefon')}</Label>
             <Input
               id="restaurant-phone"
               type="tel"
@@ -142,7 +144,7 @@ export function RestaurantFormDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="restaurant-opens">Ochilish</Label>
+              <Label htmlFor="restaurant-opens">{t('Ochilish')}</Label>
               <Input
                 id="restaurant-opens"
                 type="time"
@@ -152,7 +154,7 @@ export function RestaurantFormDialog({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="restaurant-closes">Yopilish</Label>
+              <Label htmlFor="restaurant-closes">{t('Yopilish')}</Label>
               <Input
                 id="restaurant-closes"
                 type="time"
@@ -165,7 +167,7 @@ export function RestaurantFormDialog({
 
           <div className="flex items-center justify-between rounded-md border p-3">
             <Label htmlFor="restaurant-active" className="font-normal">
-              Faol
+              {t('Faol')}
             </Label>
             <Switch
               id="restaurant-active"
@@ -176,10 +178,10 @@ export function RestaurantFormDialog({
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Bekor qilish
+              {t('Bekor qilish')}
             </Button>
             <Button type="submit" disabled={saving}>
-              {saving ? 'Saqlanmoqda...' : 'Saqlash'}
+              {saving ? t('Saqlanmoqda...') : t('Saqlash')}
             </Button>
           </DialogFooter>
         </form>
