@@ -294,6 +294,30 @@ oʻzgarishsiz ishlaydi.
 Xodim va tizim egasi paneli Mini App'ga koʻchirilmaydi: ular kun boʻyi katta ekranda
 ishlaydi, ikkalasi ham xuddi shu API'ga ulanaveradi.
 
+### Bot xabarnomalari
+
+Buyurtma holati oʻzgarganda Telegram orqali kirgan mijozga bot xabar yozadi — ilova yopiq
+boʻlsa ham «buyurtmangiz tayyor» xabari telefoniga keladi:
+
+| Holat | Xabar |
+|---|---|
+| `tolov_qilindi` | Olib ketish kodi va taxminiy tayyor boʻlish vaqti |
+| `tayyor` | «Buyurtmangiz tayyor!» + kod |
+| `mijoz_qarori_kutilmoqda` | Mahsulot tugadi, ilovada almashtiring yoki bekor qiling |
+| `bekor_qilindi_mahsulot_yoq` | Bekor qilindi, toʻlov qaytariladi |
+| `muddati_otdi` | Muddati oʻtgani uchun yopildi |
+
+- Xabar **bitta joydan** — `OrderObserver` orqali — yuboriladi, shuning uchun holat qayerda
+  oʻzgarishidan (mijoz toʻlovi, oshxona paneli, `orders:expire`) qatʼi nazar mijoz xabardor
+  boʻladi. Shu sababli `orders:expire` ommaviy `update()` emas, buyurtmalarni bittalab
+  saqlaydi: aks holda model hodisalari ishlamas edi.
+- «Tayyorlanmoqda» kabi oraliq holatlar uchun xabar yuborilmaydi — telefon behuda
+  chirillamasligi kerak.
+- Xabar yuborilmasligi biznes jarayonini toʻxtatmaydi: nosozlik logga yoziladi, soʻrov esa
+  muvaffaqiyatli tugaydi. Bot tokeni sozlanmagan boʻlsa hech narsa yuborilmaydi.
+- Yuborish `SendTelegramMessage` job'i orqali ketadi, shuning uchun `QUEUE_CONNECTION` ni
+  oʻzgartirish bilanoq xabarlar navbatga oʻtadi.
+
 ## Statistika
 
 Oshxona xodimi oʻz taxtasida, super admin esa panelida bugungi va soʻnggi 7 kunlik
@@ -309,7 +333,7 @@ vaqt mintaqasi boʻyicha kesiladi, shuning uchun «bugun» Toshkent yarim tunida
 ## Testlar
 
 ```bash
-cd backend  && php artisan test     # 167 ta test
+cd backend  && php artisan test     # 174 ta test
 cd backend  && ./vendor/bin/pint    # kod uslubi
 cd frontend && npm run test         # 17 ta test (Vitest + Testing Library)
 cd frontend && npm run lint         # oxlint
@@ -391,11 +415,10 @@ ham tekshiradi: backend uchun Pint + PHPUnit, frontend uchun lint + test + build
 - [x] Profil, parolni oʻzgartirish va parolni tiklash oqimi.
 - [x] Oshxona va tizim statistikasi.
 - [x] **7-bosqich (1-qism)** — Telegram Mini App uchun `initData` autentifikatsiyasi.
+- [x] **7-bosqich (2-qism)** — bot xabarnomalari: buyurtma holati oʻzgarganda mijozga xabar.
 
 Keyingi bosqichlar:
 
-- [ ] **7-bosqich (2-qism)** — Telegram boti: menyu tugmasi va buyurtma holati haqida xabar
-      yuborish (mijoz uchun pollingning oʻrnini bosadi).
 - [ ] **7-bosqich (3-qism)** — interfeysni Telegram qobigʻiga moslash: `MainButton`,
       `BackButton`, Telegram mavzu ranglari.
 - [ ] Payme/Click integratsiyasi — merchant hisobi va kalitlari kerak, hozircha toʻlov

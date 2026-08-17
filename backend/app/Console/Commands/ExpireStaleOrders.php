@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 /**
@@ -26,18 +27,43 @@ class ExpireStaleOrders extends Command
     {
         $now = Carbon::now();
 
-        $unpaid = Order::where('status', OrderStatus::Pending)
-            ->where('created_at', '<=', $now->copy()->subMinutes($this->minutes('unpaid_after_minutes')))
-            ->update(['status' => OrderStatus::Expired, 'updated_at' => $now]);
+        $unpaid = $this->expire(
+            Order::where('status', OrderStatus::Pending)
+                ->where('created_at', '<=', $now->copy()->subMinutes($this->minutes('unpaid_after_minutes')))
+        );
 
-        $uncollected = Order::where('status', OrderStatus::Ready)
-            ->whereNotNull('ready_at')
-            ->where('ready_at', '<=', $now->copy()->subMinutes($this->minutes('uncollected_after_minutes')))
-            ->update(['status' => OrderStatus::Expired, 'updated_at' => $now]);
+        $uncollected = $this->expire(
+            Order::where('status', OrderStatus::Ready)
+                ->whereNotNull('ready_at')
+                ->where('ready_at', '<=', $now->copy()->subMinutes($this->minutes('uncollected_after_minutes')))
+        );
 
         $this->info("Toʻlanmagan: {$unpaid}, olib ketilmagan: {$uncollected}.");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Buyurtmalar bittalab saqlanadi, ommaviy `update()` bilan emas: aks holda
+     * model hodisalari ishlamaydi va mijoz «buyurtmangiz yopildi» xabarini
+     * olmay qoladi. Bir seansda yopiladigan buyurtmalar soni kam, shuning uchun
+     * bu narx sezilmaydi.
+     *
+     * @param  Builder<Order>  $query
+     */
+    private function expire(Builder $query): int
+    {
+        $count = 0;
+
+        $query->chunkById(100, function ($orders) use (&$count) {
+            foreach ($orders as $order) {
+                $order->status = OrderStatus::Expired;
+                $order->save();
+                $count++;
+            }
+        });
+
+        return $count;
     }
 
     private function minutes(string $key): int
