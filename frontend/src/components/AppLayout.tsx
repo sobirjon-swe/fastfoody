@@ -5,11 +5,14 @@ import { ROLE_HOME } from '@/auth/auth-context'
 import { useAuth } from '@/auth/use-auth'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { useT } from '@/i18n/use-i18n'
 import { cn } from '@/lib/utils'
 import { ROLE_LABELS } from '@/types/api'
 
 export function AppLayout() {
   const { user, logout } = useAuth()
+  const t = useT()
   const navigate = useNavigate()
 
   async function handleLogout() {
@@ -39,7 +42,7 @@ export function AppLayout() {
                     cn('hover:text-foreground', isActive ? 'font-medium' : 'text-muted-foreground')
                   }
                 >
-                  Buyurtmalar
+                  {t('Buyurtmalar')}
                 </NavLink>
                 <NavLink
                   to="/staff/menu"
@@ -47,7 +50,7 @@ export function AppLayout() {
                     cn('hover:text-foreground', isActive ? 'font-medium' : 'text-muted-foreground')
                   }
                 >
-                  Menyu
+                  {t('Menyu')}
                 </NavLink>
               </nav>
             )}
@@ -61,7 +64,7 @@ export function AppLayout() {
                     cn('hover:text-foreground', isActive ? 'font-medium' : 'text-muted-foreground')
                   }
                 >
-                  Oshxonalar
+                  {t('Oshxonalar')}
                 </NavLink>
                 <NavLink
                   to="/orders"
@@ -69,7 +72,7 @@ export function AppLayout() {
                     cn('hover:text-foreground', isActive ? 'font-medium' : 'text-muted-foreground')
                   }
                 >
-                  Buyurtmalarim
+                  {t('Buyurtmalarim')}
                 </NavLink>
               </nav>
             )}
@@ -81,8 +84,9 @@ export function AppLayout() {
                 <div className="text-sm leading-tight font-medium hover:underline">{user.name}</div>
                 <div className="text-muted-foreground text-xs">{user.email}</div>
               </Link>
-              <Badge variant="secondary">{ROLE_LABELS[user.role]}</Badge>
-              <Button variant="ghost" size="icon" onClick={handleLogout} aria-label="Chiqish">
+              <LanguageSwitcher className="hidden md:flex" />
+              <Badge variant="secondary">{t(ROLE_LABELS[user.role])}</Badge>
+              <Button variant="ghost" size="icon" onClick={handleLogout} aria-label={t('Chiqish')}>
                 <LogOut />
               </Button>
             </div>

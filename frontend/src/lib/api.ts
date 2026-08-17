@@ -21,11 +21,26 @@ export function setToken(token: string | null): void {
   }
 }
 
+let acceptLanguage: string | null = null
+
+/**
+ * Server xatolari ham interfeys tilida kelishi uchun har soʻrovga
+ * `Accept-Language` qoʻshiladi. Foydalanuvchi profilida til saqlangan boʻlsa,
+ * backend baribir uni ustun qoʻyadi.
+ */
+export function setAcceptLanguage(locale: string | null): void {
+  acceptLanguage = locale
+}
+
 api.interceptors.request.use((config) => {
   const token = getToken()
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
+  }
+
+  if (acceptLanguage) {
+    config.headers['Accept-Language'] = acceptLanguage
   }
 
   return config

@@ -5,15 +5,10 @@ import { ROLE_HOME } from '@/auth/auth-context'
 import { useAuth } from '@/auth/use-auth'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useT } from '@/i18n/use-i18n'
 import { apiErrorMessage } from '@/lib/api'
 
 const EMPTY_FORM = {
@@ -26,6 +21,7 @@ const EMPTY_FORM = {
 
 export function RegisterPage() {
   const { user, register } = useAuth()
+  const t = useT()
   const navigate = useNavigate()
   const [form, setForm] = useState(EMPTY_FORM)
   const [error, setError] = useState<string | null>(null)
@@ -51,7 +47,7 @@ export function RegisterPage() {
 
       navigate(ROLE_HOME[created.role], { replace: true })
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Roʻyxatdan oʻtishda xatolik yuz berdi.'))
+      setError(apiErrorMessage(caught, t('Roʻyxatdan oʻtishda xatolik yuz berdi.')))
     } finally {
       setSubmitting(false)
     }
@@ -61,8 +57,8 @@ export function RegisterPage() {
     <div className="bg-muted/40 flex min-h-screen items-center justify-center px-4 py-12">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-xl">Roʻyxatdan oʻtish</CardTitle>
-          <CardDescription>Buyurtma berish uchun mijoz hisobini yarating.</CardDescription>
+          <CardTitle className="text-xl">{t('Roʻyxatdan oʻtish')}</CardTitle>
+          <CardDescription>{t('Yangi hisob oching va buyurtma bering.')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4" onSubmit={handleSubmit}>
@@ -73,7 +69,7 @@ export function RegisterPage() {
             )}
 
             <div className="grid gap-2">
-              <Label htmlFor="name">Ism</Label>
+              <Label htmlFor="name">{t('Ism')}</Label>
               <Input
                 id="name"
                 required
@@ -83,7 +79,7 @@ export function RegisterPage() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('Email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -95,7 +91,7 @@ export function RegisterPage() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="phone">Telefon (ixtiyoriy)</Label>
+              <Label htmlFor="phone">{t('Telefon (ixtiyoriy)')}</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -106,7 +102,7 @@ export function RegisterPage() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="password">Parol</Label>
+              <Label htmlFor="password">{t('Parol')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -118,7 +114,7 @@ export function RegisterPage() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="password_confirmation">Parolni takrorlang</Label>
+              <Label htmlFor="password_confirmation">{t('Parolni takrorlang')}</Label>
               <Input
                 id="password_confirmation"
                 type="password"
@@ -130,13 +126,13 @@ export function RegisterPage() {
             </div>
 
             <Button type="submit" disabled={submitting}>
-              {submitting ? 'Yaratilmoqda...' : 'Roʻyxatdan oʻtish'}
+              {submitting ? t('Yaratilmoqda...') : t('Roʻyxatdan oʻtish')}
             </Button>
 
             <p className="text-muted-foreground text-center text-sm">
-              Hisobingiz bormi?{' '}
+              {t('Hisobingiz bormi?')}{' '}
               <Link to="/login" className="text-foreground underline underline-offset-4">
-                Kirish
+                {t('Kirish')}
               </Link>
             </p>
           </form>

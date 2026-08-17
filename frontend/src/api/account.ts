@@ -1,3 +1,4 @@
+import type { Locale } from '@/i18n/locales'
 import { api } from '@/lib/api'
 import type { User } from '@/types/api'
 
@@ -5,6 +6,8 @@ export interface ProfilePayload {
   name?: string
   email?: string
   phone?: string | null
+  /** Interfeys tili (`uz`, `uz_Cyrl`, `ru`, `en`). */
+  locale?: Locale
 }
 
 export async function updateProfile(payload: ProfilePayload) {

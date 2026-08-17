@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 import { AuthContext, type AuthContextValue } from '@/auth/auth-context'
+import { isLocale } from '@/i18n/locales'
+import { useI18n } from '@/i18n/use-i18n'
 import { api, getToken, setToken, setUnauthorizedHandler } from '@/lib/api'
 import { getWebApp, isTelegramMiniApp } from '@/lib/telegram'
 import type { AuthResponse, LoginPayload, RegisterPayload, User } from '@/types/api'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { setLocale } = useI18n()
   const [user, setUser] = useState<User | null>(null)
   const [initialising, setInitialising] = useState(true)
 
@@ -76,6 +79,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       active = false
     }
   }, [])
+
+  // Hisobdagi til brauzerdagi tanlovdan ustun: foydalanuvchi qaysi
+  // qurilmadan kirmasin, oʻzi tanlagan tilni koʻradi.
+  useEffect(() => {
+    if (isLocale(user?.locale)) {
+      setLocale(user.locale)
+    }
+  }, [user?.locale, setLocale])
 
   const authenticate = useCallback(async (url: string, payload: object) => {
     const { data } = await api.post<AuthResponse>(url, payload)

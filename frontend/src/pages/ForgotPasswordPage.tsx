@@ -7,9 +7,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useT } from '@/i18n/use-i18n'
 import { apiErrorMessage } from '@/lib/api'
 
 export function ForgotPasswordPage() {
+  const t = useT()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -23,7 +25,7 @@ export function ForgotPasswordPage() {
     try {
       setSent(await requestPasswordReset(email))
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Havolani yuborib boʻlmadi.'))
+      setError(apiErrorMessage(caught, t('Havolani yuborib boʻlmadi.')))
     } finally {
       setSending(false)
     }
@@ -33,8 +35,10 @@ export function ForgotPasswordPage() {
     <div className="bg-muted/40 flex min-h-screen items-center justify-center px-4 py-12">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-xl">Parolni tiklash</CardTitle>
-          <CardDescription>Emailingizni yozing — tiklash havolasini yuboramiz.</CardDescription>
+          <CardTitle className="text-xl">{t('Parolni tiklash')}</CardTitle>
+          <CardDescription>
+            {t('Emailingizni kiriting — tiklash havolasini yuboramiz.')}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {sent ? (
@@ -43,7 +47,7 @@ export function ForgotPasswordPage() {
                 <AlertDescription>{sent}</AlertDescription>
               </Alert>
               <Button asChild variant="outline">
-                <Link to="/login">Kirish sahifasiga</Link>
+                <Link to="/login">{t('Kirish sahifasiga')}</Link>
               </Button>
             </div>
           ) : (
@@ -55,7 +59,7 @@ export function ForgotPasswordPage() {
               )}
 
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('Email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -67,12 +71,12 @@ export function ForgotPasswordPage() {
               </div>
 
               <Button type="submit" disabled={sending}>
-                {sending ? 'Yuborilmoqda...' : 'Havola yuborish'}
+                {sending ? t('Yuborilmoqda...') : t('Havola yuborish')}
               </Button>
 
               <p className="text-muted-foreground text-center text-sm">
                 <Link to="/login" className="text-foreground underline underline-offset-4">
-                  Kirishga qaytish
+                  {t('Kirishga qaytish')}
                 </Link>
               </p>
             </form>

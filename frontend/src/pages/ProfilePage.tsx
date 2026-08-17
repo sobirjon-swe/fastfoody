@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import type { Locale } from '@/i18n/locales'
+import { useT } from '@/i18n/use-i18n'
 import { apiErrorMessage } from '@/lib/api'
 import { ROLE_LABELS } from '@/types/api'
 
@@ -15,6 +18,7 @@ const EMPTY_PASSWORD = { current_password: '', password: '', password_confirmati
 
 export function ProfilePage() {
   const { user, refresh } = useAuth()
+  const t = useT()
 
   const [details, setDetails] = useState({
     name: user?.name ?? '',
@@ -36,9 +40,9 @@ export function ProfilePage() {
     try {
       await updateProfile({ ...details, phone: details.phone || null })
       await refresh()
-      toast.success('Maʼlumotlar saqlandi.')
+      toast.success(t('Maʼlumotlar saqlandi.'))
     } catch (caught) {
-      setDetailsError(apiErrorMessage(caught, 'Saqlab boʻlmadi.'))
+      setDetailsError(apiErrorMessage(caught, t('Saqlab boʻlmadi.')))
     } finally {
       setSavingDetails(false)
     }
@@ -52,28 +56,50 @@ export function ProfilePage() {
     try {
       await updatePassword(passwords)
       setPasswords(EMPTY_PASSWORD)
-      toast.success('Parol yangilandi. Boshqa qurilmalardagi seanslar yopildi.')
+      toast.success(t('Parol yangilandi. Boshqa qurilmalardagi seanslar yopildi.'))
     } catch (caught) {
-      setPasswordError(apiErrorMessage(caught, 'Parolni oʻzgartirib boʻlmadi.'))
+      setPasswordError(apiErrorMessage(caught, t('Parolni oʻzgartirib boʻlmadi.')))
     } finally {
       setSavingPassword(false)
+    }
+  }
+
+  async function changeLocale(locale: Locale) {
+    try {
+      await updateProfile({ locale })
+      await refresh()
+      toast.success(t('Til oʻzgartirildi.'))
+    } catch (caught) {
+      toast.error(apiErrorMessage(caught, t('Tilni oʻzgartirib boʻlmadi.')))
     }
   }
 
   return (
     <div className="grid max-w-xl gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Profil</h1>
+        <h1 className="text-2xl font-semibold">{t('Profil')}</h1>
         <p className="text-muted-foreground mt-1 text-sm">
-          {user && ROLE_LABELS[user.role]}
+          {user && t(ROLE_LABELS[user.role])}
           {user?.restaurant && ` · ${user.restaurant.name}`}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Maʼlumotlarim</CardTitle>
-          <CardDescription>Rol va oshxona bu yerdan oʻzgarmaydi.</CardDescription>
+          <CardTitle>{t('Interfeys tili')}</CardTitle>
+          <CardDescription>
+            {t('Tanlangan til hisobingizga saqlanadi va bot xabarlari ham shu tilda keladi.')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <LanguageSwitcher onChange={changeLocale} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('Maʼlumotlarim')}</CardTitle>
+          <CardDescription>{t('Rol va oshxona bu yerdan oʻzgarmaydi.')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4" onSubmit={saveDetails}>
@@ -84,7 +110,7 @@ export function ProfilePage() {
             )}
 
             <div className="grid gap-2">
-              <Label htmlFor="profile-name">Ism</Label>
+              <Label htmlFor="profile-name">{t('Ism')}</Label>
               <Input
                 id="profile-name"
                 required
@@ -94,7 +120,7 @@ export function ProfilePage() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="profile-email">Email</Label>
+              <Label htmlFor="profile-email">{t('Email')}</Label>
               <Input
                 id="profile-email"
                 type="email"
@@ -105,7 +131,7 @@ export function ProfilePage() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="profile-phone">Telefon</Label>
+              <Label htmlFor="profile-phone">{t('Telefon')}</Label>
               <Input
                 id="profile-phone"
                 type="tel"
@@ -116,7 +142,7 @@ export function ProfilePage() {
             </div>
 
             <Button type="submit" disabled={savingDetails} className="w-fit">
-              {savingDetails ? 'Saqlanmoqda...' : 'Saqlash'}
+              {savingDetails ? t('Saqlanmoqda...') : t('Saqlash')}
             </Button>
           </form>
         </CardContent>
@@ -124,9 +150,9 @@ export function ProfilePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Parolni oʻzgartirish</CardTitle>
+          <CardTitle>{t('Parolni oʻzgartirish')}</CardTitle>
           <CardDescription>
-            Yangi parol qoʻyilgach, boshqa qurilmalardagi seanslar yopiladi.
+            {t('Yangi parol qoʻyilgach, boshqa qurilmalardagi seanslar yopiladi.')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -138,7 +164,7 @@ export function ProfilePage() {
             )}
 
             <div className="grid gap-2">
-              <Label htmlFor="current-password">Joriy parol</Label>
+              <Label htmlFor="current-password">{t('Joriy parol')}</Label>
               <Input
                 id="current-password"
                 type="password"
@@ -152,7 +178,7 @@ export function ProfilePage() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="new-password">Yangi parol</Label>
+              <Label htmlFor="new-password">{t('Yangi parol')}</Label>
               <Input
                 id="new-password"
                 type="password"
@@ -164,7 +190,7 @@ export function ProfilePage() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="new-password-confirm">Takrorlang</Label>
+              <Label htmlFor="new-password-confirm">{t('Takrorlang')}</Label>
               <Input
                 id="new-password-confirm"
                 type="password"
@@ -178,7 +204,7 @@ export function ProfilePage() {
             </div>
 
             <Button type="submit" disabled={savingPassword} className="w-fit">
-              {savingPassword ? 'Oʻzgartirilmoqda...' : 'Parolni oʻzgartirish'}
+              {savingPassword ? t('Oʻzgartirilmoqda...') : t('Parolni oʻzgartirish')}
             </Button>
           </form>
         </CardContent>

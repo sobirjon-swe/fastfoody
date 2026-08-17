@@ -5,19 +5,16 @@ import { ROLE_HOME } from '@/auth/auth-context'
 import { useAuth } from '@/auth/use-auth'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { useT } from '@/i18n/use-i18n'
 import { apiErrorMessage } from '@/lib/api'
 
 export function LoginPage() {
   const { user, login } = useAuth()
+  const t = useT()
   const navigate = useNavigate()
   const location = useLocation()
   const [email, setEmail] = useState('')
@@ -40,7 +37,7 @@ export function LoginPage() {
 
       navigate(from ?? ROLE_HOME[signedIn.role], { replace: true })
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Kirishda xatolik yuz berdi.'))
+      setError(apiErrorMessage(caught, t('Kirishda xatolik yuz berdi.')))
     } finally {
       setSubmitting(false)
     }
@@ -50,10 +47,11 @@ export function LoginPage() {
     <div className="bg-muted/40 flex min-h-screen items-center justify-center px-4 py-12">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-xl">Kirish</CardTitle>
-          <CardDescription>FastFoody hisobingizga kiring.</CardDescription>
+          <CardTitle className="text-xl">{t('Kirish')}</CardTitle>
+          <CardDescription>{t('FastFoody hisobingizga kiring.')}</CardDescription>
         </CardHeader>
         <CardContent>
+          <LanguageSwitcher className="mb-4 justify-center" />
           <form className="grid gap-4" onSubmit={handleSubmit}>
             {error && (
               <Alert variant="destructive">
@@ -62,7 +60,7 @@ export function LoginPage() {
             )}
 
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('Email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -74,7 +72,7 @@ export function LoginPage() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="password">Parol</Label>
+              <Label htmlFor="password">{t('Parol')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -86,19 +84,19 @@ export function LoginPage() {
             </div>
 
             <Button type="submit" disabled={submitting}>
-              {submitting ? 'Kirilmoqda...' : 'Kirish'}
+              {submitting ? t('Kirilmoqda...') : t('Kirish')}
             </Button>
 
             <p className="text-muted-foreground text-center text-sm">
               <Link to="/parolni-unutdim" className="underline underline-offset-4">
-                Parolni unutdingizmi?
+                {t('Parolni unutdingizmi?')}
               </Link>
             </p>
 
             <p className="text-muted-foreground text-center text-sm">
-              Hisobingiz yoʻqmi?{' '}
+              {t('Hisobingiz yoʻqmi?')}{' '}
               <Link to="/register" className="text-foreground underline underline-offset-4">
-                Roʻyxatdan oʻtish
+                {t('Roʻyxatdan oʻtish')}
               </Link>
             </p>
           </form>

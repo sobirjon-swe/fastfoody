@@ -1,3 +1,5 @@
+import type { TranslationKey } from '@/i18n/uz'
+
 export type UserRole = 'customer' | 'restaurant_staff' | 'super_admin'
 
 export interface Restaurant {
@@ -19,8 +21,11 @@ export interface Restaurant {
 export interface User {
   id: number
   name: string
-  email: string
+  /** Telegram orqali kirgan foydalanuvchida email boʻlmasligi mumkin. */
+  email: string | null
   phone: string | null
+  /** Tanlangan interfeys tili; tanlanmagan boʻlsa NULL. */
+  locale: string | null
   role: UserRole
   restaurant_id: number | null
   is_deactivated?: boolean
@@ -85,7 +90,8 @@ export interface Order {
   items?: OrderItem[]
 }
 
-export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+/** Qiymatlar — tarjima kalitlari, `t(ORDER_STATUS_LABELS[status])`. */
+export const ORDER_STATUS_LABELS: Record<OrderStatus, TranslationKey> = {
   kutilmoqda: 'Toʻlov kutilmoqda',
   tolov_qilindi: 'Toʻlandi',
   tayyorlanmoqda: 'Tayyorlanmoqda',
@@ -130,7 +136,11 @@ export interface LoginPayload {
   password: string
 }
 
-export const ROLE_LABELS: Record<UserRole, string> = {
+/**
+ * Qiymatlar — tarjima kalitlari (`src/i18n/uz.ts`), shuning uchun ular
+ * `t(ROLE_LABELS[role])` koʻrinishida chiziladi.
+ */
+export const ROLE_LABELS: Record<UserRole, TranslationKey> = {
   customer: 'Mijoz',
   restaurant_staff: 'Oshxona xodimi',
   super_admin: 'Tizim egasi',

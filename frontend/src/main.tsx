@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router'
 import App from '@/App'
 import { AuthProvider } from '@/auth/AuthProvider'
 import { Toaster } from '@/components/ui/sonner'
+import { I18nProvider } from '@/i18n/I18nProvider'
 import { initTelegram } from '@/lib/telegram'
 import '@/index.css'
 
@@ -15,10 +16,12 @@ initTelegram()
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <App />
-        <Toaster />
-      </AuthProvider>
+      <I18nProvider>
+        <AuthProvider>
+          <App />
+          <Toaster />
+        </AuthProvider>
+      </I18nProvider>
     </BrowserRouter>
   </StrictMode>,
 )

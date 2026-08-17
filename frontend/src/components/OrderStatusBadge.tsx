@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge'
+import { useT } from '@/i18n/use-i18n'
 import { ORDER_STATUS_LABELS, type OrderStatus } from '@/types/api'
 
 const VARIANTS: Record<OrderStatus, 'default' | 'secondary' | 'outline' | 'destructive'> = {
@@ -13,5 +14,7 @@ const VARIANTS: Record<OrderStatus, 'default' | 'secondary' | 'outline' | 'destr
 }
 
 export function OrderStatusBadge({ status }: { status: OrderStatus }) {
-  return <Badge variant={VARIANTS[status]}>{ORDER_STATUS_LABELS[status]}</Badge>
+  const t = useT()
+
+  return <Badge variant={VARIANTS[status]}>{t(ORDER_STATUS_LABELS[status])}</Badge>
 }

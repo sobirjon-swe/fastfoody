@@ -8,9 +8,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useT } from '@/i18n/use-i18n'
 import { apiErrorMessage } from '@/lib/api'
 
 export function ResetPasswordPage() {
+  const t = useT()
   const [params] = useSearchParams()
   const navigate = useNavigate()
 
@@ -36,10 +38,10 @@ export function ResetPasswordPage() {
         password_confirmation: confirmation,
       })
 
-      toast.success('Parol yangilandi.')
+      toast.success(t('Parol yangilandi.'))
       navigate('/login', { replace: true })
     } catch (caught) {
-      setError(apiErrorMessage(caught, 'Parolni tiklab boʻlmadi.'))
+      setError(apiErrorMessage(caught, t('Parolni tiklab boʻlmadi.')))
     } finally {
       setSaving(false)
     }
@@ -49,17 +51,19 @@ export function ResetPasswordPage() {
     <div className="bg-muted/40 flex min-h-screen items-center justify-center px-4 py-12">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-xl">Yangi parol</CardTitle>
-          <CardDescription>{email || 'Havola toʻliq emas.'}</CardDescription>
+          <CardTitle className="text-xl">{t('Yangi parol')}</CardTitle>
+          <CardDescription>{email || t('Havola toʻliq emas.')}</CardDescription>
         </CardHeader>
         <CardContent>
           {!token || !email ? (
             <div className="grid gap-4">
               <Alert variant="destructive">
-                <AlertDescription>Havola notoʻgʻri. Tiklashni qaytadan boshlang.</AlertDescription>
+                <AlertDescription>
+                  {t('Havola notoʻgʻri. Tiklashni qaytadan boshlang.')}
+                </AlertDescription>
               </Alert>
               <Button asChild variant="outline">
-                <Link to="/parolni-unutdim">Qaytadan urinish</Link>
+                <Link to="/parolni-unutdim">{t('Qaytadan urinish')}</Link>
               </Button>
             </div>
           ) : (
@@ -71,7 +75,7 @@ export function ResetPasswordPage() {
               )}
 
               <div className="grid gap-2">
-                <Label htmlFor="password">Yangi parol</Label>
+                <Label htmlFor="password">{t('Yangi parol')}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -83,7 +87,7 @@ export function ResetPasswordPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="password_confirmation">Takrorlang</Label>
+                <Label htmlFor="password_confirmation">{t('Takrorlang')}</Label>
                 <Input
                   id="password_confirmation"
                   type="password"
@@ -95,7 +99,7 @@ export function ResetPasswordPage() {
               </div>
 
               <Button type="submit" disabled={saving}>
-                {saving ? 'Saqlanmoqda...' : 'Parolni yangilash'}
+                {saving ? t('Saqlanmoqda...') : t('Parolni yangilash')}
               </Button>
             </form>
           )}
