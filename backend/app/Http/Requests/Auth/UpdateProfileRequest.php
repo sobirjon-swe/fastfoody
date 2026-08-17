@@ -26,6 +26,7 @@ class UpdateProfileRequest extends FormRequest
                 'nullable', 'string', 'max:32',
                 Rule::unique('users', 'phone')->ignore($this->user()->id),
             ],
+            'locale' => ['sometimes', 'required', 'string', Rule::in(config('fastfoody.locales'))],
         ];
     }
 }

@@ -19,7 +19,7 @@ use Laravel\Sanctum\HasApiTokens;
  * list: they decide what a user is allowed to see, so they are always assigned
  * explicitly (seeders, admin actions) and never from request input.
  */
-#[Fillable(['name', 'email', 'phone', 'password'])]
+#[Fillable(['name', 'email', 'phone', 'password', 'locale'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {

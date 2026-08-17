@@ -266,6 +266,25 @@ Toʻlangan buyurtmadagi taom tugab qolsa:
 Bloklangan buyurtma oshxona taxtasida koʻrinib turadi (`next_statuses` boʻsh) — xodim uning
 mijoz javobini kutayotganini biladi, lekin uni oldinga sura olmaydi.
 
+## Tillar (8-bosqich)
+
+Interfeys uch tilda: **oʻzbekcha lotin** (asosiy), **oʻzbekcha kirill** va **inglizcha**.
+
+Til quyidagi tartibda tanlanadi:
+
+1. Foydalanuvchi profilida saqlangan til (`users.locale`, `PATCH /api/auth/profile`);
+2. soʻrovdagi `Accept-Language` sarlavhasi;
+3. sukut boʻyicha `APP_LOCALE` (oʻzbekcha lotin).
+
+Telegram orqali birinchi marta kirgan foydalanuvchiga `language_code` dan til qoʻyiladi
+(`en-GB` → `en`), keyin uni profilidan oʻzgartira oladi. Bot xabarnomalari **mijozning**
+tilida yoziladi — holatni oʻzgartirgan xodimning tilida emas.
+
+Tarjima kalitlari — oʻzbekcha lotin jumlalarning oʻzi: `lang/uz.json` (ayni jumlalar),
+`lang/uz_Cyrl.json`, `lang/en.json`, hamda `lang/uz_Cyrl/{auth,validation}.php` va
+`lang/en/validation.php`. `lang/uz.json` boʻsh koʻrinsa ham **kerak**: usiz `uz` tili zaxira
+tilga (`en`) tushib ketadi va oʻzbek foydalanuvchi inglizcha xabar koʻradi.
+
 ## Telegram Mini App (7-bosqich)
 
 Mijoz tomonini Telegram ichida ochish uchun asos tayyor. Mini App sahifasi Telegram'dan
@@ -349,7 +368,7 @@ vaqt mintaqasi boʻyicha kesiladi, shuning uchun «bugun» Toshkent yarim tunida
 ## Testlar
 
 ```bash
-cd backend  && php artisan test     # 174 ta test
+cd backend  && php artisan test     # 182 ta test
 cd backend  && ./vendor/bin/pint    # kod uslubi
 cd frontend && npm run test         # 24 ta test (Vitest + Testing Library)
 cd frontend && npm run lint         # oxlint
@@ -432,6 +451,7 @@ ham tekshiradi: backend uchun Pint + PHPUnit, frontend uchun lint + test + build
 - [x] Oshxona va tizim statistikasi.
 - [x] **7-bosqich (1-qism)** — Telegram Mini App uchun `initData` autentifikatsiyasi.
 - [x] **7-bosqich (2-qism)** — bot xabarnomalari: buyurtma holati oʻzgarganda mijozga xabar.
+- [x] **8-bosqich (1-qism)** — backend koʻp tilliligi: uz, uz_Cyrl, en.
 - [x] **7-bosqich (3-qism)** — interfeys Telegram qobigʻida: avtomatik kirish, mavzu,
       `MainButton` va `BackButton`.
 

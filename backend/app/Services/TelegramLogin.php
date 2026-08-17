@@ -34,6 +34,9 @@ class TelegramLogin
             $user->telegram_id = $profile['id'];
             // Rol hech qachon Telegram'dan olinmaydi: yangi hisob doim mijoz.
             $user->role = UserRole::Customer;
+            // Telegram tilini boshlangʻich til sifatida olamiz; keyin
+            // foydalanuvchi profilidan oʻzgartira oladi.
+            $user->locale = $this->locale($profile['language_code']);
         }
 
         $user->name = $profile['name'];
@@ -52,7 +55,7 @@ class TelegramLogin
     /**
      * Imzoni tekshiradi va Telegram bergan profilni qaytaradi.
      *
-     * @return array{id: int, name: string, username: ?string}
+     * @return array{id: int, name: string, username: ?string, language_code: ?string}
      */
     public function verify(string $initData): array
     {
@@ -144,7 +147,7 @@ class TelegramLogin
     }
 
     /**
-     * @return array{id: int, name: string, username: ?string}
+     * @return array{id: int, name: string, username: ?string, language_code: ?string}
      */
     private function profile(?string $userJson): array
     {
@@ -169,7 +172,30 @@ class TelegramLogin
             'id' => $user['id'],
             'name' => mb_substr($name, 0, 255),
             'username' => is_string($user['username'] ?? null) ? $user['username'] : null,
+            'language_code' => is_string($user['language_code'] ?? null) ? $user['language_code'] : null,
         ];
+    }
+
+    /**
+     * Telegram tili ilova tillariga solishtiriladi ("en-GB" ham "en" boʻladi).
+     * Mos til topilmasa NULL qaytadi va til `Accept-Language` yoki sukut
+     * boʻyicha aniqlanadi.
+     */
+    private function locale(?string $languageCode): ?string
+    {
+        if ($languageCode === null) {
+            return null;
+        }
+
+        $code = strtolower(str_replace('-', '_', $languageCode));
+
+        foreach ((array) config('fastfoody.locales') as $locale) {
+            if ($code === strtolower($locale) || str_starts_with($code, strtolower($locale).'_')) {
+                return $locale;
+            }
+        }
+
+        return null;
     }
 
     /**
