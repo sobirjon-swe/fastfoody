@@ -294,6 +294,22 @@ oʻzgarishsiz ishlaydi.
 Xodim va tizim egasi paneli Mini App'ga koʻchirilmaydi: ular kun boʻyi katta ekranda
 ishlaydi, ikkalasi ham xuddi shu API'ga ulanaveradi.
 
+### Interfeys Telegram ichida
+
+Bitta SPA ikkala muhitda ham ishlaydi — `src/lib/telegram.ts` dagi hamma funksiya Telegram
+boʻlmasa jimgina hech narsa qilmaydi:
+
+- **Kirish sahifasi koʻrsatilmaydi.** Mini App ochilishi bilan `initData` yuboriladi va
+  foydalanuvchi oʻz ekraniga tushadi; imzo rad etilsa odatdagi kirish sahifasi chiqadi.
+- **Mavzu.** Telegram qorongʻi rejimda boʻlsa ilova ham qorongʻi palitraga oʻtadi
+  (`themeChanged` hodisasiga obuna boʻlinadi).
+- **`MainButton`.** Savatchada taom paydo boʻlishi bilan «Buyurtma berish» Telegram'ning
+  pastdagi asosiy tugmasiga chiqadi; brauzerda esa kartadagi tugma oʻz oʻrnida qoladi.
+- **`BackButton`.** Menyu sahifasida Telegram sarlavhasidagi «orqaga» tugmasi ishlaydi.
+
+`index.html` Telegram skriptini yuklaydi. Skript yuklanmasa ham (masalan tarmoq bloklagan
+boʻlsa) ilova oddiy veb-ilova sifatida ishlayveradi.
+
 ### Bot xabarnomalari
 
 Buyurtma holati oʻzgarganda Telegram orqali kirgan mijozga bot xabar yozadi — ilova yopiq
@@ -335,7 +351,7 @@ vaqt mintaqasi boʻyicha kesiladi, shuning uchun «bugun» Toshkent yarim tunida
 ```bash
 cd backend  && php artisan test     # 174 ta test
 cd backend  && ./vendor/bin/pint    # kod uslubi
-cd frontend && npm run test         # 17 ta test (Vitest + Testing Library)
+cd frontend && npm run test         # 24 ta test (Vitest + Testing Library)
 cd frontend && npm run lint         # oxlint
 cd frontend && npm run build        # tsc + vite build
 ```
@@ -416,11 +432,11 @@ ham tekshiradi: backend uchun Pint + PHPUnit, frontend uchun lint + test + build
 - [x] Oshxona va tizim statistikasi.
 - [x] **7-bosqich (1-qism)** — Telegram Mini App uchun `initData` autentifikatsiyasi.
 - [x] **7-bosqich (2-qism)** — bot xabarnomalari: buyurtma holati oʻzgarganda mijozga xabar.
+- [x] **7-bosqich (3-qism)** — interfeys Telegram qobigʻida: avtomatik kirish, mavzu,
+      `MainButton` va `BackButton`.
 
 Keyingi bosqichlar:
 
-- [ ] **7-bosqich (3-qism)** — interfeysni Telegram qobigʻiga moslash: `MainButton`,
-      `BackButton`, Telegram mavzu ranglari.
 - [ ] Payme/Click integratsiyasi — merchant hisobi va kalitlari kerak, hozircha toʻlov
       simulyatsiya qilinadi.
 - [ ] Real vaqtdagi bildirishnoma (WebSocket) — hozircha 15 soniyalik polling yetarli.

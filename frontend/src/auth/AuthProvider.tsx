@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 
 import { AuthContext, type AuthContextValue } from '@/auth/auth-context'
 import { api, getToken, setToken, setUnauthorizedHandler } from '@/lib/api'
+import { getWebApp, isTelegramMiniApp } from '@/lib/telegram'
 import type { AuthResponse, LoginPayload, RegisterPayload, User } from '@/types/api'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -19,13 +20,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // A token in localStorage only means "possibly signed in": it is verified
   // against the API once on boot, and dropped if the server rejects it.
   useEffect(() => {
-    if (!getToken()) {
-      setInitialising(false)
-
-      return
-    }
-
     let active = true
+
+    if (!getToken()) {
+      // Telegram ichida kirish sahifasi koʻrsatilmaydi: Mini App ochilishi
+      // bilan initData imzosi orqali oʻzi kiradi.
+      if (!isTelegramMiniApp()) {
+        setInitialising(false)
+
+        return
+      }
+
+      api
+        .post<AuthResponse>('/auth/telegram', {
+          init_data: getWebApp()?.initData,
+          device_name: 'telegram',
+        })
+        .then((response) => {
+          if (active) {
+            setToken(response.data.token)
+            setUser(response.data.user)
+          }
+        })
+        .catch(() => {
+          // Imzo rad etilsa oddiy kirish sahifasi koʻrsatiladi.
+        })
+        .finally(() => {
+          if (active) {
+            setInitialising(false)
+          }
+        })
+
+      return () => {
+        active = false
+      }
+    }
 
     api
       .get<{ user: User }>('/auth/me')
@@ -63,7 +92,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const register = useCallback(
-    (payload: RegisterPayload) => authenticate('/auth/register', { ...payload, device_name: 'web' }),
+    (payload: RegisterPayload) =>
+      authenticate('/auth/register', { ...payload, device_name: 'web' }),
     [authenticate],
   )
 

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { apiErrorMessage } from '@/lib/api'
 import { formatClock, formatPrepTime, formatPrice, minutesFromNow } from '@/lib/format'
+import { useTelegramBackButton, useTelegramMainButton } from '@/lib/use-telegram'
 import type { MenuItem, OrderEstimate, Restaurant } from '@/types/api'
 
 /** menu item id -> quantity */
@@ -138,6 +139,17 @@ export function RestaurantMenuPage() {
       setPlacing(false)
     }
   }
+
+  // Telegram ichida buyurtma tugmasi pastdagi asosiy tugmaga chiqadi —
+  // barmoq yetadigan joyda. Brauzerda kartadagi tugma oʻz oʻrnida qoladi.
+  useTelegramMainButton({
+    text: restaurant?.is_open_now === false ? 'Oshxona yopiq' : 'Buyurtma berish',
+    visible: lines.length > 0,
+    disabled: placing || restaurant?.is_open_now === false,
+    onClick: submit,
+  })
+
+  useTelegramBackButton(() => navigate('/'))
 
   if (loading) {
     return <Spinner />
