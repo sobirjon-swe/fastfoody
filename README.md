@@ -34,6 +34,20 @@ php artisan storage:link          # taom rasmlari uchun (bir marta)
 php artisan serve
 ```
 
+**MySQL oʻrnatmasdan sinab koʻrish.** Lokalda SQLite yetarli — `.env` da `DB_CONNECTION=sqlite`
+qoldiring, qolgan `DB_*` qatorlarini oʻchiring va bazani bitta fayl sifatida yarating:
+
+```bash
+touch database/database.sqlite
+php artisan migrate --seed
+```
+
+Lokalda hamma narsa ishlaydi: buyurtma, navbat hisobi, toʻlov (simulyatsiya), toʻrt til,
+modifikatorlar. Parolni tiklash havolasi `storage/logs/laravel.log` ga yoziladi (SMTP shart
+emas), muddati oʻtgan buyurtmalarni yopish uchun esa yonida `php artisan schedule:work` ni
+ishlatib qoʻying. Faqat ikki narsa lokalda tekshirilmaydi: Telegram Mini App (HTTPS talab
+qiladi) va Payme/Click (merchant kalitlari kerak).
+
 ### Frontend (http://localhost:5173)
 
 ```bash
