@@ -16,7 +16,9 @@
     "Joriy parol": "Текущий пароль",
     "Kechirasiz, buyurtmangizdagi mahsulot tugab qoldi. Ilovada uni almashtiring yoki buyurtmani bekor qiling.": "К сожалению, продукт из вашего заказа закончился. Замените его в приложении или отмените заказ.",
     "Logged out.": "Вы вышли из системы.",
+    "Majburiy tanlov variantlar sonidan koʻp boʻlmasligi kerak.": "Обязательный выбор не может превышать число вариантов.",
     "Miqdor": "Количество",
+    "Modifikatorlar": "Модификаторы",
     "Oshxona hozir yopiq. Ish vaqti: :opens–:closes.": "Заведение сейчас закрыто. Часы работы: :opens–:closes.",
     "Parol yangilandi.": "Пароль обновлён.",
     "Parol yangilandi. Endi kirishingiz mumkin.": "Пароль обновлён. Теперь вы можете войти.",
@@ -24,6 +26,7 @@
     "Savatcha": "Корзина",
     "Sizga oshxona biriktirilmagan.": "К вам не прикреплено заведение.",
     "Soʻralgan maʼlumot topilmadi.": "Запрошенная запись не найдена.",
+    "Tanlangan variant bu taomga tegishli emas.": "Выбранный вариант не относится к этому блюду.",
     "Taom": "Блюдо",
     "Taxminan :time ga tayyor boʻladi.": "Будет готово примерно к :time.",
     "Telegram foydalanuvchisi": "Пользователь Telegram",
@@ -33,5 +36,7 @@
     "Tiklash havolasi notoʻgʻri yoki muddati oʻtgan.": "Ссылка для восстановления неверна или истекла.",
     "Tugagan taom": "Закончившееся блюдо",
     "Yangi taom": "Новое блюдо",
-    "«:from» holatidan «:to» holatiga oʻtib boʻlmaydi.": "Переход из статуса «:from» в «:to» невозможен."
+    "«:from» holatidan «:to» holatiga oʻtib boʻlmaydi.": "Переход из статуса «:from» в «:to» невозможен.",
+    "«:group» uchun kamida :count ta variant tanlang.": "Для «:group» выберите не менее :count варианта.",
+    "«:group» uchun koʻpi bilan :count ta variant tanlash mumkin.": "Для «:group» можно выбрать не более :count варианта."
 }

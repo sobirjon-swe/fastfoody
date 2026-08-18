@@ -16,7 +16,9 @@
     "Joriy parol": "Joriy parol",
     "Kechirasiz, buyurtmangizdagi mahsulot tugab qoldi. Ilovada uni almashtiring yoki buyurtmani bekor qiling.": "Kechirasiz, buyurtmangizdagi mahsulot tugab qoldi. Ilovada uni almashtiring yoki buyurtmani bekor qiling.",
     "Logged out.": "Logged out.",
+    "Majburiy tanlov variantlar sonidan koʻp boʻlmasligi kerak.": "Majburiy tanlov variantlar sonidan koʻp boʻlmasligi kerak.",
     "Miqdor": "Miqdor",
+    "Modifikatorlar": "Modifikatorlar",
     "Oshxona hozir yopiq. Ish vaqti: :opens–:closes.": "Oshxona hozir yopiq. Ish vaqti: :opens–:closes.",
     "Parol yangilandi.": "Parol yangilandi.",
     "Parol yangilandi. Endi kirishingiz mumkin.": "Parol yangilandi. Endi kirishingiz mumkin.",
@@ -24,6 +26,7 @@
     "Savatcha": "Savatcha",
     "Sizga oshxona biriktirilmagan.": "Sizga oshxona biriktirilmagan.",
     "Soʻralgan maʼlumot topilmadi.": "Soʻralgan maʼlumot topilmadi.",
+    "Tanlangan variant bu taomga tegishli emas.": "Tanlangan variant bu taomga tegishli emas.",
     "Taom": "Taom",
     "Taxminan :time ga tayyor boʻladi.": "Taxminan :time ga tayyor boʻladi.",
     "Telegram foydalanuvchisi": "Telegram foydalanuvchisi",
@@ -33,5 +36,7 @@
     "Tiklash havolasi notoʻgʻri yoki muddati oʻtgan.": "Tiklash havolasi notoʻgʻri yoki muddati oʻtgan.",
     "Tugagan taom": "Tugagan taom",
     "Yangi taom": "Yangi taom",
-    "«:from» holatidan «:to» holatiga oʻtib boʻlmaydi.": "«:from» holatidan «:to» holatiga oʻtib boʻlmaydi."
+    "«:from» holatidan «:to» holatiga oʻtib boʻlmaydi.": "«:from» holatidan «:to» holatiga oʻtib boʻlmaydi.",
+    "«:group» uchun kamida :count ta variant tanlang.": "«:group» uchun kamida :count ta variant tanlang.",
+    "«:group» uchun koʻpi bilan :count ta variant tanlash mumkin.": "«:group» uchun koʻpi bilan :count ta variant tanlash mumkin."
 }

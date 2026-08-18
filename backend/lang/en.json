@@ -16,7 +16,9 @@
     "Joriy parol": "Current password",
     "Kechirasiz, buyurtmangizdagi mahsulot tugab qoldi. Ilovada uni almashtiring yoki buyurtmani bekor qiling.": "Sorry, an item in your order has run out. Please replace it in the app or cancel the order.",
     "Logged out.": "Logged out.",
+    "Majburiy tanlov variantlar sonidan koʻp boʻlmasligi kerak.": "The required count cannot exceed the number of options.",
     "Miqdor": "Quantity",
+    "Modifikatorlar": "Options",
     "Oshxona hozir yopiq. Ish vaqti: :opens–:closes.": "The restaurant is closed right now. Opening hours: :opens–:closes.",
     "Parol yangilandi.": "Password updated.",
     "Parol yangilandi. Endi kirishingiz mumkin.": "Password updated. You can sign in now.",
@@ -24,6 +26,7 @@
     "Savatcha": "Cart",
     "Sizga oshxona biriktirilmagan.": "You are not assigned to a restaurant.",
     "Soʻralgan maʼlumot topilmadi.": "The requested record was not found.",
+    "Tanlangan variant bu taomga tegishli emas.": "The selected option does not belong to this item.",
     "Taom": "Item",
     "Taxminan :time ga tayyor boʻladi.": "It should be ready at around :time.",
     "Telegram foydalanuvchisi": "Telegram user",
@@ -33,5 +36,7 @@
     "Tiklash havolasi notoʻgʻri yoki muddati oʻtgan.": "The reset link is invalid or has expired.",
     "Tugagan taom": "Out of stock item",
     "Yangi taom": "Replacement item",
-    "«:from» holatidan «:to» holatiga oʻtib boʻlmaydi.": "An order cannot move from \":from\" to \":to\"."
+    "«:from» holatidan «:to» holatiga oʻtib boʻlmaydi.": "An order cannot move from \":from\" to \":to\".",
+    "«:group» uchun kamida :count ta variant tanlang.": "Choose at least :count option(s) for \":group\".",
+    "«:group» uchun koʻpi bilan :count ta variant tanlash mumkin.": "You can choose at most :count option(s) for \":group\"."
 }

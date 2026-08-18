@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Staff\StoreMenuItemRequest;
+use App\Http\Requests\Staff\SyncOptionGroupsRequest;
 use App\Http\Requests\Staff\UpdateMenuItemRequest;
 use App\Http\Requests\Staff\UploadMenuItemImageRequest;
 use App\Http\Resources\StaffMenuItemResource;
 use App\Models\MenuItem;
+use App\Services\OptionSync;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,7 +29,7 @@ class MenuItemController extends Controller
     {
         return response()->json([
             'menu_items' => StaffMenuItemResource::collection(
-                $this->query($request)->orderBy('name')->get(),
+                $this->query($request)->with('optionGroups.options')->orderBy('name')->get(),
             ),
         ]);
     }
@@ -80,6 +82,19 @@ class MenuItemController extends Controller
         $item->translations = MenuItem::cleanTranslations((array) $request->input('translations', []));
     }
 
+    /**
+     * Modifikator guruhlari bitta soʻrovda saqlanadi: kelgan roʻyxat —
+     * yakuniy holat.
+     */
+    public function syncOptions(SyncOptionGroupsRequest $request, int $menuItem, OptionSync $sync): JsonResponse
+    {
+        $item = $this->find($request, $menuItem);
+
+        return response()->json([
+            'menu_item' => StaffMenuItemResource::make($sync->sync($item, $request->validated('groups'))),
+        ]);
+    }
+
     public function destroy(Request $request, int $menuItem): Response
     {
         $item = $this->find($request, $menuItem);
@@ -128,7 +143,7 @@ class MenuItemController extends Controller
 
     private function find(Request $request, int $menuItem): MenuItem
     {
-        return $this->query($request)->findOrFail($menuItem);
+        return $this->query($request)->with('optionGroups.options')->findOrFail($menuItem);
     }
 
     /**

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * A line of an order. name, unit_price and prep_minutes are snapshots taken
@@ -52,5 +53,15 @@ class OrderItem extends Model
     public function menuItem(): BelongsTo
     {
         return $this->belongsTo(MenuItem::class);
+    }
+
+    /**
+     * Shu qatorda tanlangan modifikatorlar.
+     *
+     * @return HasMany<OrderItemOption, $this>
+     */
+    public function options(): HasMany
+    {
+        return $this->hasMany(OrderItemOption::class);
     }
 }

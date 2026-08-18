@@ -102,6 +102,10 @@ Route::middleware(['auth:sanctum', 'role:restaurant_staff'])->prefix('staff')->g
     Route::get('menu-items/{menuItem}', [MenuItemController::class, 'show'])->whereNumber('menuItem');
     Route::patch('menu-items/{menuItem}', [MenuItemController::class, 'update'])->whereNumber('menuItem');
     Route::delete('menu-items/{menuItem}', [MenuItemController::class, 'destroy'])->whereNumber('menuItem');
+    // Modifikator guruhlari (9-bosqich)
+    Route::put('menu-items/{menuItem}/options', [MenuItemController::class, 'syncOptions'])
+        ->whereNumber('menuItem');
+
     Route::post('menu-items/{menuItem}/image', [MenuItemController::class, 'uploadImage'])
         ->whereNumber('menuItem');
     Route::delete('menu-items/{menuItem}/image', [MenuItemController::class, 'destroyImage'])

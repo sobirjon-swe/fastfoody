@@ -43,7 +43,7 @@ class OrderController extends Controller
                 $request->string('code')->trim()->toString(),
             ))
             ->whereIn('status', array_filter($statuses))
-            ->with('items', 'customer')
+            ->with('items.options', 'customer')
             ->orderBy('paid_at')
             ->orderBy('id')
             ->paginate(perPage: 30)
@@ -115,7 +115,7 @@ class OrderController extends Controller
 
     private function find(Request $request, int $order): Order
     {
-        return $this->query($request)->with('items', 'customer')->findOrFail($order);
+        return $this->query($request)->with('items.options', 'customer')->findOrFail($order);
     }
 
     /**

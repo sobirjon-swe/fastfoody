@@ -176,6 +176,31 @@ Kod bitta oshxonaning **ochiq** buyurtmalari orasida takrorlanmaydi; yopilgan bu
 kodlari qayta ishlatilaveradi, shuning uchun 4 xona umrbod yetadi. Boʻsh kod topilmasa
 (nazariy holat) 6 belgili zaxira kod beriladi.
 
+## Modifikatorlar (9-bosqich)
+
+Taomga savol-javob shaklidagi tanlovlar qoʻshiladi: **guruh** — savol («Sous», «Oʻlcham»),
+**variant** — javob («Smetana», «Katta»). Guruh turi ikki son bilan aniqlanadi:
+
+| `min_select` | `max_select` | Maʼnosi |
+|---|---|---|
+| 1 | 1 | Majburiy, bittasi — oʻlcham |
+| 0 | 1 | Ixtiyoriy, bittasi — sous |
+| 0 | — | Ixtiyoriy, xohlagancha — qoʻshimchalar |
+
+- **Narx har bir dona uchun** qoʻshiladi (3 ta gamburgerga pishloq — uch marta pul),
+  **tayyorlash vaqti esa qatorga bir marta**: sous butun partiyaga birdan qoʻshiladi, uni har
+  donaga koʻpaytirish navbatni asossiz choʻzardi.
+- Narx va vaqt qoʻshimchasi **manfiy boʻlmaydi** — «mayonez kerak emas» narxni kamaytirmaydi.
+- Tanlov ham narx kabi **serverda tekshiriladi**: mijoz faqat `option_ids` yuboradi, qolgani
+  menyudan oʻqiladi. Begona taomning varianti, mavjud boʻlmagan variant, majburiy guruhga
+  javob berilmagani yoki bitta tanlovli guruhga ikkita javob — hammasi `422`.
+- Guruh va variant nomlari ham **tarjima qilinadi**, buyurtma esa oʻz nusxasini saqlaydi
+  (`order_item_options`): variant keyin oʻchirilsa yoki narxi oshsa ham eski chek oʻzgarmaydi.
+
+| Metod | Endpoint | Tavsif |
+|---|---|---|
+| PUT | `/api/staff/menu-items/{id}/options` | Guruhlarning yakuniy holati: roʻyxatda yoʻq guruh yoki variant oʻchiriladi |
+
 ## Tayyor boʻlish vaqti (3-bosqich)
 
 Loyihaning oʻzagi. Vaqt ikki omildan yigʻiladi:
@@ -395,7 +420,7 @@ vaqt mintaqasi boʻyicha kesiladi, shuning uchun «bugun» Toshkent yarim tunida
 ## Testlar
 
 ```bash
-cd backend  && php artisan test     # 191 ta test
+cd backend  && php artisan test     # 210 ta test
 cd backend  && ./vendor/bin/pint    # kod uslubi
 cd frontend && npm run test         # 33 ta test (Vitest + Testing Library)
 cd frontend && npm run lint         # oxlint
@@ -481,6 +506,7 @@ ham tekshiradi: backend uchun Pint + PHPUnit, frontend uchun lint + test + build
 - [x] **8-bosqich (1-qism)** — backend koʻp tilliligi: uz, uz_Cyrl, ru, en.
 - [x] **8-bosqich (2-qism)** — frontend toʻliq tarjimasi va til almashtirgich.
 - [x] **8-bosqich (3-qism)** — menyu maʼlumotlari tarjimasi (nom, tavsif, kategoriya).
+- [x] **9-bosqich (1-qism)** — modifikatorlar: guruhlar, variantlar, narx va vaqtga taʼsiri.
 - [x] **7-bosqich (3-qism)** — interfeys Telegram qobigʻida: avtomatik kirish, mavzu,
       `MainButton` va `BackButton`.
 

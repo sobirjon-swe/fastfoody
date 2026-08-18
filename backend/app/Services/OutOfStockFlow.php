@@ -48,7 +48,7 @@ class OutOfStockFlow
                 $item->menuItem->update(['is_available' => false]);
             }
 
-            return $order->load('items', 'customer', 'restaurant');
+            return $order->load('items.options', 'customer', 'restaurant');
         });
     }
 
@@ -96,7 +96,7 @@ class OutOfStockFlow
             $this->queue->schedule($order);
             $order->save();
 
-            return $order->load('items', 'customer', 'restaurant');
+            return $order->load('items.options', 'customer', 'restaurant');
         });
     }
 
@@ -114,7 +114,7 @@ class OutOfStockFlow
         $order->ready_at = null;
         $order->save();
 
-        return $order->load('items', 'customer', 'restaurant');
+        return $order->load('items.options', 'customer', 'restaurant');
     }
 
     private function assertAwaitingDecision(Order $order): void

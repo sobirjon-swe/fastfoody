@@ -22,6 +22,11 @@ class OrderItemResource extends JsonResource
             'id' => $this->id,
             'menu_item_id' => $this->menu_item_id,
             'name' => $this->translated('name'),
+            'options' => $this->whenLoaded('options', fn () => $this->options->map(fn ($option) => [
+                'group_name' => $option->translated('group_name'),
+                'name' => $option->translated('name'),
+                'price_delta' => $option->price_delta,
+            ])),
             'unit_price' => $this->unit_price,
             'quantity' => $this->quantity,
             'line_total' => $this->line_total,

@@ -159,7 +159,7 @@ class OrderController extends Controller
 
     private function find(Request $request, int $order): Order
     {
-        return $this->query($request)->with('items', 'restaurant')->findOrFail($order);
+        return $this->query($request)->with('items.options', 'restaurant')->findOrFail($order);
     }
 
     /**

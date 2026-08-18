@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -43,6 +44,16 @@ class MenuItem extends Model
     public function imageUrl(): ?string
     {
         return $this->image_path ? Storage::disk('public')->url($this->image_path) : null;
+    }
+
+    /**
+     * Modifikator guruhlari: «Oʻlcham», «Sous» kabi savollar.
+     *
+     * @return HasMany<OptionGroup, $this>
+     */
+    public function optionGroups(): HasMany
+    {
+        return $this->hasMany(OptionGroup::class)->orderBy('position')->orderBy('id');
     }
 
     /**

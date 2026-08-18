@@ -45,7 +45,7 @@ class RestaurantController extends Controller
         return response()->json([
             'restaurant' => RestaurantResource::make($restaurant),
             'menu_items' => MenuItemResource::collection(
-                $restaurant->menuItems()->available()->orderBy('name')->get(),
+                $restaurant->menuItems()->available()->with('optionGroups.options')->orderBy('name')->get(),
             ),
         ]);
     }

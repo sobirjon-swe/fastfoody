@@ -30,6 +30,7 @@ class MenuItemResource extends JsonResource
             'base_prep_minutes' => $this->base_prep_minutes,
             'extra_prep_minutes' => $this->extra_prep_minutes,
             'is_available' => $this->is_available,
+            'option_groups' => OptionGroupResource::collection($this->whenLoaded('optionGroups')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -4,10 +4,12 @@ namespace App\Services;
 
 use App\Enums\OrderStatus;
 use App\Models\MenuItem;
+use App\Models\Option;
 use App\Models\Order;
 use App\Models\Restaurant;
 use App\Models\User;
 use App\Support\Money;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -19,6 +21,8 @@ use Illuminate\Validation\ValidationException;
  */
 class OrderPlacer
 {
+    public function __construct(private readonly CartOptions $options) {}
+
     /**
      * Prices and preparation time of a cart, without writing anything. The cart
      * goes through exactly the same checks as a real order, so an estimate can
@@ -87,6 +91,20 @@ class OrderPlacer
                 $orderItem->translations = $menuItem->translations;
                 $orderItem->save();
 
+                foreach ($line['options'] as $option) {
+                    $chosen = $orderItem->options()->make([
+                        'option_id' => $option->id,
+                        'group_name' => $option->group->name,
+                        'name' => $option->name,
+                        'price_delta' => $option->price_delta,
+                        'prep_delta_minutes' => $option->prep_delta_minutes,
+                    ]);
+                    // Guruh nomi ham, variant nomi ham nusxa koʻchiriladi:
+                    // chek keyin ham oʻsha koʻrinishda qoladi.
+                    $chosen->translations = $this->optionTranslations($option);
+                    $chosen->save();
+                }
+
                 $totalTiyin += $line['line_tiyin'];
                 $prepMinutes += $line['prep_minutes'];
             }
@@ -96,8 +114,34 @@ class OrderPlacer
                 'prep_minutes' => $prepMinutes,
             ])->save();
 
-            return $order->load('items', 'restaurant');
+            return $order->load('items.options', 'restaurant');
         });
+    }
+
+    /**
+     * Variant va u tegishli guruh nomlarini bitta tarjima toʻplamiga
+     * yigʻadi, shunda chek qatorini bir joydan chizish mumkin.
+     *
+     * @return array<string, array<string, string>>|null
+     */
+    private function optionTranslations(Option $option): ?array
+    {
+        $merged = [];
+
+        foreach ((array) $option->translations as $locale => $fields) {
+            $merged[$locale] = array_filter([
+                'name' => $fields['name'] ?? null,
+                'group_name' => $option->group->translations[$locale]['name'] ?? null,
+            ], fn ($value) => is_string($value) && $value !== '');
+        }
+
+        foreach ((array) $option->group->translations as $locale => $fields) {
+            if (isset($fields['name']) && ! isset($merged[$locale]['group_name'])) {
+                $merged[$locale]['group_name'] = $fields['name'];
+            }
+        }
+
+        return array_filter($merged) ?: null;
     }
 
     /**
@@ -123,24 +167,35 @@ class OrderPlacer
     }
 
     /**
-     * @param  array<int, array{menu_item_id: int, quantity: int}>  $cart
-     * @return array<int, array{menu_item: MenuItem, quantity: int, line_tiyin: int, prep_minutes: int}>
+     * Modifikator narxi **har bir dona uchun** qoʻshiladi (3 ta gamburgerga
+     * pishloq — uch marta pul), tayyorlash vaqti esa **qatorga bir marta**:
+     * sousni butun partiyaga birdan qoʻshiladi, shuning uchun uni har donaga
+     * koʻpaytirish navbatni asossiz choʻzardi.
+     *
+     * @param  array<int, array{menu_item_id: int, quantity: int, option_ids?: array<int, int>}>  $cart
+     * @return array<int, array{menu_item: MenuItem, quantity: int, line_tiyin: int, prep_minutes: int, options: Collection<int, Option>}>
      */
     private function lines(Restaurant $restaurant, array $cart, bool $lock = false): array
     {
         $menuItems = $this->menuItemsFor($restaurant, $cart, $lock);
+        $selection = $this->options->resolve($menuItems, $cart);
 
-        return array_map(function (array $line) use ($menuItems) {
+        return array_map(function (array $line, int $index) use ($menuItems, $selection) {
             $menuItem = $menuItems[(int) $line['menu_item_id']];
             $quantity = (int) $line['quantity'];
+            $options = $selection[$index] ?? collect();
+
+            $optionTiyin = $options->sum(fn (Option $option) => Money::toTiyin($option->price_delta));
+            $optionMinutes = (int) $options->sum(fn (Option $option) => $option->prep_delta_minutes);
 
             return [
                 'menu_item' => $menuItem,
                 'quantity' => $quantity,
-                'line_tiyin' => Money::toTiyin($menuItem->price) * $quantity,
-                'prep_minutes' => $menuItem->prepMinutesFor($quantity),
+                'line_tiyin' => (Money::toTiyin($menuItem->price) + $optionTiyin) * $quantity,
+                'prep_minutes' => $menuItem->prepMinutesFor($quantity) + $optionMinutes,
+                'options' => $options,
             ];
-        }, $cart);
+        }, $cart, array_keys($cart));
     }
 
     /**
@@ -159,7 +214,7 @@ class OrderPlacer
             $query->lockForUpdate();
         }
 
-        $menuItems = $query->get()->keyBy('id');
+        $menuItems = $query->with('optionGroups')->get()->keyBy('id');
 
         $errors = [];
 
