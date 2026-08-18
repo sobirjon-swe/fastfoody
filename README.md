@@ -201,6 +201,13 @@ Taomga savol-javob shaklidagi tanlovlar qoʻshiladi: **guruh** — savol («Sous
 |---|---|---|
 | PUT | `/api/staff/menu-items/{id}/options` | Guruhlarning yakuniy holati: roʻyxatda yoʻq guruh yoki variant oʻchiriladi |
 
+Interfeysda: xodim panelida taom yonidagi roʻyxat tugmasi guruhlarni tahrirlash oynasini
+ochadi — «Majburiy» va «Koʻp tanlov» tugmalari `min_select`/`max_select` ni yashiradi, chunki
+xodimga son emas, maʼno kerak. Mijoz tomonida modifikatorli taomga «+» bosilganda tanlov
+oynasi ochiladi: bitta tanlovli guruh radio, koʻp tanlovli guruh belgilash koʻrinishida
+chiziladi, tugmada esa bitta dona narxi jonli koʻrinadi. Bitta taom har xil tanlovlar bilan
+savatchada alohida qator boʻlib turadi.
+
 ## Tayyor boʻlish vaqti (3-bosqich)
 
 Loyihaning oʻzagi. Vaqt ikki omildan yigʻiladi:
@@ -506,7 +513,7 @@ ham tekshiradi: backend uchun Pint + PHPUnit, frontend uchun lint + test + build
 - [x] **8-bosqich (1-qism)** — backend koʻp tilliligi: uz, uz_Cyrl, ru, en.
 - [x] **8-bosqich (2-qism)** — frontend toʻliq tarjimasi va til almashtirgich.
 - [x] **8-bosqich (3-qism)** — menyu maʼlumotlari tarjimasi (nom, tavsif, kategoriya).
-- [x] **9-bosqich (1-qism)** — modifikatorlar: guruhlar, variantlar, narx va vaqtga taʼsiri.
+- [x] **9-bosqich** — modifikatorlar: backend, xodim paneli va mijoz tanlovi.
 - [x] **7-bosqich (3-qism)** — interfeys Telegram qobigʻida: avtomatik kirish, mavzu,
       `MainButton` va `BackButton`.
 

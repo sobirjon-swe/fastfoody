@@ -27,8 +27,9 @@ class AppServiceProvider extends ServiceProvider
         JsonResource::withoutWrapping();
 
         // Fail loudly in development instead of silently returning null for a
-        // relation that was never eager loaded.
-        Model::preventLazyLoading($this->app->isLocal());
+        // relation that was never eager loaded. Testlarda ham yoqilgan:
+        // aks holda kechikkan yuklash xatosi faqat brauzerda bilinardi.
+        Model::preventLazyLoading($this->app->isLocal() || $this->app->runningUnitTests());
 
         // Tiklash havolasi API'ga emas, SPA sahifasiga olib boradi.
         ResetPassword::createUrlUsing(fn (object $user, string $token) => sprintf(

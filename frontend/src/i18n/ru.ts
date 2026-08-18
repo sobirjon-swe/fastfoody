@@ -303,4 +303,31 @@ export const ru: Record<TranslationKey, string> = {
   'Kategoriya (:locale)': 'Категория (:locale)',
 
   ':minutes daq (+:extra daq)': ':minutes мин (+:extra мин)',
+
+  // Modifikatorlar
+  Modifikatorlar: 'Модификаторы',
+  Tanlovlar: 'Варианты',
+  'Guruh qoʻshish': 'Добавить группу',
+  'Variant qoʻshish': 'Добавить вариант',
+  'Guruh nomi': 'Название группы',
+  'Variant nomi': 'Название варианта',
+  Majburiy: 'Обязательно',
+  'Koʻp tanlov': 'Несколько',
+  'Narx (+)': 'Цена (+)',
+  'Vaqt (+daq)': 'Время (+мин)',
+  'Guruhni oʻchirish': 'Удалить группу',
+  'Variantni oʻchirish': 'Удалить вариант',
+  'Hozircha modifikator yoʻq. Masalan «Sous» guruhi va uning variantlari.':
+    'Пока нет модификаторов. Например, группа «Соус» и её варианты.',
+  'Modifikatorlar saqlandi.': 'Модификаторы сохранены.',
+  'Modifikatorlarni saqlab boʻlmadi.': 'Не удалось сохранить модификаторы.',
+  ':name modifikatorlari': 'Модификаторы: :name',
+  'Har bir guruh — bitta savol, variantlar — javoblar. Narx har donaga, vaqt esa qatorga bir marta qoʻshiladi.':
+    'Каждая группа — один вопрос, варианты — ответы. Цена добавляется к каждой порции, время — один раз на строку.',
+  Tanlanmagan: 'Не выбрано',
+  Tanlang: 'Выберите',
+  'Bittasini tanlang': 'Выберите один',
+  'Xohlagancha tanlang': 'Выберите любые',
+  Savatchaga: 'В корзину',
+  Oʻzgartirish: 'Изменить',
 }

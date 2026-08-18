@@ -254,6 +254,11 @@ export function StaffOrdersPage() {
                     <li key={item.id} className="flex justify-between gap-3">
                       <span className="font-medium">
                         {item.quantity} × {item.name}
+                        {item.options && item.options.length > 0 && (
+                          <span className="text-muted-foreground block text-xs font-normal">
+                            {item.options.map((option) => option.name).join(' · ')}
+                          </span>
+                        )}
                         {item.is_out_of_stock && (
                           <span className="text-destructive ml-2 text-xs font-normal">
                             {t('tugadi')}

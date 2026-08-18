@@ -302,4 +302,31 @@ export const en: Record<TranslationKey, string> = {
   'Kategoriya (:locale)': 'Category (:locale)',
 
   ':minutes daq (+:extra daq)': ':minutes min (+:extra min)',
+
+  // Modifikatorlar
+  Modifikatorlar: 'Options',
+  Tanlovlar: 'Choices',
+  'Guruh qoʻshish': 'Add group',
+  'Variant qoʻshish': 'Add option',
+  'Guruh nomi': 'Group name',
+  'Variant nomi': 'Option name',
+  Majburiy: 'Required',
+  'Koʻp tanlov': 'Multiple',
+  'Narx (+)': 'Price (+)',
+  'Vaqt (+daq)': 'Time (+min)',
+  'Guruhni oʻchirish': 'Remove group',
+  'Variantni oʻchirish': 'Remove option',
+  'Hozircha modifikator yoʻq. Masalan «Sous» guruhi va uning variantlari.':
+    'No options yet. For example a "Sauce" group with its choices.',
+  'Modifikatorlar saqlandi.': 'Options saved.',
+  'Modifikatorlarni saqlab boʻlmadi.': 'Could not save the options.',
+  ':name modifikatorlari': ':name options',
+  'Har bir guruh — bitta savol, variantlar — javoblar. Narx har donaga, vaqt esa qatorga bir marta qoʻshiladi.':
+    'Each group is one question, options are the answers. Price applies per unit, time once per line.',
+  Tanlanmagan: 'Not selected',
+  Tanlang: 'Choose',
+  'Bittasini tanlang': 'Choose one',
+  'Xohlagancha tanlang': 'Choose any',
+  Savatchaga: 'Add to cart',
+  Oʻzgartirish: 'Change',
 }

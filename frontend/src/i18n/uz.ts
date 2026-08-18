@@ -314,6 +314,33 @@ export const uz = {
   'Kategoriya (:locale)': 'Kategoriya (:locale)',
 
   ':minutes daq (+:extra daq)': ':minutes daq (+:extra daq)',
+
+  // Modifikatorlar
+  Modifikatorlar: 'Modifikatorlar',
+  Tanlovlar: 'Tanlovlar',
+  'Guruh qoʻshish': 'Guruh qoʻshish',
+  'Variant qoʻshish': 'Variant qoʻshish',
+  'Guruh nomi': 'Guruh nomi',
+  'Variant nomi': 'Variant nomi',
+  Majburiy: 'Majburiy',
+  'Koʻp tanlov': 'Koʻp tanlov',
+  'Narx (+)': 'Narx (+)',
+  'Vaqt (+daq)': 'Vaqt (+daq)',
+  'Guruhni oʻchirish': 'Guruhni oʻchirish',
+  'Variantni oʻchirish': 'Variantni oʻchirish',
+  'Hozircha modifikator yoʻq. Masalan «Sous» guruhi va uning variantlari.':
+    'Hozircha modifikator yoʻq. Masalan «Sous» guruhi va uning variantlari.',
+  'Modifikatorlar saqlandi.': 'Modifikatorlar saqlandi.',
+  'Modifikatorlarni saqlab boʻlmadi.': 'Modifikatorlarni saqlab boʻlmadi.',
+  ':name modifikatorlari': ':name modifikatorlari',
+  'Har bir guruh — bitta savol, variantlar — javoblar. Narx har donaga, vaqt esa qatorga bir marta qoʻshiladi.':
+    'Har bir guruh — bitta savol, variantlar — javoblar. Narx har donaga, vaqt esa qatorga bir marta qoʻshiladi.',
+  Tanlanmagan: 'Tanlanmagan',
+  Tanlang: 'Tanlang',
+  'Bittasini tanlang': 'Bittasini tanlang',
+  'Xohlagancha tanlang': 'Xohlagancha tanlang',
+  Savatchaga: 'Savatchaga',
+  Oʻzgartirish: 'Oʻzgartirish',
 } as const
 
 export type TranslationKey = keyof typeof uz

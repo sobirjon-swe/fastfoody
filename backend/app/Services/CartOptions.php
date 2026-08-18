@@ -119,6 +119,6 @@ class CartOptions
             ->flatMap(fn (MenuItem $item) => $item->optionGroups->pluck('id'))
             ->all();
 
-        return Option::whereIn('option_group_id', $groupIds)->get()->keyBy('id');
+        return Option::whereIn('option_group_id', $groupIds)->with('group')->get()->keyBy('id');
     }
 }

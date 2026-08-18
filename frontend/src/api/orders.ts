@@ -4,6 +4,8 @@ import type { MenuItem, Order, OrderEstimate, PaginationMeta, Restaurant } from 
 export interface CartLine {
   menu_item_id: number
   quantity: number
+  /** Tanlangan modifikatorlar; narx va vaqt serverda hisoblanadi. */
+  option_ids?: number[]
 }
 
 export async function listPublicRestaurants(q?: string) {

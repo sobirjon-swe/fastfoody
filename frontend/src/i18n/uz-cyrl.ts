@@ -302,4 +302,31 @@ export const uzCyrl: Record<TranslationKey, string> = {
   'Kategoriya (:locale)': 'Категория (:locale)',
 
   ':minutes daq (+:extra daq)': ':minutes дақ (+:extra дақ)',
+
+  // Modifikatorlar
+  Modifikatorlar: 'Модификаторлар',
+  Tanlovlar: 'Танловлар',
+  'Guruh qoʻshish': 'Гуруҳ қўшиш',
+  'Variant qoʻshish': 'Вариант қўшиш',
+  'Guruh nomi': 'Гуруҳ номи',
+  'Variant nomi': 'Вариант номи',
+  Majburiy: 'Мажбурий',
+  'Koʻp tanlov': 'Кўп танлов',
+  'Narx (+)': 'Нарх (+)',
+  'Vaqt (+daq)': 'Вақт (+дақ)',
+  'Guruhni oʻchirish': 'Гуруҳни ўчириш',
+  'Variantni oʻchirish': 'Вариантни ўчириш',
+  'Hozircha modifikator yoʻq. Masalan «Sous» guruhi va uning variantlari.':
+    'Ҳозирча модификатор йўқ. Масалан «Соус» гуруҳи ва унинг вариантлари.',
+  'Modifikatorlar saqlandi.': 'Модификаторлар сақланди.',
+  'Modifikatorlarni saqlab boʻlmadi.': 'Модификаторларни сақлаб бўлмади.',
+  ':name modifikatorlari': ':name модификаторлари',
+  'Har bir guruh — bitta savol, variantlar — javoblar. Narx har donaga, vaqt esa qatorga bir marta qoʻshiladi.':
+    'Ҳар бир гуруҳ — битта савол, вариантлар — жавоблар. Нарх ҳар донага, вақт эса қаторга бир марта қўшилади.',
+  Tanlanmagan: 'Танланмаган',
+  Tanlang: 'Танланг',
+  'Bittasini tanlang': 'Биттасини танланг',
+  'Xohlagancha tanlang': 'Хоҳлаганча танланг',
+  Savatchaga: 'Саватчага',
+  Oʻzgartirish: 'Ўзгартириш',
 }

@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 
 import { estimateOrder, getRestaurantMenu, placeOrder } from '@/api/orders'
+import { OptionPickerDialog } from '@/components/OptionPickerDialog'
 import { Spinner } from '@/components/Spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -15,8 +16,21 @@ import { useMoney, usePrepTime } from '@/i18n/use-money'
 import { useTelegramBackButton, useTelegramMainButton } from '@/lib/use-telegram'
 import type { MenuItem, OrderEstimate, Restaurant } from '@/types/api'
 
-/** menu item id -> quantity */
-type Cart = Record<number, number>
+/**
+ * Savatcha qatori. Bitta taom har xil modifikatorlar bilan bir necha marta
+ * qoʻshilishi mumkin, shuning uchun kalit — taom id'si va tanlangan
+ * variantlar birgalikda.
+ */
+interface CartLineState {
+  key: string
+  item: MenuItem
+  quantity: number
+  optionIds: number[]
+}
+
+function lineKey(itemId: number, optionIds: number[]): string {
+  return [itemId, ...[...optionIds].sort((a, b) => a - b)].join(':')
+}
 
 export function RestaurantMenuPage() {
   const t = useT()
@@ -27,7 +41,8 @@ export function RestaurantMenuPage() {
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
   const [menu, setMenu] = useState<MenuItem[]>([])
-  const [cart, setCart] = useState<Cart>({})
+  const [cart, setCart] = useState<CartLineState[]>([])
+  const [picking, setPicking] = useState<MenuItem | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [placing, setPlacing] = useState(false)
@@ -56,19 +71,59 @@ export function RestaurantMenuPage() {
     void load()
   }, [load, t])
 
-  function changeQuantity(item: MenuItem, delta: number) {
-    setCart((current) => {
-      const quantity = Math.min(50, Math.max(0, (current[item.id] ?? 0) + delta))
-      const next = { ...current }
+  /** Savatchadagi qator miqdorini oʻzgartiradi; nolga tushsa qator chiqadi. */
+  function changeQuantity(key: string, delta: number) {
+    setCart((current) =>
+      current
+        .map((line) =>
+          line.key === key
+            ? { ...line, quantity: Math.min(50, Math.max(0, line.quantity + delta)) }
+            : line,
+        )
+        .filter((line) => line.quantity > 0),
+    )
+  }
 
-      if (quantity === 0) {
-        delete next[item.id]
-      } else {
-        next[item.id] = quantity
-      }
+  /**
+   * Modifikatorli taom uchun avval tanlov oynasi ochiladi; oddiy taom
+   * toʻgʻridan-toʻgʻri savatchaga tushadi.
+   */
+  function addToCart(item: MenuItem, optionIds: number[] = []) {
+    const key = lineKey(item.id, optionIds)
 
-      return next
-    })
+    setCart((current) =>
+      current.some((line) => line.key === key)
+        ? current.map((line) =>
+            line.key === key ? { ...line, quantity: Math.min(50, line.quantity + 1) } : line,
+          )
+        : [...current, { key, item, quantity: 1, optionIds }],
+    )
+  }
+
+  function add(item: MenuItem) {
+    if ((item.option_groups ?? []).length > 0) {
+      setPicking(item)
+
+      return
+    }
+
+    addToCart(item)
+  }
+
+  /** Shu taomning savatchadagi umumiy soni — kartadagi raqam uchun. */
+  function quantityOf(item: MenuItem): number {
+    return cart
+      .filter((line) => line.item.id === item.id)
+      .reduce((sum, line) => sum + line.quantity, 0)
+  }
+
+  /** Taomning oxirgi qatoridan bittasini olib tashlaydi. */
+  function removeOne(item: MenuItem) {
+    const last = [...cart].reverse().find((line) => line.item.id === item.id)
+
+    if (last) {
+      changeQuantity(last.key, -1)
+    }
   }
 
   // Kategoriya boʻyicha guruhlash: nomsizlar oxirida, tartib menyudagidek.
@@ -80,18 +135,32 @@ export function RestaurantMenuPage() {
     }, new Map<string, MenuItem[]>()),
   ].sort(([a], [b]) => (a === '' ? 1 : b === '' ? -1 : a.localeCompare(b)))
 
-  const lines = menu
-    .filter((item) => cart[item.id])
-    .map((item) => ({ item, quantity: cart[item.id] }))
+  const lines = cart
 
   // Stable identity of the cart contents, so the estimate effect reruns on a
   // real change and not on every render.
-  const cartKey = lines.map((line) => `${line.item.id}:${line.quantity}`).join(',')
+  const cartKey = lines.map((line) => `${line.key}x${line.quantity}`).join(',')
 
-  const total = lines.reduce(
-    (sum, line) => sum + Number.parseFloat(line.item.price) * line.quantity,
-    0,
-  )
+  /** Bitta dona narxi: taom narxi + tanlangan variantlar. */
+  function unitPrice(line: CartLineState): number {
+    const extras = (line.item.option_groups ?? [])
+      .flatMap((group) => group.options)
+      .filter((option) => line.optionIds.includes(option.id))
+      .reduce((sum, option) => sum + Number.parseFloat(option.price_delta), 0)
+
+    return Number.parseFloat(line.item.price) + extras
+  }
+
+  /** Qatordagi tanlangan variantlar nomi: «Smetana · Pishloq». */
+  function optionNames(line: CartLineState): string {
+    return (line.item.option_groups ?? [])
+      .flatMap((group) => group.options)
+      .filter((option) => line.optionIds.includes(option.id))
+      .map((option) => option.name)
+      .join(' · ')
+  }
+
+  const total = lines.reduce((sum, line) => sum + unitPrice(line) * line.quantity, 0)
 
   // The ready time depends on the kitchen queue, so it is asked of the server
   // rather than guessed here. Debounced: tapping "+" five times must not fire
@@ -103,7 +172,11 @@ export function RestaurantMenuPage() {
       return
     }
 
-    const payload = lines.map((line) => ({ menu_item_id: line.item.id, quantity: line.quantity }))
+    const payload = lines.map((line) => ({
+      menu_item_id: line.item.id,
+      quantity: line.quantity,
+      option_ids: line.optionIds,
+    }))
     let current = true
 
     setEstimating(true)
@@ -128,7 +201,11 @@ export function RestaurantMenuPage() {
     try {
       const order = await placeOrder(
         id,
-        lines.map((line) => ({ menu_item_id: line.item.id, quantity: line.quantity })),
+        lines.map((line) => ({
+          menu_item_id: line.item.id,
+          quantity: line.quantity,
+          option_ids: line.optionIds,
+        })),
       )
 
       toast.success(t('Buyurtma qabul qilindi.'))
@@ -248,19 +325,19 @@ export function RestaurantMenuPage() {
                         size="icon"
                         variant="outline"
                         aria-label={t(':name kamaytirish', { name: item.name })}
-                        disabled={!cart[item.id]}
-                        onClick={() => changeQuantity(item, -1)}
+                        disabled={quantityOf(item) === 0}
+                        onClick={() => removeOne(item)}
                       >
                         <Minus />
                       </Button>
                       <span className="w-6 text-center tabular-nums" data-testid={`qty-${item.id}`}>
-                        {cart[item.id] ?? 0}
+                        {quantityOf(item)}
                       </span>
                       <Button
                         size="icon"
                         variant="outline"
                         aria-label={t(':name qoʻshish', { name: item.name })}
-                        onClick={() => changeQuantity(item, 1)}
+                        onClick={() => add(item)}
                       >
                         <Plus />
                       </Button>
@@ -272,6 +349,12 @@ export function RestaurantMenuPage() {
           ))
         )}
       </div>
+
+      <OptionPickerDialog
+        item={picking}
+        onOpenChange={(open) => !open && setPicking(null)}
+        onConfirm={(optionIds) => picking && addToCart(picking, optionIds)}
+      />
 
       <Card className="h-fit lg:sticky lg:top-6">
         <CardHeader>
@@ -285,13 +368,18 @@ export function RestaurantMenuPage() {
           ) : (
             <>
               <ul className="grid gap-2 text-sm">
-                {lines.map(({ item, quantity }) => (
-                  <li key={item.id} className="flex justify-between gap-2">
+                {lines.map((line) => (
+                  <li key={line.key} className="flex justify-between gap-2">
                     <span>
-                      {item.name} × {quantity}
+                      {line.item.name} × {line.quantity}
+                      {line.optionIds.length > 0 && (
+                        <span className="text-muted-foreground block text-xs">
+                          {optionNames(line)}
+                        </span>
+                      )}
                     </span>
                     <span className="whitespace-nowrap">
-                      {money(Number.parseFloat(item.price) * quantity)}
+                      {money(unitPrice(line) * line.quantity)}
                     </span>
                   </li>
                 ))}

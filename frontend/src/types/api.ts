@@ -33,12 +33,35 @@ export interface User {
   created_at: string
 }
 
+export interface MenuItemOption {
+  id: number
+  name: string
+  price_delta: string
+  prep_delta_minutes: number
+  /** Faqat xodim panelida keladi. */
+  is_available?: boolean
+  translations?: Record<string, { name?: string }> | null
+}
+
+export interface MenuItemOptionGroup {
+  id: number
+  name: string
+  min_select: number
+  max_select: number | null
+  /** Mijoz javobida keladi; xodim panelida min_select'dan hisoblanadi. */
+  is_required?: boolean
+  options: MenuItemOption[]
+  translations?: Record<string, { name?: string }> | null
+}
+
 export interface MenuItem {
   id: number
   restaurant_id: number
   name: string
   description: string | null
   category: string | null
+  /** Modifikator guruhlari: «Sous», «Oʻlcham». */
+  option_groups?: MenuItemOptionGroup[]
   /** Boshqa tillardagi nom, tavsif va kategoriya; tarjima majburiy emas. */
   translations?: Record<string, { name?: string; description?: string; category?: string }> | null
   image_url: string | null
@@ -61,6 +84,12 @@ export type OrderStatus =
   | 'bekor_qilindi_mahsulot_yoq'
   | 'muddati_otdi'
 
+export interface OrderItemOption {
+  group_name: string
+  name: string
+  price_delta: string
+}
+
 export interface OrderItem {
   id: number
   menu_item_id: number | null
@@ -71,6 +100,8 @@ export interface OrderItem {
   prep_minutes: number
   /** Oshxona shu qatordagi taom tugaganini belgilagan. */
   is_out_of_stock: boolean
+  /** Tanlangan modifikatorlar; buyurtma paytidagi nusxasi. */
+  options?: OrderItemOption[]
 }
 
 export interface Order {

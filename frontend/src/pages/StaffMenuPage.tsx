@@ -1,4 +1,4 @@
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { ListChecks, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -6,6 +6,7 @@ import { deleteMenuItem, listMenuItems, updateMenuItem } from '@/api/menu-items'
 import { useAuth } from '@/auth/use-auth'
 import { Spinner } from '@/components/Spinner'
 import { MenuItemFormDialog } from '@/components/staff/MenuItemFormDialog'
+import { MenuItemOptionsDialog } from '@/components/staff/MenuItemOptionsDialog'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -46,6 +47,7 @@ export function StaffMenuPage() {
 
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<MenuItem | null>(null)
+  const [optionsFor, setOptionsFor] = useState<MenuItem | null>(null)
   const [deleting, setDeleting] = useState<MenuItem | null>(null)
 
   const load = useCallback(async () => {
@@ -208,6 +210,14 @@ export function StaffMenuPage() {
                       <Button
                         size="icon"
                         variant="ghost"
+                        aria-label={t(':name modifikatorlari', { name: item.name })}
+                        onClick={() => setOptionsFor(item)}
+                      >
+                        <ListChecks />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
                         aria-label={t(':name tahrirlash', { name: item.name })}
                         onClick={() => {
                           setEditing(item)
@@ -232,6 +242,12 @@ export function StaffMenuPage() {
           </Table>
         </div>
       )}
+
+      <MenuItemOptionsDialog
+        menuItem={optionsFor}
+        onOpenChange={(open) => !open && setOptionsFor(null)}
+        onSaved={load}
+      />
 
       <MenuItemFormDialog
         open={formOpen}

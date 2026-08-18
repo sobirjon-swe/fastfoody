@@ -56,3 +56,36 @@ export async function deleteMenuItemImage(id: number) {
 
   return data.menu_item
 }
+
+/** Bitta variant: «Smetana», narx va vaqt qoʻshimchasi bilan. */
+export interface OptionInput {
+  id?: number
+  name: string
+  price_delta: number
+  prep_delta_minutes: number
+  is_available?: boolean
+  translations?: Record<string, { name?: string }>
+}
+
+/** Bitta savol: «Sous». min/max tanlov turini belgilaydi. */
+export interface OptionGroupInput {
+  id?: number
+  name: string
+  min_select: number
+  max_select: number | null
+  options: OptionInput[]
+  translations?: Record<string, { name?: string }>
+}
+
+/**
+ * Guruhlarning yakuniy holatini saqlaydi: roʻyxatda yoʻq guruh yoki variant
+ * serverda oʻchiriladi.
+ */
+export async function syncMenuItemOptions(menuItemId: number, groups: OptionGroupInput[]) {
+  const { data } = await api.put<{ menu_item: MenuItem }>(
+    `/staff/menu-items/${menuItemId}/options`,
+    { groups },
+  )
+
+  return data.menu_item
+}
