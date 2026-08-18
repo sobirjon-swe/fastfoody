@@ -292,4 +292,14 @@ export const en: Record<TranslationKey, string> = {
 
   // Valyuta
   soʻm: 'soʻm',
+
+  // Menyu tarjimasi
+  'Boshqa tillarda': 'Other languages',
+  'Ixtiyoriy. Toʻldirilmagan til uchun mijozga asl nom koʻrsatiladi.':
+    'Optional. For a language left blank the customer sees the original name.',
+  'Nomi (:locale)': 'Name (:locale)',
+  'Tavsif (:locale)': 'Description (:locale)',
+  'Kategoriya (:locale)': 'Category (:locale)',
+
+  ':minutes daq (+:extra daq)': ':minutes min (+:extra min)',
 }

@@ -28,14 +28,15 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useT } from '@/i18n/use-i18n'
-import { useMoney } from '@/i18n/use-money'
+import { useMoney, usePrepTime } from '@/i18n/use-money'
 import { apiErrorMessage } from '@/lib/api'
-import { formatPrepTime } from '@/lib/format'
+
 import type { MenuItem } from '@/types/api'
 
 export function StaffMenuPage() {
   const t = useT()
   const money = useMoney()
+  const prepTime = usePrepTime()
   const { user } = useAuth()
   const restaurant = user?.restaurant
 
@@ -193,7 +194,7 @@ export function StaffMenuPage() {
                   </TableCell>
                   <TableCell className="whitespace-nowrap">{money(item.price)}</TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatPrepTime(item.base_prep_minutes, item.extra_prep_minutes)}
+                    {prepTime(item.base_prep_minutes, item.extra_prep_minutes)}
                   </TableCell>
                   <TableCell>
                     <Switch

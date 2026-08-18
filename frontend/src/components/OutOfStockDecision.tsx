@@ -8,9 +8,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useT } from '@/i18n/use-i18n'
-import { useMoney } from '@/i18n/use-money'
+import { useMoney, usePrepTime } from '@/i18n/use-money'
 import { apiErrorMessage } from '@/lib/api'
-import { formatPrepTime } from '@/lib/format'
+
 import type { MenuItem, Order } from '@/types/api'
 
 /**
@@ -26,6 +26,7 @@ export function OutOfStockDecision({
 }) {
   const t = useT()
   const money = useMoney()
+  const prepTime = usePrepTime()
   const missing = order.items?.find((item) => item.is_out_of_stock)
 
   const [menu, setMenu] = useState<MenuItem[]>([])
@@ -130,7 +131,7 @@ export function OutOfStockDecision({
                   <div className="text-sm font-medium">{item.name}</div>
                   <div className="text-muted-foreground text-xs">
                     {money(item.price)} ·{' '}
-                    {formatPrepTime(item.base_prep_minutes, item.extra_prep_minutes)}
+                    {prepTime(item.base_prep_minutes, item.extra_prep_minutes)}
                   </div>
                 </div>
                 <Button size="sm" disabled={busy} onClick={() => replace(item)}>

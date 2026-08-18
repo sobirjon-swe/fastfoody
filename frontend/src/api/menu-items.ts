@@ -1,6 +1,12 @@
 import { api } from '@/lib/api'
 import type { MenuItem } from '@/types/api'
 
+/** Til kodi → shu tildagi matnlar. Asosiy til bu yerga yozilmaydi. */
+export type MenuItemTranslations = Record<
+  string,
+  { name?: string; description?: string; category?: string }
+>
+
 export interface MenuItemPayload {
   name: string
   description?: string | null
@@ -9,6 +15,7 @@ export interface MenuItemPayload {
   base_prep_minutes: number
   extra_prep_minutes: number
   is_available?: boolean
+  translations?: MenuItemTranslations | null
 }
 
 export async function listMenuItems() {

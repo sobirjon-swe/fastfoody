@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests\Staff;
 
+use App\Http\Requests\Staff\Concerns\TranslationRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class StoreMenuItemRequest extends FormRequest
 {
+    use TranslationRules;
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -32,6 +35,6 @@ class StoreMenuItemRequest extends FormRequest
             'base_prep_minutes' => ['required', 'integer', 'min:1', 'max:600'],
             'extra_prep_minutes' => ['required', 'integer', 'min:0', 'max:600'],
             'is_available' => ['boolean'],
-        ];
+        ] + $this->translationRules();
     }
 }

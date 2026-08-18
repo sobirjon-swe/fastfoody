@@ -13,3 +13,19 @@ export function useMoney() {
 
   return useCallback((price: string | number) => formatPrice(price, t('soʻm')), [t])
 }
+
+/**
+ * Tayyorlash vaqti: «4 daq (+2 daq)» / «4 мин (+2 мин)». Daqiqa qisqartmasi
+ * tilga qarab oʻzgaradi, raqamlar esa oʻsha-oʻsha.
+ */
+export function usePrepTime() {
+  const t = useT()
+
+  return useCallback(
+    (base: number, extra: number) =>
+      extra > 0
+        ? t(':minutes daq (+:extra daq)', { minutes: base, extra })
+        : t(':minutes daq', { minutes: base }),
+    [t],
+  )
+}

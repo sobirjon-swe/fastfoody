@@ -292,6 +292,26 @@ Backend tarjima kalitlari — oʻzbekcha lotin jumlalarning oʻzi: `lang/uz.json
 `lang/{uz_Cyrl,ru}/{auth,validation}.php` va `lang/en/validation.php`. `lang/uz.json` boʻsh koʻrinsa ham **kerak**: usiz `uz` tili zaxira
 tilga (`en`) tushib ketadi va oʻzbek foydalanuvchi inglizcha xabar koʻradi.
 
+### Menyu tarjimasi
+
+Taom nomi, tavsifi va kategoriyasi ham tarjima qilinadi — aks holda interfeysni tarjima
+qilishning maʼnosi qolmaydi: mijoz taom nimaligini tushunmasa, ekran qaysi tilda ekani muhim
+emas.
+
+- Asosiy matn oshxona kiritgan tilda `menu_items.name` / `description` / `category` da qoladi;
+  boshqa tillar `menu_items.translations` JSON ustunida saqlanadi.
+- **Tarjima majburiy emas.** Xodim bitta tilda ishlayversa ham boʻladi: tarjima yoʻq boʻlsa
+  mijozga asl nom koʻrsatiladi, boʻsh joy emas. Xodim panelidagi «Boshqa tillarda» boʻlimi
+  yigʻilgan holda turadi, shuning uchun kundalik ish soddaligicha qoladi.
+- **Xodim doim asl matnni tahrirlaydi.** Xodim paneli alohida `StaffMenuItemResource` dan
+  foydalanadi — u matnni tarjima qilmaydi. Aks holda ruscha ishlayotgan xodim taomni
+  saqlaganda tarjima asl nom oʻrniga yozilib ketardi (test bilan qoplangan).
+- **Buyurtma oʻz nusxasini saqlaydi** — tarjimaga ham tegishli: `order_items.translations`
+  buyurtma paytidagi holicha yoziladi, shuning uchun menyu keyin oʻzgarsa ham mijoz
+  buyurtmasini oʻsha nom bilan koʻradi.
+- Asosiy tilni tarjimalar orasiga yozishga urinish `422` bilan rad etiladi — u `name`
+  maydonida turadi, ikki joyda emas.
+
 ## Telegram Mini App (7-bosqich)
 
 Mijoz tomonini Telegram ichida ochish uchun asos tayyor. Mini App sahifasi Telegram'dan
@@ -375,7 +395,7 @@ vaqt mintaqasi boʻyicha kesiladi, shuning uchun «bugun» Toshkent yarim tunida
 ## Testlar
 
 ```bash
-cd backend  && php artisan test     # 183 ta test
+cd backend  && php artisan test     # 191 ta test
 cd backend  && ./vendor/bin/pint    # kod uslubi
 cd frontend && npm run test         # 33 ta test (Vitest + Testing Library)
 cd frontend && npm run lint         # oxlint
@@ -460,6 +480,7 @@ ham tekshiradi: backend uchun Pint + PHPUnit, frontend uchun lint + test + build
 - [x] **7-bosqich (2-qism)** — bot xabarnomalari: buyurtma holati oʻzgarganda mijozga xabar.
 - [x] **8-bosqich (1-qism)** — backend koʻp tilliligi: uz, uz_Cyrl, ru, en.
 - [x] **8-bosqich (2-qism)** — frontend toʻliq tarjimasi va til almashtirgich.
+- [x] **8-bosqich (3-qism)** — menyu maʼlumotlari tarjimasi (nom, tavsif, kategoriya).
 - [x] **7-bosqich (3-qism)** — interfeys Telegram qobigʻida: avtomatik kirish, mavzu,
       `MainButton` va `BackButton`.
 

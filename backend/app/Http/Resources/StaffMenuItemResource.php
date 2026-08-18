@@ -7,13 +7,18 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
+ * Xodim panelidagi taom.
+ *
+ * Mijoz koʻradigan `MenuItemResource` dan farqi: bu yerda matnlar **tarjima
+ * qilinmaydi**. Xodim asl matnni tahrirlaydi, shuning uchun ruscha ishlayotgan
+ * xodimning tahrirlash oynasi asl oʻzbekcha nomni koʻrsatishi shart — aks
+ * holda saqlaganda tarjima asl nom oʻrniga yozilib ketardi.
+ *
  * @mixin MenuItem
  */
-class MenuItemResource extends JsonResource
+class StaffMenuItemResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
-     *
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
@@ -21,10 +26,10 @@ class MenuItemResource extends JsonResource
         return [
             'id' => $this->id,
             'restaurant_id' => $this->restaurant_id,
-            // Mijoz oʻz tilida koʻradi; tarjima boʻlmasa asl nom qaytadi.
-            'name' => $this->translated('name'),
-            'description' => $this->translated('description'),
-            'category' => $this->translated('category'),
+            'name' => $this->name,
+            'description' => $this->description,
+            'category' => $this->category,
+            'translations' => $this->translations,
             'image_url' => $this->imageUrl(),
             'price' => $this->price,
             'base_prep_minutes' => $this->base_prep_minutes,

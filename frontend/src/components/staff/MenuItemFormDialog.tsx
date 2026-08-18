@@ -7,6 +7,7 @@ import {
   updateMenuItem,
   uploadMenuItemImage,
   type MenuItemPayload,
+  type MenuItemTranslations,
 } from '@/api/menu-items'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -22,6 +23,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { DEFAULT_LOCALE, LOCALES, LOCALE_LABELS } from '@/i18n/locales'
 import { useT } from '@/i18n/use-i18n'
 import { apiErrorMessage } from '@/lib/api'
 import type { MenuItem } from '@/types/api'
@@ -30,6 +32,8 @@ interface FormState {
   name: string
   description: string
   category: string
+  /** Til kodi → shu tildagi matnlar; asosiy til bu yerda yoʻq. */
+  translations: MenuItemTranslations
   price: string
   base_prep_minutes: string
   extra_prep_minutes: string
@@ -40,6 +44,7 @@ const EMPTY: FormState = {
   name: '',
   description: '',
   category: '',
+  translations: {},
   price: '',
   base_prep_minutes: '3',
   extra_prep_minutes: '1',
@@ -80,6 +85,7 @@ export function MenuItemFormDialog({
             name: menuItem.name,
             description: menuItem.description ?? '',
             category: menuItem.category ?? '',
+            translations: menuItem.translations ?? {},
             price: String(Number.parseFloat(menuItem.price)),
             base_prep_minutes: String(menuItem.base_prep_minutes),
             extra_prep_minutes: String(menuItem.extra_prep_minutes),
@@ -89,8 +95,26 @@ export function MenuItemFormDialog({
     )
   }, [open, menuItem])
 
+  // Tarjimasi bor taomni tahrirlashda boʻlim ochiq turadi, aks holda xodim
+  // kiritgan matnini koʻrmay qolardi.
+  const hasTranslations = Object.keys(form.translations).length > 0
+
   function update<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  function updateTranslation(
+    locale: string,
+    field: 'name' | 'description' | 'category',
+    value: string,
+  ) {
+    setForm((current) => ({
+      ...current,
+      translations: {
+        ...current.translations,
+        [locale]: { ...current.translations[locale], [field]: value },
+      },
+    }))
   }
 
   async function removeImage() {
@@ -121,6 +145,7 @@ export function MenuItemFormDialog({
       base_prep_minutes: Number(form.base_prep_minutes),
       extra_prep_minutes: Number(form.extra_prep_minutes),
       is_available: form.is_available,
+      translations: form.translations,
     }
 
     try {
@@ -145,7 +170,7 @@ export function MenuItemFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[85dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{menuItem ? t('Taomni tahrirlash') : t('Yangi taom')}</DialogTitle>
           <DialogDescription>
@@ -267,6 +292,45 @@ export function MenuItemFormDialog({
               />
             </div>
           </div>
+
+          <details className="grid gap-3 rounded-md border p-3" open={hasTranslations}>
+            <summary className="cursor-pointer text-sm font-medium">
+              {t('Boshqa tillarda')}
+              <p className="text-muted-foreground mt-1 text-xs font-normal">
+                {t('Ixtiyoriy. Toʻldirilmagan til uchun mijozga asl nom koʻrsatiladi.')}
+              </p>
+            </summary>
+
+            {LOCALES.filter((locale) => locale !== DEFAULT_LOCALE).map((locale) => (
+              <div className="grid gap-2" key={locale}>
+                <Label htmlFor={`item-name-${locale}`}>
+                  {t('Nomi (:locale)', { locale: LOCALE_LABELS[locale] })}
+                </Label>
+                <Input
+                  id={`item-name-${locale}`}
+                  value={form.translations[locale]?.name ?? ''}
+                  onChange={(event) => updateTranslation(locale, 'name', event.target.value)}
+                />
+                <Label htmlFor={`item-description-${locale}`} className="text-muted-foreground">
+                  {t('Tavsif (:locale)', { locale: LOCALE_LABELS[locale] })}
+                </Label>
+                <Textarea
+                  id={`item-description-${locale}`}
+                  rows={2}
+                  value={form.translations[locale]?.description ?? ''}
+                  onChange={(event) => updateTranslation(locale, 'description', event.target.value)}
+                />
+                <Label htmlFor={`item-category-${locale}`} className="text-muted-foreground">
+                  {t('Kategoriya (:locale)', { locale: LOCALE_LABELS[locale] })}
+                </Label>
+                <Input
+                  id={`item-category-${locale}`}
+                  value={form.translations[locale]?.category ?? ''}
+                  onChange={(event) => updateTranslation(locale, 'category', event.target.value)}
+                />
+              </div>
+            ))}
+          </details>
 
           <div className="flex items-center justify-between rounded-md border p-3">
             <Label htmlFor="item-available" className="font-normal">

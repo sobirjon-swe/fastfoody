@@ -85,6 +85,7 @@ class OutOfStockFlow
                 'line_total' => Money::toDecimal(Money::toTiyin($replacement->price) * $quantity),
                 'prep_minutes' => $replacement->prepMinutesFor($quantity),
             ]);
+            $item->translations = $replacement->translations;
             $item->out_of_stock_at = null;
             $item->save();
 

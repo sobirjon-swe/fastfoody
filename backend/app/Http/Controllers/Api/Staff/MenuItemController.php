@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Staff\StoreMenuItemRequest;
 use App\Http\Requests\Staff\UpdateMenuItemRequest;
 use App\Http\Requests\Staff\UploadMenuItemImageRequest;
-use App\Http\Resources\MenuItemResource;
+use App\Http\Resources\StaffMenuItemResource;
 use App\Models\MenuItem;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -26,7 +26,7 @@ class MenuItemController extends Controller
     public function index(Request $request): JsonResponse
     {
         return response()->json([
-            'menu_items' => MenuItemResource::collection(
+            'menu_items' => StaffMenuItemResource::collection(
                 $this->query($request)->orderBy('name')->get(),
             ),
         ]);
@@ -36,31 +36,48 @@ class MenuItemController extends Controller
     {
         $menuItem = new MenuItem($request->validated());
         $menuItem->restaurant_id = $this->restaurantId($request);
+        $this->applyTranslations($menuItem, $request);
         $menuItem->save();
 
         // Pick up column defaults (is_available) that the request did not set.
         $menuItem->refresh();
 
         return response()->json([
-            'menu_item' => MenuItemResource::make($menuItem),
+            'menu_item' => StaffMenuItemResource::make($menuItem),
         ], Response::HTTP_CREATED);
     }
 
     public function show(Request $request, int $menuItem): JsonResponse
     {
         return response()->json([
-            'menu_item' => MenuItemResource::make($this->find($request, $menuItem)),
+            'menu_item' => StaffMenuItemResource::make($this->find($request, $menuItem)),
         ]);
     }
 
     public function update(UpdateMenuItemRequest $request, int $menuItem): JsonResponse
     {
         $item = $this->find($request, $menuItem);
-        $item->update($request->validated());
+        $item->fill($request->validated());
+        $this->applyTranslations($item, $request);
+        $item->save();
 
         return response()->json([
-            'menu_item' => MenuItemResource::make($item),
+            'menu_item' => StaffMenuItemResource::make($item),
         ]);
+    }
+
+    /**
+     * `translations` ataylab fillable emas — u ham `restaurant_id` kabi faqat
+     * kod ichida beriladi. Soʻrovda umuman boʻlmasa, eski tarjimalar
+     * saqlanib qoladi.
+     */
+    private function applyTranslations(MenuItem $item, Request $request): void
+    {
+        if (! $request->has('translations')) {
+            return;
+        }
+
+        $item->translations = MenuItem::cleanTranslations((array) $request->input('translations', []));
     }
 
     public function destroy(Request $request, int $menuItem): Response
@@ -88,7 +105,7 @@ class MenuItemController extends Controller
         $item->image_path = $request->file('image')->store("menu-items/{$item->restaurant_id}", 'public');
         $item->save();
 
-        return response()->json(['menu_item' => MenuItemResource::make($item)]);
+        return response()->json(['menu_item' => StaffMenuItemResource::make($item)]);
     }
 
     public function destroyImage(Request $request, int $menuItem): JsonResponse
@@ -99,7 +116,7 @@ class MenuItemController extends Controller
         $item->image_path = null;
         $item->save();
 
-        return response()->json(['menu_item' => MenuItemResource::make($item)]);
+        return response()->json(['menu_item' => StaffMenuItemResource::make($item)]);
     }
 
     private function deleteImage(MenuItem $item): void

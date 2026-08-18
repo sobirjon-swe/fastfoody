@@ -21,7 +21,7 @@ class OrderItemResource extends JsonResource
         return [
             'id' => $this->id,
             'menu_item_id' => $this->menu_item_id,
-            'name' => $this->name,
+            'name' => $this->translated('name'),
             'unit_price' => $this->unit_price,
             'quantity' => $this->quantity,
             'line_total' => $this->line_total,

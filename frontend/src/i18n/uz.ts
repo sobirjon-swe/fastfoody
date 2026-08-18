@@ -304,6 +304,16 @@ export const uz = {
 
   // Valyuta
   soʻm: 'soʻm',
+
+  // Menyu tarjimasi
+  'Boshqa tillarda': 'Boshqa tillarda',
+  'Ixtiyoriy. Toʻldirilmagan til uchun mijozga asl nom koʻrsatiladi.':
+    'Ixtiyoriy. Toʻldirilmagan til uchun mijozga asl nom koʻrsatiladi.',
+  'Nomi (:locale)': 'Nomi (:locale)',
+  'Tavsif (:locale)': 'Tavsif (:locale)',
+  'Kategoriya (:locale)': 'Kategoriya (:locale)',
+
+  ':minutes daq (+:extra daq)': ':minutes daq (+:extra daq)',
 } as const
 
 export type TranslationKey = keyof typeof uz

@@ -74,7 +74,7 @@ class OrderPlacer
             foreach ($lines as $line) {
                 $menuItem = $line['menu_item'];
 
-                $order->items()->create([
+                $orderItem = $order->items()->make([
                     'menu_item_id' => $menuItem->id,
                     'name' => $menuItem->name,
                     'unit_price' => $menuItem->price,
@@ -82,6 +82,10 @@ class OrderPlacer
                     'line_total' => Money::toDecimal($line['line_tiyin']),
                     'prep_minutes' => $line['prep_minutes'],
                 ]);
+                // Nom bilan birga tarjimasi ham nusxa koʻchiriladi: keyin
+                // menyu oʻzgarsa ham mijoz buyurtmasini oʻz tilida koʻradi.
+                $orderItem->translations = $menuItem->translations;
+                $orderItem->save();
 
                 $totalTiyin += $line['line_tiyin'];
                 $prepMinutes += $line['prep_minutes'];

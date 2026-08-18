@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasTranslations;
 use Database\Factories\MenuItemFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Storage;
 class MenuItem extends Model
 {
     /** @use HasFactory<MenuItemFactory> */
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
     /**
      * Get the attributes that should be cast.
@@ -32,6 +33,7 @@ class MenuItem extends Model
             'base_prep_minutes' => 'integer',
             'extra_prep_minutes' => 'integer',
             'is_available' => 'boolean',
+            'translations' => 'array',
         ];
     }
 

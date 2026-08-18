@@ -293,4 +293,14 @@ export const ru: Record<TranslationKey, string> = {
 
   // Valyuta
   soʻm: 'сум',
+
+  // Menyu tarjimasi
+  'Boshqa tillarda': 'На других языках',
+  'Ixtiyoriy. Toʻldirilmagan til uchun mijozga asl nom koʻrsatiladi.':
+    'Необязательно. Для незаполненного языка клиент увидит оригинальное название.',
+  'Nomi (:locale)': 'Название (:locale)',
+  'Tavsif (:locale)': 'Описание (:locale)',
+  'Kategoriya (:locale)': 'Категория (:locale)',
+
+  ':minutes daq (+:extra daq)': ':minutes мин (+:extra мин)',
 }

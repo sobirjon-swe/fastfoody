@@ -9,9 +9,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { apiErrorMessage } from '@/lib/api'
-import { formatClock, formatPrepTime, minutesFromNow } from '@/lib/format'
+import { formatClock, minutesFromNow } from '@/lib/format'
 import { useT } from '@/i18n/use-i18n'
-import { useMoney } from '@/i18n/use-money'
+import { useMoney, usePrepTime } from '@/i18n/use-money'
 import { useTelegramBackButton, useTelegramMainButton } from '@/lib/use-telegram'
 import type { MenuItem, OrderEstimate, Restaurant } from '@/types/api'
 
@@ -21,6 +21,7 @@ type Cart = Record<number, number>
 export function RestaurantMenuPage() {
   const t = useT()
   const money = useMoney()
+  const prepTime = usePrepTime()
   const { restaurantId } = useParams()
   const navigate = useNavigate()
 
@@ -237,7 +238,7 @@ export function RestaurantMenuPage() {
                         )}
                         <div className="text-muted-foreground mt-1 text-sm">
                           {money(item.price)} ·{' '}
-                          {formatPrepTime(item.base_prep_minutes, item.extra_prep_minutes)}
+                          {prepTime(item.base_prep_minutes, item.extra_prep_minutes)}
                         </div>
                       </div>
                     </div>

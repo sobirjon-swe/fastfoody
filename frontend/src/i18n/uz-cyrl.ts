@@ -292,4 +292,14 @@ export const uzCyrl: Record<TranslationKey, string> = {
 
   // Valyuta
   soʻm: 'сўм',
+
+  // Menyu tarjimasi
+  'Boshqa tillarda': 'Бошқа тилларда',
+  'Ixtiyoriy. Toʻldirilmagan til uchun mijozga asl nom koʻrsatiladi.':
+    'Ихтиёрий. Тўлдирилмаган тил учун мижозга асл ном кўрсатилади.',
+  'Nomi (:locale)': 'Номи (:locale)',
+  'Tavsif (:locale)': 'Тавсиф (:locale)',
+  'Kategoriya (:locale)': 'Категория (:locale)',
+
+  ':minutes daq (+:extra daq)': ':minutes дақ (+:extra дақ)',
 }
