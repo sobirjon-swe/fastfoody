@@ -25,11 +25,14 @@ class RestaurantController extends Controller
                 // "%" and "_" typed by the admin are literal characters, not
                 // wildcards, so they are escaped before building the pattern.
                 $term = addcslashes($request->string('q')->trim()->toString(), '%_\\');
-                $pattern = "%{$term}%";
+                // Both sides are lowered so the search stays case-insensitive on
+                // PostgreSQL, where LIKE — unlike MySQL's default collation — is
+                // case-sensitive. Backslash is the default LIKE escape on both.
+                $pattern = mb_strtolower("%{$term}%");
 
                 $query->where(fn ($q) => $q
-                    ->whereRaw('name LIKE ? ESCAPE ?', [$pattern, '\\'])
-                    ->orWhereRaw('address LIKE ? ESCAPE ?', [$pattern, '\\']));
+                    ->whereRaw('LOWER(name) LIKE ? ESCAPE ?', [$pattern, '\\'])
+                    ->orWhereRaw('LOWER(address) LIKE ? ESCAPE ?', [$pattern, '\\']));
             })
             // Anything other than the two known values means "no filter", so a
             // mistyped parameter cannot quietly answer with the inactive list.

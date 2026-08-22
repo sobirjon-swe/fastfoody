@@ -24,11 +24,13 @@ class RestaurantController extends Controller
             ->withCount(['menuItems' => fn ($query) => $query->available()])
             ->when($request->filled('q'), function ($query) use ($request) {
                 $term = addcslashes($request->string('q')->trim()->toString(), '%_\\');
-                $pattern = "%{$term}%";
+                // Lowered on both sides so the search behaves the same on
+                // PostgreSQL, where LIKE is case-sensitive.
+                $pattern = mb_strtolower("%{$term}%");
 
                 $query->where(fn ($q) => $q
-                    ->whereRaw('name LIKE ? ESCAPE ?', [$pattern, '\\'])
-                    ->orWhereRaw('address LIKE ? ESCAPE ?', [$pattern, '\\']));
+                    ->whereRaw('LOWER(name) LIKE ? ESCAPE ?', [$pattern, '\\'])
+                    ->orWhereRaw('LOWER(address) LIKE ? ESCAPE ?', [$pattern, '\\']));
             })
             ->orderBy('name')
             ->get();
