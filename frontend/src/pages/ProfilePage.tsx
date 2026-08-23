@@ -9,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import type { Locale } from '@/i18n/locales'
 import { useT } from '@/i18n/use-i18n'
 import { apiErrorMessage } from '@/lib/api'
 import { ROLE_LABELS } from '@/types/api'
@@ -64,16 +63,6 @@ export function ProfilePage() {
     }
   }
 
-  async function changeLocale(locale: Locale) {
-    try {
-      await updateProfile({ locale })
-      await refresh()
-      toast.success(t('Til oʻzgartirildi.'))
-    } catch (caught) {
-      toast.error(apiErrorMessage(caught, t('Tilni oʻzgartirib boʻlmadi.')))
-    }
-  }
-
   return (
     <div className="grid max-w-xl gap-6">
       <div>
@@ -92,7 +81,8 @@ export function ProfilePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <LanguageSwitcher onChange={changeLocale} />
+          {/* Saqlash va xabar `LanguageSwitcher` ichida — bu yerda qoʻshimcha yoʻq. */}
+          <LanguageSwitcher />
         </CardContent>
       </Card>
 
