@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 
 import { estimateOrder, getRestaurantMenu, placeOrder } from '@/api/orders'
+import { ImageBand } from '@/components/ImageBand'
 import { OptionPickerDialog } from '@/components/OptionPickerDialog'
 import { Spinner } from '@/components/Spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -48,6 +49,8 @@ export function RestaurantMenuPage() {
   const [placing, setPlacing] = useState(false)
   const [estimate, setEstimate] = useState<OrderEstimate | null>(null)
   const [estimating, setEstimating] = useState(false)
+  /** null — hali tanlanmagan, birinchi kategoriya koʻrsatiladi. */
+  const [activeCategory, setActiveCategory] = useState<string | null>(null)
 
   const id = Number(restaurantId)
 
@@ -134,6 +137,17 @@ export function RestaurantMenuPage() {
       return map.set(key, [...(map.get(key) ?? []), item])
     }, new Map<string, MenuItem[]>()),
   ].sort(([a], [b]) => (a === '' ? 1 : b === '' ? -1 : a.localeCompare(b)))
+
+  /*
+    Dizaynda kategoriyalar ustma-ust emas, tepadagi yorliqlar orqali
+    almashtiriladi. Yorliqlar faqat rostdan bir nechta kategoriya boʻlsa
+    chiqadi — bitta (yoki nomsiz) guruhda ular ortiqcha shovqin.
+  */
+  const hasTabs = groups.length > 1
+  const activeGroup = hasTabs
+    ? (groups.find(([category]) => category === activeCategory) ?? groups[0])
+    : null
+  const visibleGroups = activeGroup ? [activeGroup] : groups
 
   const lines = cart
 
@@ -255,16 +269,40 @@ export function RestaurantMenuPage() {
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
       <div className="grid gap-4">
-        <div>
-          <Button asChild variant="ghost" size="sm" className="-ml-2 mb-2">
-            <Link to="/">
-              <ArrowLeft /> {t('Oshxonalar')}
-            </Link>
-          </Button>
-          <h1 className="text-2xl font-semibold">{restaurant.name}</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {restaurant.address} · {restaurant.opens_at}–{restaurant.closes_at}
-          </p>
+        {/* Dizayndagi muqova tasmasi: orqaga tugmasi rasm ustida turadi. */}
+        <div className="bg-card overflow-hidden rounded-2xl shadow-sm">
+          <ImageBand src={null} alt={restaurant.name} className="h-28">
+            <Button
+              asChild
+              size="icon"
+              variant="secondary"
+              className="bg-card/90 absolute top-3 left-3 rounded-full shadow-sm"
+            >
+              <Link to="/" aria-label={t('Oshxonalar')}>
+                <ArrowLeft />
+              </Link>
+            </Button>
+          </ImageBand>
+
+          <div className="p-4">
+            <h1 className="text-xl font-semibold tracking-tight">{restaurant.name}</h1>
+            <p className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-1.5 text-sm">
+              <span
+                className={
+                  restaurant.is_open_now
+                    ? 'bg-success size-2 rounded-full'
+                    : 'bg-muted-foreground/50 size-2 rounded-full'
+                }
+                aria-hidden
+              />
+              <span className={restaurant.is_open_now ? 'text-success font-medium' : undefined}>
+                {restaurant.is_open_now ? t('Hozir ochiq') : t('Hozir yopiq')}
+              </span>
+              <span>
+                · {restaurant.opens_at}–{restaurant.closes_at} · {restaurant.address}
+              </span>
+            </p>
+          </div>
         </div>
 
         {!restaurant.is_open_now && (
@@ -284,67 +322,129 @@ export function RestaurantMenuPage() {
           </Alert>
         )}
 
+        {hasTabs && (
+          <div
+            role="tablist"
+            aria-label={t('Menyu boʻlimlari')}
+            className="border-border -mb-1 flex gap-5 overflow-x-auto border-b"
+          >
+            {groups.map(([category]) => {
+              const active = activeGroup?.[0] === category
+
+              return (
+                <button
+                  key={category}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setActiveCategory(category)}
+                  className={
+                    active
+                      ? 'border-primary text-primary -mb-px shrink-0 border-b-2 pb-2.5 text-sm font-medium'
+                      : 'text-muted-foreground hover:text-foreground -mb-px shrink-0 border-b-2 border-transparent pb-2.5 text-sm transition'
+                  }
+                >
+                  {category || t('Boshqa')}
+                </button>
+              )
+            })}
+          </div>
+        )}
+
         {menu.length === 0 ? (
           <p className="text-muted-foreground py-10 text-center text-sm">
             {t('Bu oshxonada hozircha mavjud taom yoʻq.')}
           </p>
         ) : (
-          groups.map(([category, items]) => (
-            <div className="grid gap-3" key={category}>
-              {category && (
-                <h2 className="text-muted-foreground mt-2 text-sm font-medium uppercase">
-                  {category}
-                </h2>
-              )}
-              {items.map((item) => (
-                <Card key={item.id}>
-                  <CardContent className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      {item.image_url && (
-                        <img
-                          src={item.image_url}
-                          alt={item.name}
-                          className="size-16 shrink-0 rounded-md object-cover"
-                          loading="lazy"
-                        />
-                      )}
-                      <div>
-                        <div className="font-medium">{item.name}</div>
-                        {item.description && (
-                          <div className="text-muted-foreground text-sm">{item.description}</div>
-                        )}
-                        <div className="text-muted-foreground mt-1 text-sm">
-                          {money(item.price)} ·{' '}
-                          {prepTime(item.base_prep_minutes, item.extra_prep_minutes)}
+          visibleGroups.map(([category, items]) => (
+            <div className="grid gap-2" key={category}>
+              {items.map((item) => {
+                const quantity = quantityOf(item)
+                const soldOut = item.is_available === false
+
+                return (
+                  <div
+                    key={item.id}
+                    className={
+                      soldOut
+                        ? 'bg-card flex items-center gap-3 rounded-2xl p-3 opacity-55 shadow-sm'
+                        : 'bg-card flex items-center gap-3 rounded-2xl p-3 shadow-sm'
+                    }
+                  >
+                    <ImageBand
+                      src={item.image_url}
+                      alt={item.name}
+                      className="size-16 shrink-0 rounded-xl"
+                    />
+
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium">{item.name}</div>
+                      {item.description && (
+                        <div className="text-muted-foreground truncate text-sm">
+                          {item.description}
                         </div>
+                      )}
+                      <div className="mt-1 text-sm">
+                        <span className="font-semibold">{money(item.price)}</span>
+                        <span className="text-muted-foreground">
+                          {' '}
+                          · {prepTime(item.base_prep_minutes, item.extra_prep_minutes)}
+                        </span>
                       </div>
                     </div>
 
-                    <div className="flex shrink-0 items-center gap-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        aria-label={t(':name kamaytirish', { name: item.name })}
-                        disabled={quantityOf(item) === 0}
-                        onClick={() => removeOne(item)}
-                      >
-                        <Minus />
-                      </Button>
-                      <span className="w-6 text-center tabular-nums" data-testid={`qty-${item.id}`}>
-                        {quantityOf(item)}
+                    {/*
+                      Soni koʻrinadigan joyda faqat 0 dan katta boʻlganda
+                      chiqadi, lekin testlar uchun u har doim oʻqilishi kerak.
+                    */}
+                    <span className="sr-only" data-testid={`qty-${item.id}`}>
+                      {quantity}
+                    </span>
+
+                    {/*
+                      Dizaynda savatda yoʻq taomda bitta "+ Qoʻshish" tugmasi
+                      turadi; soni paydo boʻlgach −/son/+ boshqaruviga oʻtadi.
+                    */}
+                    {soldOut ? (
+                      <span className="bg-muted text-muted-foreground shrink-0 rounded-full px-3 py-1.5 text-xs font-medium">
+                        {t('Tugagan')}
                       </span>
+                    ) : quantity === 0 ? (
                       <Button
-                        size="icon"
-                        variant="outline"
+                        size="sm"
+                        className="shrink-0 rounded-full"
                         aria-label={t(':name qoʻshish', { name: item.name })}
                         onClick={() => add(item)}
                       >
-                        <Plus />
+                        <Plus /> {t('Qoʻshish')}
                       </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    ) : (
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="size-8 rounded-full"
+                          aria-label={t(':name kamaytirish', { name: item.name })}
+                          onClick={() => removeOne(item)}
+                        >
+                          <Minus />
+                        </Button>
+                        <span className="w-5 text-center font-medium tabular-nums" aria-hidden>
+                          {quantity}
+                        </span>
+                        <Button
+                          size="icon"
+                          className="size-8 rounded-full"
+                          aria-label={t(':name qoʻshish', { name: item.name })}
+                          onClick={() => add(item)}
+                        >
+                          <Plus />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           ))
         )}
@@ -390,11 +490,14 @@ export function RestaurantMenuPage() {
                 <span data-testid="cart-total">{money(total)}</span>
               </div>
 
-              <div className="bg-muted/50 grid gap-1 rounded-md p-3 text-sm" data-testid="estimate">
+              <div
+                className="bg-warning-muted/60 grid gap-1 rounded-xl p-3 text-sm"
+                data-testid="estimate"
+              >
                 {estimate ? (
                   <>
-                    <div className="flex items-center gap-2 font-medium">
-                      <Clock className="size-4" />
+                    <div className="text-warning-foreground flex items-center gap-2 font-medium">
+                      <Clock className="size-4 shrink-0" />
                       {t('Taxminan :time da tayyor', { time: formatClock(estimate.ready_at) })}
                       <span className="text-muted-foreground font-normal">
                         {t('(~:minutes daq)', { minutes: minutesFromNow(estimate.ready_at) })}

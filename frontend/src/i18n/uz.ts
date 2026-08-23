@@ -117,6 +117,7 @@ export const uz = {
   'Oshxona nomi yoki manzili': 'Oshxona nomi yoki manzili',
   'Hozircha ochiq oshxona topilmadi.': 'Hozircha ochiq oshxona topilmadi.',
   'Hozir yopiq': 'Hozir yopiq',
+  Ochiq: 'Ochiq',
   ':count ta taom': ':count ta taom',
   'Oshxonalarni yuklab boʻlmadi.': 'Oshxonalarni yuklab boʻlmadi.',
   'Holat oʻzi yangilanib turadi. Batafsil koʻrish uchun buyurtmani oching.':
@@ -341,6 +342,17 @@ export const uz = {
   'Xohlagancha tanlang': 'Xohlagancha tanlang',
   Savatchaga: 'Savatchaga',
   Oʻzgartirish: 'Oʻzgartirish',
+  'Hozir ochiq': 'Hozir ochiq',
+  'Menyu boʻlimlari': 'Menyu boʻlimlari',
+  Boshqa: 'Boshqa',
+  Tugagan: 'Tugagan',
+  'Qoʻshish': 'Qoʻshish',
+  'Buyurtma bosqichlari': 'Buyurtma bosqichlari',
+  'Tayyor boʻlishiga': 'Tayyor boʻlishiga',
+  '~:minutes daqiqa': '~:minutes daqiqa',
+  'taxminan :time da': 'taxminan :time da',
+  'Boʻsh': 'Boʻsh',
+  'Navbatda kutmang — kelguningizcha tayyor boʻladi.': 'Navbatda kutmang — kelguningizcha tayyor boʻladi.',
 } as const
 
 export type TranslationKey = keyof typeof uz

@@ -105,6 +105,7 @@ export const en: Record<TranslationKey, string> = {
   'Oshxona nomi yoki manzili': 'Restaurant name or address',
   'Hozircha ochiq oshxona topilmadi.': 'No open restaurant found yet.',
   'Hozir yopiq': 'Closed now',
+  Ochiq: 'Open',
   ':count ta taom': ':count items',
   'Oshxonalarni yuklab boʻlmadi.': 'Could not load the restaurants.',
   'Holat oʻzi yangilanib turadi. Batafsil koʻrish uchun buyurtmani oching.':
@@ -329,4 +330,15 @@ export const en: Record<TranslationKey, string> = {
   'Xohlagancha tanlang': 'Choose any',
   Savatchaga: 'Add to cart',
   Oʻzgartirish: 'Change',
+  'Hozir ochiq': 'Open now',
+  'Menyu boʻlimlari': 'Menu sections',
+  Boshqa: 'Other',
+  Tugagan: 'Sold out',
+  'Qoʻshish': 'Add',
+  'Buyurtma bosqichlari': 'Order steps',
+  'Tayyor boʻlishiga': 'Ready in',
+  '~:minutes daqiqa': '~:minutes min',
+  'taxminan :time da': 'around :time',
+  'Boʻsh': 'Empty',
+  'Navbatda kutmang — kelguningizcha tayyor boʻladi.': 'Skip the queue — your food is ready when you arrive.',
 }

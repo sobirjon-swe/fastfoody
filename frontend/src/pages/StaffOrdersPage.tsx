@@ -1,33 +1,33 @@
-import { Clock, PackageX, Phone, RefreshCw, Search } from 'lucide-react'
+import { RefreshCw, Search } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { listStaffOrders, updateStaffOrderStatus, type StaffOrder } from '@/api/staff-orders'
 import { getStaffStatistics, type StatisticsWindow } from '@/api/statistics'
 import { OutOfStockDialog } from '@/components/staff/OutOfStockDialog'
+import { StaffOrderCard } from '@/components/staff/StaffOrderCard'
 import { useAuth } from '@/auth/use-auth'
-import { OrderStatusBadge } from '@/components/OrderStatusBadge'
 import { Spinner } from '@/components/Spinner'
 import { StatisticsCards } from '@/components/StatisticsCards'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useT } from '@/i18n/use-i18n'
-import { useMoney } from '@/i18n/use-money'
 import { apiErrorMessage } from '@/lib/api'
 import { POLL_MS, usePolling } from '@/lib/use-polling'
-import { formatClock, minutesFromNow } from '@/lib/format'
 import type { TranslationKey } from '@/i18n/uz'
 import { ORDER_STATUS_LABELS, type OrderStatus, type PaginationMeta } from '@/types/api'
 
-/** Qiymatlar — tarjima kalitlari. */
-const ACTIONS: Partial<Record<OrderStatus, TranslationKey>> = {
-  tayyorlanmoqda: 'Tayyorlashni boshlash',
-  tayyor: 'Tayyor',
-  olib_ketildi: 'Berildi',
-  muddati_otdi: 'Kelmadi',
-}
+/**
+ * Ish taxtasining ustunlari. Mijoz javobi kutilayotgan buyurtma ham
+ * "Tayyorlanmoqda" ustunida turadi — u oshxona uchun oʻsha bosqichning bir
+ * qismi, alohida ustun ochish kerak emas.
+ */
+const BOARD_COLUMNS: { label: TranslationKey; statuses: OrderStatus[] }[] = [
+  { label: 'Toʻlangan', statuses: ['tolov_qilindi'] },
+  { label: 'Tayyorlanmoqda', statuses: ['tayyorlanmoqda', 'mijoz_qarori_kutilmoqda'] },
+  { label: 'Tayyor', statuses: ['tayyor'] },
+]
 
 const FILTERS: { value: OrderStatus | ''; label: TranslationKey }[] = [
   { value: '', label: 'Ish taxtasi' },
@@ -42,7 +42,6 @@ const FILTERS: { value: OrderStatus | ''; label: TranslationKey }[] = [
 export function StaffOrdersPage() {
   const { user } = useAuth()
   const t = useT()
-  const money = useMoney()
   const [orders, setOrders] = useState<StaffOrder[]>([])
   const [filter, setFilter] = useState<OrderStatus | ''>('')
   const [meta, setMeta] = useState<PaginationMeta | null>(null)
@@ -111,6 +110,10 @@ export function StaffOrdersPage() {
     void load(true)
     void loadStats()
   }, POLL_MS)
+
+  // Ustunli koʻrinish faqat umumiy taxtada maʼnoli: bitta holat tanlangan
+  // yoki kod boʻyicha qidirilgan boʻlsa, oddiy roʻyxat qulayroq.
+  const board = filter === '' && code === ''
 
   async function move(order: StaffOrder, status: OrderStatus) {
     setBusyId(order.id)
@@ -210,96 +213,46 @@ export function StaffOrdersPage() {
               ? t('Hozircha yangi buyurtma yoʻq.')
               : t('Bu holatda buyurtma yoʻq.')}
         </p>
+      ) : board ? (
+        // Dizayndagi ish taxtasi: uchta ustun, har birida sanogʻi bilan.
+        <div className="grid gap-4 lg:grid-cols-3">
+          {BOARD_COLUMNS.map((column) => {
+            const columnOrders = orders.filter((order) => column.statuses.includes(order.status))
+
+            return (
+              <section key={column.label} className="bg-muted/40 grid gap-3 rounded-2xl p-3">
+                <h2 className="flex items-center justify-between px-1 text-sm font-medium">
+                  {t(column.label)}
+                  <span className="text-muted-foreground tabular-nums">{columnOrders.length}</span>
+                </h2>
+
+                {columnOrders.length === 0 ? (
+                  <p className="text-muted-foreground px-1 pb-2 text-xs">{t('Boʻsh')}</p>
+                ) : (
+                  columnOrders.map((order) => (
+                    <StaffOrderCard
+                      key={order.id}
+                      order={order}
+                      busy={busyId === order.id}
+                      onOutOfStock={setOutOfStockFor}
+                      onMove={move}
+                    />
+                  ))
+                )}
+              </section>
+            )
+          })}
+        </div>
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {orders.map((order) => (
-            <Card key={order.id} data-testid={`order-${order.id}`}>
-              <CardHeader>
-                <CardTitle className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="flex items-center gap-2">
-                    {t('Buyurtma #:id', { id: order.id })}
-                    {order.pickup_code && (
-                      <span className="bg-muted rounded px-2 py-0.5 font-mono text-base tracking-widest">
-                        {order.pickup_code}
-                      </span>
-                    )}
-                  </span>
-                  <OrderStatusBadge status={order.status} />
-                </CardTitle>
-                <div className="text-muted-foreground grid gap-1 text-sm">
-                  <span>
-                    {order.customer.name}
-                    {order.customer.phone && (
-                      <span className="ml-2 inline-flex items-center gap-1">
-                        <Phone className="size-3" />
-                        {order.customer.phone}
-                      </span>
-                    )}
-                  </span>
-                  {order.ready_at && (
-                    <span className="flex items-center gap-1">
-                      <Clock className="size-3" />
-                      {t(':time ga tayyor boʻlishi kerak (~:minutes daq) · :prep daq ish', {
-                        time: formatClock(order.ready_at),
-                        minutes: minutesFromNow(order.ready_at),
-                        prep: order.prep_minutes,
-                      })}
-                    </span>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="grid gap-3">
-                <ul className="grid gap-1 text-sm">
-                  {order.items?.map((item) => (
-                    <li key={item.id} className="flex justify-between gap-3">
-                      <span className="font-medium">
-                        {item.quantity} × {item.name}
-                        {item.options && item.options.length > 0 && (
-                          <span className="text-muted-foreground block text-xs font-normal">
-                            {item.options.map((option) => option.name).join(' · ')}
-                          </span>
-                        )}
-                        {item.is_out_of_stock && (
-                          <span className="text-destructive ml-2 text-xs font-normal">
-                            {t('tugadi')}
-                          </span>
-                        )}
-                      </span>
-                      <span className="text-muted-foreground whitespace-nowrap">
-                        {money(item.line_total)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="flex items-center justify-between gap-3 border-t pt-3">
-                  <span className="font-medium">{money(order.total_price)}</span>
-                  <div className="flex gap-2">
-                    {order.can_report_out_of_stock && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={busyId === order.id}
-                        onClick={() => setOutOfStockFor(order)}
-                      >
-                        <PackageX /> {t('Mahsulot tugadi')}
-                      </Button>
-                    )}
-                    {order.next_statuses.map((next) => (
-                      <Button
-                        key={next}
-                        size="sm"
-                        variant={next === 'muddati_otdi' ? 'outline' : 'default'}
-                        disabled={busyId === order.id}
-                        onClick={() => move(order, next)}
-                      >
-                        {t(ACTIONS[next] ?? ORDER_STATUS_LABELS[next])}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <StaffOrderCard
+              key={order.id}
+              order={order}
+              busy={busyId === order.id}
+              onOutOfStock={setOutOfStockFor}
+              onMove={move}
+            />
           ))}
         </div>
       )}

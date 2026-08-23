@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router'
 import { toast } from 'sonner'
 
 import { getOrder, payOrder } from '@/api/orders'
+import { OrderProgress } from '@/components/OrderProgress'
 import { OrderStatusBadge } from '@/components/OrderStatusBadge'
 import { OutOfStockDecision } from '@/components/OutOfStockDecision'
 import { Spinner } from '@/components/Spinner'
@@ -37,25 +38,28 @@ function ReadyTimeCard({ order }: { order: Order }) {
 
   return (
     <Card>
-      <CardContent className="flex items-center gap-3">
-        <Clock className="text-muted-foreground size-5" />
-        <div>
-          <div className="text-lg font-semibold" data-testid="ready-at">
-            {t(':time da tayyor boʻladi', { time: formatClock(time) })}
-            <span className="text-muted-foreground ml-2 text-sm font-normal">
-              {t('(~:minutes daq)', { minutes: minutesFromNow(time) })}
-            </span>
-          </div>
-          <p className="text-muted-foreground text-sm">
-            {order.ready_at
-              ? t(
-                  'Oshxona navbatiga qoʻshildi. Shu vaqtga yetib boring — kechiksangiz taom sovib qolishi mumkin.',
-                )
-              : t(
-                  'Bu — taxminiy vaqt. Toʻlaganingizdan keyin buyurtma navbatga qoʻshiladi va vaqt qatʼiylashadi.',
-                )}
-          </p>
+      <CardContent className="grid gap-4">
+        {/* Dizaynda qolgan vaqt eng yirik element — ekranga qaragan zahoti oʻqiladi. */}
+        <div className="grid gap-0.5 text-center">
+          <span className="text-muted-foreground text-sm">{t('Tayyor boʻlishiga')}</span>
+          <span className="text-primary text-3xl font-semibold" data-testid="ready-at">
+            {t('~:minutes daqiqa', { minutes: minutesFromNow(time) })}
+          </span>
+          <span className="text-muted-foreground text-sm">
+            {t('taxminan :time da', { time: formatClock(time) })}
+          </span>
         </div>
+
+        <p className="text-muted-foreground flex items-start gap-2 text-sm">
+          <Clock className="mt-0.5 size-4 shrink-0" aria-hidden />
+          {order.ready_at
+            ? t(
+                'Oshxona navbatiga qoʻshildi. Shu vaqtga yetib boring — kechiksangiz taom sovib qolishi mumkin.',
+              )
+            : t(
+                'Bu — taxminiy vaqt. Toʻlaganingizdan keyin buyurtma navbatga qoʻshiladi va vaqt qatʼiylashadi.',
+              )}
+        </p>
       </CardContent>
     </Card>
   )
@@ -191,23 +195,41 @@ export function OrderDetailPage() {
         </Alert>
       )}
 
+      {/*
+        Bosqichlar chizigʻi alohida kartochkada: u tayyor vaqti koʻrsatilmaydigan
+        holatlarda ham (masalan buyurtma olib ketilgach) kerak boʻladi.
+      */}
+      <Card>
+        <CardContent>
+          <OrderProgress status={order.status} />
+        </CardContent>
+      </Card>
+
+      <ReadyTimeCard order={order} />
+
       {order.pickup_code && (
         <Card>
-          <CardContent className="flex items-center justify-between gap-4">
+          <CardContent className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="text-muted-foreground text-sm">{t('Olib ketish kodi')}</div>
-              <div className="text-3xl font-semibold tracking-widest" data-testid="pickup-code">
+              <div
+                className="text-primary text-3xl font-semibold tracking-[0.2em]"
+                data-testid="pickup-code"
+              >
                 {order.pickup_code}
               </div>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {t('Oshxonaga kelganingizda shu kodni ayting.')}
+              </p>
             </div>
-            <p className="text-muted-foreground max-w-56 text-sm">
-              {t('Oshxonaga kelganingizda shu kodni ayting.')}
-            </p>
+            <div className="text-right">
+              <div className="text-muted-foreground text-sm">{t('Manzil')}</div>
+              <div className="font-medium">{order.restaurant?.name}</div>
+              <div className="text-muted-foreground text-sm">{order.restaurant?.address}</div>
+            </div>
           </CardContent>
         </Card>
       )}
-
-      <ReadyTimeCard order={order} />
 
       <Card>
         <CardHeader>

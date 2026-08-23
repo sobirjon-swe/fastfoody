@@ -1,3 +1,4 @@
+import { UtensilsCrossed } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 
@@ -46,11 +47,30 @@ export function LoginPage() {
   return (
     <div className="bg-muted/40 flex min-h-screen items-center justify-center px-4 py-12">
       <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-xl">{t('Kirish')}</CardTitle>
-          <CardDescription>{t('FastFoody hisobingizga kiring.')}</CardDescription>
+        <CardHeader className="items-center text-center">
+          {/* Dizayndagi belgi: to'q sariq kvadrat ichida oshxona ramzi. */}
+          <span className="bg-primary text-primary-foreground mx-auto flex size-12 items-center justify-center rounded-2xl">
+            <UtensilsCrossed className="size-6" aria-hidden />
+          </span>
+          <CardTitle className="mt-3 text-xl">FastFoody</CardTitle>
+          <CardDescription>
+            {t('Navbatda kutmang — kelguningizcha tayyor boʻladi.')}
+          </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Kirish / Roʻyxatdan oʻtish — dizayndagi ikki boʻlakli almashtirgich. */}
+          <div className="bg-muted mb-4 grid grid-cols-2 gap-1 rounded-xl p-1">
+            <span className="bg-card rounded-lg py-1.5 text-center text-sm font-medium shadow-sm">
+              {t('Kirish')}
+            </span>
+            <Link
+              to="/register"
+              className="text-muted-foreground hover:text-foreground rounded-lg py-1.5 text-center text-sm transition"
+            >
+              {t('Roʻyxatdan oʻtish')}
+            </Link>
+          </div>
+
           <LanguageSwitcher className="mb-4 justify-center" />
           <form className="grid gap-4" onSubmit={handleSubmit}>
             {error && (
@@ -87,16 +107,10 @@ export function LoginPage() {
               {submitting ? t('Kirilmoqda...') : t('Kirish')}
             </Button>
 
+            {/* Roʻyxatdan oʻtish havolasi endi yuqoridagi almashtirgichda. */}
             <p className="text-muted-foreground text-center text-sm">
               <Link to="/parolni-unutdim" className="underline underline-offset-4">
                 {t('Parolni unutdingizmi?')}
-              </Link>
-            </p>
-
-            <p className="text-muted-foreground text-center text-sm">
-              {t('Hisobingiz yoʻqmi?')}{' '}
-              <Link to="/register" className="text-foreground underline underline-offset-4">
-                {t('Roʻyxatdan oʻtish')}
               </Link>
             </p>
           </form>

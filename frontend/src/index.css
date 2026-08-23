@@ -3,49 +3,99 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+  FastFoody dizayn tizimi — iliq krem fon, to'q sariq asosiy rang.
+  Dizayn manbasi: "FastFoody - Mijoz va Oshxona" canvas.
+
+  Dark tokenlar Telegram uchun kerak: `lib/telegram.ts` mijozning Telegram
+  temasiga qarab <html> ga `dark` klassini qo'yadi. Shuning uchun ular
+  neytral kulrang emas, xuddi shu iliq palitraning qorong'i variantidir.
+*/
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --radius: 0.75rem;
+
+  --background: oklch(0.972 0.014 58);
+  --foreground: oklch(0.24 0.021 250);
+
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.24 0.021 250);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --popover-foreground: oklch(0.24 0.021 250);
+
+  --primary: oklch(0.615 0.196 40);
+  --primary-foreground: oklch(0.99 0.005 60);
+
+  --secondary: oklch(0.94 0.024 60);
+  --secondary-foreground: oklch(0.32 0.032 45);
+
+  --muted: oklch(0.955 0.012 60);
+  --muted-foreground: oklch(0.53 0.035 245);
+
+  /* Telefon ilovasidagi sarlavha paneli — och yashil-moviy. */
+  --accent: oklch(0.93 0.028 165);
+  --accent-foreground: oklch(0.32 0.045 165);
+
+  --destructive: oklch(0.585 0.21 27);
+  --destructive-foreground: oklch(0.99 0.005 60);
+
+  --border: oklch(0.9 0.016 60);
+  --input: oklch(0.9 0.016 60);
+  --ring: oklch(0.615 0.196 40);
+
+  /*
+    Dizayndagi holat ranglari. shadcn'da tayyori yo'q, lekin ular bir necha
+    joyda takrorlanadi: "Ochiq" nishoni, reyting, "Olib ketildi", va
+    "Mijoz javobi kutilmoqda" kartochkasi.
+  */
+  --success: oklch(0.52 0.115 152);
+  --success-foreground: oklch(0.99 0.005 60);
+  --success-muted: oklch(0.94 0.042 152);
+
+  --warning: oklch(0.63 0.13 75);
+  --warning-foreground: oklch(0.26 0.05 75);
+  --warning-muted: oklch(0.95 0.055 85);
+
+  /* Rasm yuklanmagan taom va oshxona kartochkalari uchun iliq to'ldiruvchi. */
+  --image-placeholder: oklch(0.885 0.04 65);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --background: oklch(0.21 0.014 55);
+  --foreground: oklch(0.95 0.008 60);
+
+  --card: oklch(0.26 0.016 55);
+  --card-foreground: oklch(0.95 0.008 60);
+  --popover: oklch(0.26 0.016 55);
+  --popover-foreground: oklch(0.95 0.008 60);
+
+  --primary: oklch(0.68 0.185 42);
+  --primary-foreground: oklch(0.18 0.015 45);
+
+  --secondary: oklch(0.32 0.022 50);
+  --secondary-foreground: oklch(0.95 0.008 60);
+
+  --muted: oklch(0.32 0.022 50);
+  --muted-foreground: oklch(0.72 0.022 240);
+
+  --accent: oklch(0.34 0.032 165);
+  --accent-foreground: oklch(0.93 0.028 165);
+
+  --destructive: oklch(0.7 0.185 22);
+  --destructive-foreground: oklch(0.18 0.015 45);
+
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.68 0.185 42);
+
+  --success: oklch(0.72 0.13 152);
+  --success-foreground: oklch(0.18 0.015 45);
+  --success-muted: oklch(0.32 0.05 152);
+
+  --warning: oklch(0.78 0.12 80);
+  --warning-foreground: oklch(0.18 0.015 45);
+  --warning-muted: oklch(0.34 0.05 80);
+
+  --image-placeholder: oklch(0.34 0.026 60);
 }
 
 @theme inline {
@@ -72,6 +122,13 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-muted: var(--success-muted);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-muted: var(--warning-muted);
+  --color-image-placeholder: var(--image-placeholder);
 }
 
 @layer base {

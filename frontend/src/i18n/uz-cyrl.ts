@@ -105,6 +105,7 @@ export const uzCyrl: Record<TranslationKey, string> = {
   'Oshxona nomi yoki manzili': 'Ошхона номи ёки манзили',
   'Hozircha ochiq oshxona topilmadi.': 'Ҳозирча очиқ ошхона топилмади.',
   'Hozir yopiq': 'Ҳозир ёпиқ',
+  Ochiq: 'Очиқ',
   ':count ta taom': ':count та таом',
   'Oshxonalarni yuklab boʻlmadi.': 'Ошхоналарни юклаб бўлмади.',
   'Holat oʻzi yangilanib turadi. Batafsil koʻrish uchun buyurtmani oching.':
@@ -329,4 +330,15 @@ export const uzCyrl: Record<TranslationKey, string> = {
   'Xohlagancha tanlang': 'Хоҳлаганча танланг',
   Savatchaga: 'Саватчага',
   Oʻzgartirish: 'Ўзгартириш',
+  'Hozir ochiq': 'Ҳозир очиқ',
+  'Menyu boʻlimlari': 'Меню бўлимлари',
+  Boshqa: 'Бошқа',
+  Tugagan: 'Тугаган',
+  'Qoʻshish': 'Қўшиш',
+  'Buyurtma bosqichlari': 'Буюртма босқичлари',
+  'Tayyor boʻlishiga': 'Тайёр бўлишига',
+  '~:minutes daqiqa': '~:minutes дақиқа',
+  'taxminan :time da': 'тахминан :time да',
+  'Boʻsh': 'Бўш',
+  'Navbatda kutmang — kelguningizcha tayyor boʻladi.': 'Навбатда кутманг — келгунингизча тайёр бўлади.',
 }

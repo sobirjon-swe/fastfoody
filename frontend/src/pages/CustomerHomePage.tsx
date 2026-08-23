@@ -1,14 +1,12 @@
-import { Clock, Search, UtensilsCrossed } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router'
 
 import { listPublicRestaurants } from '@/api/orders'
 import { useAuth } from '@/auth/use-auth'
+import { ImageBand } from '@/components/ImageBand'
 import { Spinner } from '@/components/Spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useT } from '@/i18n/use-i18n'
 import { apiErrorMessage } from '@/lib/api'
@@ -41,32 +39,36 @@ export function CustomerHomePage() {
   }, [load])
 
   return (
-    <div className="grid gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">
+    <div className="grid gap-5">
+      <header>
+        <h1 className="text-2xl font-semibold tracking-tight">
           {t('Assalomu alaykum, :name!', { name: user?.name ?? '' })}
         </h1>
         <p className="text-muted-foreground mt-1 text-sm">
           {t('Oshxonani tanlang, buyurtma bering — taom siz yetib borganingizda tayyor boʻladi.')}
         </p>
-      </div>
+      </header>
 
+      {/* Dizayndagidek: qidiruv maydoni butun kenglikda, ichida lupa belgisi. */}
       <form
-        className="flex gap-2"
+        role="search"
         onSubmit={(event) => {
           event.preventDefault()
           setQuery(search)
         }}
       >
-        <Input
-          className="max-w-sm"
-          placeholder={t('Oshxona nomi yoki manzili')}
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
-        <Button type="submit" variant="secondary">
-          <Search /> {t('Qidirish')}
-        </Button>
+        <div className="relative">
+          <Search
+            className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2"
+            aria-hidden
+          />
+          <Input
+            className="bg-card h-11 rounded-xl pl-10 shadow-sm"
+            placeholder={t('Oshxona nomi yoki manzili')}
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+        </div>
       </form>
 
       {error && (
@@ -84,31 +86,44 @@ export function CustomerHomePage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {restaurants.map((restaurant) => (
-            <Card key={restaurant.id}>
-              <CardHeader>
-                <CardTitle className="flex flex-wrap items-center gap-2">
-                  <UtensilsCrossed className="size-4" />
-                  {restaurant.name}
-                  {!restaurant.is_open_now && <Badge variant="outline">{t('Hozir yopiq')}</Badge>}
-                </CardTitle>
-                <CardDescription>{restaurant.address}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex items-end justify-between gap-3">
-                <div className="text-muted-foreground grid gap-1 text-sm">
-                  <span className="flex items-center gap-1">
-                    <Clock className="size-3.5" />
-                    {restaurant.opens_at}–{restaurant.closes_at}
-                  </span>
-                  <span>{t(':count ta taom', { count: restaurant.menu_items_count ?? 0 })}</span>
-                </div>
-                <Button asChild size="sm">
-                  <Link to={`/restaurants/${restaurant.id}`}>{t('Menyu')}</Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <RestaurantCard key={restaurant.id} restaurant={restaurant} />
           ))}
         </div>
       )}
     </div>
+  )
+}
+
+function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
+  const t = useT()
+
+  return (
+    // Dizaynda alohida "Menyu" tugmasi yoʻq — butun kartochka bosiladi.
+    <Link
+      to={`/restaurants/${restaurant.id}`}
+      className="bg-card ring-ring/60 block overflow-hidden rounded-2xl shadow-sm transition hover:shadow-md focus-visible:ring-2 focus-visible:outline-none"
+    >
+      <ImageBand src={null} alt={restaurant.name} className="h-32">
+        <span
+          className={
+            restaurant.is_open_now
+              ? 'bg-success-muted text-success absolute top-3 left-3 rounded-full px-2.5 py-1 text-xs font-medium'
+              : 'bg-card/90 text-muted-foreground absolute top-3 left-3 rounded-full px-2.5 py-1 text-xs font-medium'
+          }
+        >
+          {restaurant.is_open_now ? t('Ochiq') : t('Hozir yopiq')}
+        </span>
+      </ImageBand>
+
+      <div className="p-4">
+        <h2 className="font-semibold">{restaurant.name}</h2>
+        <p className="text-muted-foreground mt-0.5 text-sm">
+          {restaurant.address} · {restaurant.opens_at}–{restaurant.closes_at}
+        </p>
+        <p className="text-muted-foreground mt-0.5 text-sm">
+          {t(':count ta taom', { count: restaurant.menu_items_count ?? 0 })}
+        </p>
+      </div>
+    </Link>
   )
 }
