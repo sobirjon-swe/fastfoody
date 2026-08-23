@@ -19,9 +19,14 @@ class SendTelegramMessage implements ShouldQueue
 {
     use Queueable;
 
+    /**
+     * @param  array<string, mixed>|null  $replyMarkup  Xabar ostidagi tugmalar
+     *                                                  (masalan Mini App'ni ochadigan tugma).
+     */
     public function __construct(
         private readonly int $chatId,
         private readonly string $text,
+        private readonly ?array $replyMarkup = null,
     ) {}
 
     public function handle(): void
@@ -32,13 +37,20 @@ class SendTelegramMessage implements ShouldQueue
             return;
         }
 
+        $payload = [
+            'chat_id' => $this->chatId,
+            'text' => $this->text,
+        ];
+
+        if ($this->replyMarkup !== null) {
+            // Telegram bu maydonni JSON satri sifatida kutadi, massiv emas.
+            $payload['reply_markup'] = json_encode($this->replyMarkup);
+        }
+
         try {
             $response = Http::timeout(5)
                 ->retry(2, 200, throw: false)
-                ->post("https://api.telegram.org/bot{$token}/sendMessage", [
-                    'chat_id' => $this->chatId,
-                    'text' => $this->text,
-                ]);
+                ->post("https://api.telegram.org/bot{$token}/sendMessage", $payload);
 
             if ($response->failed()) {
                 Log::warning('Telegram xabari yuborilmadi.', [

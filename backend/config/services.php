@@ -33,6 +33,12 @@ return [
         // Token boʻlmasa Telegram orqali kirish umuman ochilmaydi.
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
         'bot_username' => env('TELEGRAM_BOT_USERNAME'),
+
+        // Webhook manzili ochiq turadi, shuning uchun Telegram har soʻrovda
+        // `X-Telegram-Bot-Api-Secret-Token` sarlavhasida shu satrni qaytaradi.
+        // Boʻsh boʻlsa webhook umuman qabul qilinmaydi — begona soʻrov bot
+        // nomidan javob yozdira olmasligi kerak.
+        'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
     ],
 
     'slack' => [

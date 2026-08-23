@@ -1,6 +1,10 @@
 {
     ":name hozir mavjud emas.": ":name сейчас недоступен.",
+    "«:from» holatidan «:to» holatiga oʻtib boʻlmaydi.": "Переход из статуса «:from» в «:to» невозможен.",
+    "«:group» uchun kamida :count ta variant tanlang.": "Для «:group» выберите не менее :count варианта.",
+    "«:group» uchun koʻpi bilan :count ta variant tanlash mumkin.": "Для «:group» можно выбрать не более :count варианта.",
     "Agar bunday hisob mavjud boʻlsa, tiklash havolasi emailga yuborildi.": "Если такой аккаунт существует, ссылка для восстановления отправлена на почту.",
+    "Assalomu alaykum! FastFoody bilan taomni oldindan buyurtma qiling — yetib borganingizda tayyor boʻladi.\n\nBoshlash uchun quyidagi tugmani bosing.": "Здравствуйте! С FastFoody заказывайте еду заранее — она будет готова к вашему приходу.\n\nНажмите кнопку ниже, чтобы начать.",
     "Bu amal sizning rolingiz uchun ruxsat etilmagan.": "Это действие недоступно для вашей роли.",
     "Bu buyurtma sizning qaroringizni kutmayapti.": "Этот заказ не ждёт вашего решения.",
     "Bu buyurtma uchun mahsulot tugaganini belgilab boʻlmaydi.": "Для этого заказа нельзя отметить, что продукт закончился.",
@@ -8,10 +12,12 @@
     "Bu hisob faolsizlantirilgan. Tizim egasiga murojaat qiling.": "Этот аккаунт отключён. Обратитесь к владельцу системы.",
     "Bu oshxona hozir buyurtma qabul qilmaydi.": "Это заведение сейчас не принимает заказы.",
     "Bu taom ushbu oshxona menyusida yoʻq.": "Этого блюда нет в меню заведения.",
+    "Buyurtma berish uchun quyidagi tugmani bosing — ilova shu yerda, Telegram ichida ochiladi.": "Нажмите кнопку ниже, чтобы сделать заказ — приложение откроется прямо здесь, в Telegram.",
     "Buyurtmangiz bekor qilindi, toʻlov qaytariladi.": "Ваш заказ отменён, оплата будет возвращена.",
     "Buyurtmangiz muddati oʻtgani uchun yopildi.": "Ваш заказ закрыт, так как истёк срок.",
     "Buyurtmangiz qabul qilindi. Olib ketish kodi: :code. :ready": "Ваш заказ принят. Код получения: :code. :ready",
     "Buyurtmangiz tayyor! Olib ketish kodi: :code.": "Ваш заказ готов! Код получения: :code.",
+    "FastFoody’ni ochish": "Открыть FastFoody",
     "Holat": "Статус",
     "Joriy parol": "Текущий пароль",
     "Kechirasiz, buyurtmangizdagi mahsulot tugab qoldi. Ilovada uni almashtiring yoki buyurtmani bekor qiling.": "К сожалению, продукт из вашего заказа закончился. Замените его в приложении или отмените заказ.",
@@ -35,8 +41,5 @@
     "Telegram seansi eskirgan. Ilovani qayta oching.": "Сессия Telegram устарела. Откройте приложение заново.",
     "Tiklash havolasi notoʻgʻri yoki muddati oʻtgan.": "Ссылка для восстановления неверна или истекла.",
     "Tugagan taom": "Закончившееся блюдо",
-    "Yangi taom": "Новое блюдо",
-    "«:from» holatidan «:to» holatiga oʻtib boʻlmaydi.": "Переход из статуса «:from» в «:to» невозможен.",
-    "«:group» uchun kamida :count ta variant tanlang.": "Для «:group» выберите не менее :count варианта.",
-    "«:group» uchun koʻpi bilan :count ta variant tanlash mumkin.": "Для «:group» можно выбрать не более :count варианта."
+    "Yangi taom": "Новое блюдо"
 }

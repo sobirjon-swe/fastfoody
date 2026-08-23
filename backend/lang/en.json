@@ -1,6 +1,10 @@
 {
     ":name hozir mavjud emas.": ":name is currently unavailable.",
+    "«:from» holatidan «:to» holatiga oʻtib boʻlmaydi.": "An order cannot move from \":from\" to \":to\".",
+    "«:group» uchun kamida :count ta variant tanlang.": "Choose at least :count option(s) for \":group\".",
+    "«:group» uchun koʻpi bilan :count ta variant tanlash mumkin.": "You can choose at most :count option(s) for \":group\".",
     "Agar bunday hisob mavjud boʻlsa, tiklash havolasi emailga yuborildi.": "If an account with that email exists, a reset link has been sent to it.",
+    "Assalomu alaykum! FastFoody bilan taomni oldindan buyurtma qiling — yetib borganingizda tayyor boʻladi.\n\nBoshlash uchun quyidagi tugmani bosing.": "Hello! With FastFoody you order ahead — your food is ready when you arrive.\n\nTap the button below to start.",
     "Bu amal sizning rolingiz uchun ruxsat etilmagan.": "This action is not allowed for your role.",
     "Bu buyurtma sizning qaroringizni kutmayapti.": "This order is not waiting for your decision.",
     "Bu buyurtma uchun mahsulot tugaganini belgilab boʻlmaydi.": "This order cannot be marked as out of stock.",
@@ -8,10 +12,12 @@
     "Bu hisob faolsizlantirilgan. Tizim egasiga murojaat qiling.": "This account has been deactivated. Please contact the system owner.",
     "Bu oshxona hozir buyurtma qabul qilmaydi.": "This restaurant is not accepting orders right now.",
     "Bu taom ushbu oshxona menyusida yoʻq.": "This item is not on the restaurant's menu.",
+    "Buyurtma berish uchun quyidagi tugmani bosing — ilova shu yerda, Telegram ichida ochiladi.": "Tap the button below to order — the app opens right here in Telegram.",
     "Buyurtmangiz bekor qilindi, toʻlov qaytariladi.": "Your order has been cancelled and will be refunded.",
     "Buyurtmangiz muddati oʻtgani uchun yopildi.": "Your order was closed because it expired.",
     "Buyurtmangiz qabul qilindi. Olib ketish kodi: :code. :ready": "Your order is confirmed. Pickup code: :code. :ready",
     "Buyurtmangiz tayyor! Olib ketish kodi: :code.": "Your order is ready! Pickup code: :code.",
+    "FastFoody’ni ochish": "Open FastFoody",
     "Holat": "Status",
     "Joriy parol": "Current password",
     "Kechirasiz, buyurtmangizdagi mahsulot tugab qoldi. Ilovada uni almashtiring yoki buyurtmani bekor qiling.": "Sorry, an item in your order has run out. Please replace it in the app or cancel the order.",
@@ -35,8 +41,5 @@
     "Telegram seansi eskirgan. Ilovani qayta oching.": "Your Telegram session has expired. Please reopen the app.",
     "Tiklash havolasi notoʻgʻri yoki muddati oʻtgan.": "The reset link is invalid or has expired.",
     "Tugagan taom": "Out of stock item",
-    "Yangi taom": "Replacement item",
-    "«:from» holatidan «:to» holatiga oʻtib boʻlmaydi.": "An order cannot move from \":from\" to \":to\".",
-    "«:group» uchun kamida :count ta variant tanlang.": "Choose at least :count option(s) for \":group\".",
-    "«:group» uchun koʻpi bilan :count ta variant tanlash mumkin.": "You can choose at most :count option(s) for \":group\"."
+    "Yangi taom": "Replacement item"
 }

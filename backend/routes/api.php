@@ -9,7 +9,22 @@ use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\Staff\MenuItemController;
 use App\Http\Controllers\Api\Staff\OrderController as StaffOrderController;
 use App\Http\Controllers\Api\StatisticsController;
+use App\Http\Controllers\Api\TelegramWebhookController;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Telegram bot webhook
+|--------------------------------------------------------------------------
+|
+| Telegram bu manzilga yangilanishlarni yuboradi. Autentifikatsiya yoʻq —
+| himoya `X-Telegram-Bot-Api-Secret-Token` sarlavhasi orqali (kontroller
+| ichida tekshiriladi). Chastota chegarasi keng: bir necha odam bir vaqtda
+| yozsa ham yangilanishlar tushib qolmasligi kerak.
+|
+*/
+
+Route::post('telegram/webhook', TelegramWebhookController::class)->middleware('throttle:120,1');
 
 /*
 |--------------------------------------------------------------------------
